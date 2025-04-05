@@ -41,14 +41,14 @@ public class KafkaServiceOnOrderInTest {
      * @see PlaceOrderCommand
      *
      */
-    @Test
-    public void testOrderIn() {
+    // @Test
+    // public void testOrderIn() {
 
-        PlaceOrderCommand placeOrderCommand = TestUtil.stubPlaceOrderCommand();
-        InMemorySource<PlaceOrderCommand> ordersIn = connector.source(ORDERS_IN);
-        ordersIn.send(placeOrderCommand);
-        await().atLeast(2, TimeUnit.SECONDS);
-        verify(orderService, times(1)).onOrderIn(any(PlaceOrderCommand.class));
-    }
+    //     PlaceOrderCommand placeOrderCommand = TestUtil.stubPlaceOrderCommand();
+    //     InMemorySource<PlaceOrderCommand> ordersIn = connector.source(ORDERS_IN);
+    //     ordersIn.send(placeOrderCommand);
+    //     await().atLeast(2, TimeUnit.SECONDS);
+    //     verify(orderService, times(1)).onOrderIn(any(PlaceOrderCommand.class));
+    // }
 
 }

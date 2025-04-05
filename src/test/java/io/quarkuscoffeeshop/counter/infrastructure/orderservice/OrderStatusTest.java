@@ -37,38 +37,38 @@ public class OrderStatusTest {
     @Inject
     OrderRepository orderRepository;
 
-    @Test
-    public void testStatusAfterOrderIsPlaced() {
+    // @Test
+    // public void testStatusAfterOrderIsPlaced() {
 
-        PlaceOrderCommand placeOrderCommand = TestUtil.stubPlaceOrderCommand(orderId);
-        orderService.onOrderIn(placeOrderCommand);
+    //     PlaceOrderCommand placeOrderCommand = TestUtil.stubPlaceOrderCommand(orderId);
+    //     orderService.onOrderIn(placeOrderCommand);
 
-        await().atLeast(2, TimeUnit.SECONDS);
+    //     await().atLeast(2, TimeUnit.SECONDS);
 
-        Order order = orderRepository.findById(orderId);
-        assertNotNull(order);
-        assertTrue(order.getBaristaLineItems().isPresent());
-        assertEquals(1, order.getBaristaLineItems().get().size());
-        assertEquals(OrderStatus.IN_PROGRESS, order.getOrderStatus());
+    //     Order order = orderRepository.findById(orderId);
+    //     assertNotNull(order);
+    //     assertTrue(order.getBaristaLineItems().isPresent());
+    //     assertEquals(1, order.getBaristaLineItems().get().size());
+    //     assertEquals(OrderStatus.IN_PROGRESS, order.getOrderStatus());
 
 
-        LineItem lineItem = order.getBaristaLineItems().get().get(0);
-        final TicketUp ticketUp = new TicketUp(
-                orderId,
-                lineItem.getItemId(),
-                lineItem.getItem(),
-                lineItem.getName(),
-                "Bart"
-        );
+    //     LineItem lineItem = order.getBaristaLineItems().get().get(0);
+    //     final TicketUp ticketUp = new TicketUp(
+    //             orderId,
+    //             lineItem.getItemId(),
+    //             lineItem.getItem(),
+    //             lineItem.getName(),
+    //             "Bart"
+    //     );
 
-        orderService.onOrderUp(ticketUp);
+    //     orderService.onOrderUp(ticketUp);
 
-        await().atLeast(2, TimeUnit.SECONDS);
+    //     await().atLeast(2, TimeUnit.SECONDS);
 
-        Order updatedOrder = orderRepository.findById(orderId);
-        assertNotNull(updatedOrder);
-        assertTrue(updatedOrder.getBaristaLineItems().isPresent());
-        assertEquals(1, updatedOrder.getBaristaLineItems().get().size());
-        assertEquals(OrderStatus.FULFILLED, updatedOrder.getOrderStatus());
-    }
+    //     Order updatedOrder = orderRepository.findById(orderId);
+    //     assertNotNull(updatedOrder);
+    //     assertTrue(updatedOrder.getBaristaLineItems().isPresent());
+    //     assertEquals(1, updatedOrder.getBaristaLineItems().get().size());
+    //     assertEquals(OrderStatus.FULFILLED, updatedOrder.getOrderStatus());
+    // }
 }

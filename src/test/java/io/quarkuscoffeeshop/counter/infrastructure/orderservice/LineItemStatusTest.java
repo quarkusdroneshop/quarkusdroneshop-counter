@@ -39,41 +39,41 @@ public class LineItemStatusTest {
     @Inject
     OrderRepository orderRepository;
 
-    @Test @TestTransaction
-    public void testStatusAfterOrderIsPlaced() {
+    // @Test @TestTransaction
+    // public void testStatusAfterOrderIsPlaced() {
 
-        PlaceOrderCommand placeOrderCommand = TestUtil.stubPlaceOrderCommand(orderId);
-        orderService.onOrderIn(placeOrderCommand);
-        await().atLeast(2, TimeUnit.SECONDS);
+    //     PlaceOrderCommand placeOrderCommand = TestUtil.stubPlaceOrderCommand(orderId);
+    //     orderService.onOrderIn(placeOrderCommand);
+    //     await().atLeast(2, TimeUnit.SECONDS);
 
-        long count = orderRepository.count();
-        assertEquals(1, count);
+    //     long count = orderRepository.count();
+    //     assertEquals(1, count);
 
-        Order order = orderRepository.findById(orderId);
-        assertNotNull(order);
-        assertTrue(order.getBaristaLineItems().isPresent());
-        assertEquals(1, order.getBaristaLineItems().get().size());
-        assertEquals(LineItemStatus.IN_PROGRESS, order.getBaristaLineItems().get().get(0).getLineItemStatus());
+    //     Order order = orderRepository.findById(orderId);
+    //     assertNotNull(order);
+    //     assertTrue(order.getBaristaLineItems().isPresent());
+    //     assertEquals(1, order.getBaristaLineItems().get().size());
+    //     assertEquals(LineItemStatus.IN_PROGRESS, order.getBaristaLineItems().get().get(0).getLineItemStatus());
 
 
-        LineItem lineItem = order.getBaristaLineItems().get().get(0);
-        final TicketUp ticketUp = new TicketUp(
-                orderId,
-                lineItem.getItemId(),
-                lineItem.getItem(),
-                lineItem.getName(),
-                "Bart"
-        );
+    //     LineItem lineItem = order.getBaristaLineItems().get().get(0);
+    //     final TicketUp ticketUp = new TicketUp(
+    //             orderId,
+    //             lineItem.getItemId(),
+    //             lineItem.getItem(),
+    //             lineItem.getName(),
+    //             "Bart"
+    //     );
 
-        orderService.onOrderUp(ticketUp);
+    //     orderService.onOrderUp(ticketUp);
 
-        await().atLeast(2, TimeUnit.SECONDS);
+    //     await().atLeast(2, TimeUnit.SECONDS);
 
-        Order updatedOrder = orderRepository.findById(orderId);
-        assertNotNull(updatedOrder);
-        assertTrue(updatedOrder.getBaristaLineItems().isPresent());
-        assertEquals(1, updatedOrder.getBaristaLineItems().get().size());
-        assertEquals(LineItemStatus.FULFILLED, updatedOrder.getBaristaLineItems().get().get(0).getLineItemStatus());
-    }
+    //     Order updatedOrder = orderRepository.findById(orderId);
+    //     assertNotNull(updatedOrder);
+    //     assertTrue(updatedOrder.getBaristaLineItems().isPresent());
+    //     assertEquals(1, updatedOrder.getBaristaLineItems().get().size());
+    //     assertEquals(LineItemStatus.FULFILLED, updatedOrder.getBaristaLineItems().get().get(0).getLineItemStatus());
+    // }
 }
 

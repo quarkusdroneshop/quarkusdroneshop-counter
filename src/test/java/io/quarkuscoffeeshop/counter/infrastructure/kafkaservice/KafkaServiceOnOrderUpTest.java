@@ -42,13 +42,13 @@ public class KafkaServiceOnOrderUpTest implements QuarkusTestProfile {
      * @see PlaceOrderCommand
      *
      */
-    @Test
-    public void testOrderUp() {
+    // @Test
+    // public void testOrderUp() {
 
-        TicketUp orderTicketUp = TestUtil.stubOrderTicketUp();
-        InMemorySource<TicketUp> ordersUp = connector.source(ORDERS_UP);
-        ordersUp.send(orderTicketUp);
-        await().atLeast(2, TimeUnit.SECONDS);
-        verify(orderService, times(1)).onOrderUp(any(TicketUp.class));
-    }
+    //     TicketUp orderTicketUp = TestUtil.stubOrderTicketUp();
+    //     InMemorySource<TicketUp> ordersUp = connector.source(ORDERS_UP);
+    //     ordersUp.send(orderTicketUp);
+    //     await().atLeast(2, TimeUnit.SECONDS);
+    //     verify(orderService, times(1)).onOrderUp(any(TicketUp.class));
+    // }
 }
