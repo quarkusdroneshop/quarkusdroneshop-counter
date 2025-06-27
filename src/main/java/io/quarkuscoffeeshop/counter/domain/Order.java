@@ -36,6 +36,12 @@ public class Order {
    */
   public OrderEventResult applyOrderTicketUp(final TicketUp ticketUp) {
 
+    // null check
+    if (this.getBaristaLineItems() == null) {
+      logger.error("orderRecord is null in Order#getBaristaLineItems");
+      Optional.of(Collections.<LineItem>emptyList());
+    }
+
     // set the LineItem's new status
     if (this.getBaristaLineItems().isPresent()) {
       this.getBaristaLineItems().get().stream().forEach(lineItem -> {
