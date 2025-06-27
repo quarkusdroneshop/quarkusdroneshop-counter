@@ -22,6 +22,9 @@ public class Order {
   private OrderRecord orderRecord;
 
   protected static Order fromOrderRecord(OrderRecord orderRecord) {
+    if (orderRecord == null) {
+      throw new IllegalArgumentException("OrderRecord must not be null");
+    }
     Order order = new Order();
     order.orderRecord = orderRecord;
     return order;
