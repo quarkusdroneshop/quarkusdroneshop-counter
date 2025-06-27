@@ -42,6 +42,7 @@ public class OrderService {
     @Channel("web-updates")
     Emitter<OrderUpdate> orderUpdateEmitter;
 
+    @Transactional
     public void onOrderIn(final PlaceOrderCommand placeOrderCommand) {
 
         logger.debug("onOrderIn {}", placeOrderCommand);
