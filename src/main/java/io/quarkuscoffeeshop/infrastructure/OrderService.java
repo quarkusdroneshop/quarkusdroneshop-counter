@@ -80,8 +80,15 @@ public class OrderService {
     @Transactional
     public void onOrderUp(final TicketUp ticketUp) {
 
-         logger.debug("onOrderUp: {}", ticketUp);
+        logger.debug("onOrderUp: {}", ticketUp);
         Order order = orderRepository.findById(ticketUp.getOrderId());
+
+        // null のときはSkip
+        if (order == null) {
+            logger.error("Order not found for ID: {}", ticketUp.getOrderId());
+            return;
+        }
+
         OrderEventResult orderEventResult = order.applyOrderTicketUp(ticketUp);
         logger.debug("OrderEventResult returned: {}", orderEventResult);
         orderRepository.persist(orderEventResult.getOrder());
