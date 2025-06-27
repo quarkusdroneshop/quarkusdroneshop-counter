@@ -18,6 +18,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.ws.rs.NotFoundException;
 
 @ApplicationScoped
 public class OrderService {
@@ -86,7 +87,7 @@ public class OrderService {
         // null のときはSkip
         if (order == null) {
             logger.error("Order not found for ID: {}", ticketUp.getOrderId());
-            return;
+            throw new NotFoundException("Order not found for ID: " + ticketUp.getOrderId());
         }
 
         OrderEventResult orderEventResult = order.applyOrderTicketUp(ticketUp);
