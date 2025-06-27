@@ -22,6 +22,7 @@ public class KafkaService {
 
     @Incoming("orders-in")
     @Blocking
+    @Transactional
     public void orderIn(final PlaceOrderCommand placeOrderCommand) {
 
         logger.debug("PlaceOrderCommand received: {}", placeOrderCommand);
@@ -30,6 +31,7 @@ public class KafkaService {
 
     @Incoming("orders-up")
     @Blocking
+    @Transactional
     public void orderUp(final TicketUp ticketUp) {
 
         logger.debug("TicketUp received: {}", ticketUp);
