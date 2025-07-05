@@ -23,9 +23,9 @@ public class PlaceOrderCommand {
 
   private final String loyaltyMemberId;
 
-  private final List<CommandItem> baristaLineItems;
+  private final List<CommandItem> QDCA10LineItems;
 
-  private final List<CommandItem> kitchenLineItems;
+  private final List<CommandItem> QDCA10ProLineItems;
 
   private final Instant timestamp;
 
@@ -35,21 +35,21 @@ public class PlaceOrderCommand {
           @JsonProperty("orderSource") final OrderSource orderSource,
           @JsonProperty("location") final Location location,
           @JsonProperty("loyaltyMemberId") final String loyaltyMemberId,
-          @JsonProperty("baristaLineItems") Optional<List<CommandItem>> baristaLineItems,
-          @JsonProperty("kitchenLineItems") Optional<List<CommandItem>> kitchenLineItems) {
+          @JsonProperty("QDCA10LineItems") Optional<List<CommandItem>> QDCA10LineItems,
+          @JsonProperty("QDCA10ProLineItems") Optional<List<CommandItem>> QDCA10ProLineItems) {
     this.id = id;
     this.orderSource = orderSource;
     this.location = location;
     this.loyaltyMemberId = loyaltyMemberId;
-    if (baristaLineItems.isPresent()) {
-      this.baristaLineItems = baristaLineItems.get();
+    if (QDCA10LineItems.isPresent()) {
+      this.QDCA10LineItems = QDCA10LineItems.get();
     }else{
-      this.baristaLineItems = null;
+      this.QDCA10LineItems = null;
     }
-    if (kitchenLineItems.isPresent()) {
-      this.kitchenLineItems = kitchenLineItems.get();
+    if (QDCA10ProLineItems.isPresent()) {
+      this.QDCA10ProLineItems = QDCA10ProLineItems.get();
     }else{
-      this.kitchenLineItems = null;
+      this.QDCA10ProLineItems = null;
     }
     this.timestamp = Instant.now();
   }
@@ -61,8 +61,8 @@ public class PlaceOrderCommand {
             ", orderSource=" + orderSource +
             ", location=" + location +
             ", loyaltyMemberId='" + loyaltyMemberId + '\'' +
-            ", baristaLineItems=" + baristaLineItems +
-            ", kitchenLineItems=" + kitchenLineItems +
+            ", QDCA10LineItems=" + QDCA10LineItems +
+            ", QDCA10ProLineItems=" + QDCA10ProLineItems +
             ", timestamp=" + timestamp +
             '}';
   }
@@ -72,20 +72,20 @@ public class PlaceOrderCommand {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     PlaceOrderCommand that = (PlaceOrderCommand) o;
-    return Objects.equals(id, that.id) && orderSource == that.orderSource && location == that.location && Objects.equals(loyaltyMemberId, that.loyaltyMemberId) && Objects.equals(baristaLineItems, that.baristaLineItems) && Objects.equals(kitchenLineItems, that.kitchenLineItems) && Objects.equals(timestamp, that.timestamp);
+    return Objects.equals(id, that.id) && orderSource == that.orderSource && location == that.location && Objects.equals(loyaltyMemberId, that.loyaltyMemberId) && Objects.equals(QDCA10LineItems, that.QDCA10LineItems) && Objects.equals(QDCA10ProLineItems, that.QDCA10ProLineItems) && Objects.equals(timestamp, that.timestamp);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, orderSource, location, loyaltyMemberId, baristaLineItems, kitchenLineItems, timestamp);
+    return Objects.hash(id, orderSource, location, loyaltyMemberId, QDCA10LineItems, QDCA10ProLineItems, timestamp);
   }
 
-  public Optional<List<CommandItem>> getBaristaLineItems() {
-    return Optional.ofNullable(baristaLineItems);
+  public Optional<List<CommandItem>> getQDCA10LineItems() {
+    return Optional.ofNullable(QDCA10LineItems);
   }
 
-  public Optional<List<CommandItem>> getKitchenLineItems() {
-    return Optional.ofNullable(kitchenLineItems);
+  public Optional<List<CommandItem>> getQDCA10ProLineItems() {
+    return Optional.ofNullable(QDCA10ProLineItems);
   }
 
   public Optional<String> getLoyaltyMemberId() {

@@ -28,23 +28,23 @@ public class OrderRecord extends PanacheEntityBase {
     private Location location;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "order", cascade = CascadeType.ALL)
-    private List<LineItem> baristaLineItems;
+    private List<LineItem> QDCA10LineItems;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "order", cascade = CascadeType.ALL)
-    private List<LineItem> kitchenLineItems;
+    private List<LineItem> QDCA10ProLineItems;
 
     public OrderRecord() {
     }
 
-    public OrderRecord(String orderId, OrderSource orderSource, String loyaltyMemberId, Instant timestamp, OrderStatus orderStatus, Location location, List<LineItem> baristaLineItems, List<LineItem> kitchenLineItems) {
+    public OrderRecord(String orderId, OrderSource orderSource, String loyaltyMemberId, Instant timestamp, OrderStatus orderStatus, Location location, List<LineItem> QDCA10LineItems, List<LineItem> QDCA10ProLineItems) {
         this.orderId = orderId;
         this.orderSource = orderSource;
         this.loyaltyMemberId = loyaltyMemberId;
         this.timestamp = timestamp;
         this.orderStatus = orderStatus;
         this.location = location;
-        this.baristaLineItems = baristaLineItems;
-        this.kitchenLineItems = kitchenLineItems;
+        this.QDCA10LineItems = QDCA10LineItems;
+        this.QDCA10ProLineItems = QDCA10ProLineItems;
     }
 
     @Override
@@ -56,8 +56,8 @@ public class OrderRecord extends PanacheEntityBase {
         sb.append(", timestamp=").append(timestamp);
         sb.append(", orderStatus=").append(orderStatus);
         sb.append(", location=").append(location);
-        sb.append(", baristaLineItems=").append(baristaLineItems);
-        sb.append(", kitchenLineItems=").append(kitchenLineItems);
+        sb.append(", QDCA10LineItems=").append(QDCA10LineItems);
+        sb.append(", QDCA10ProLineItems=").append(QDCA10ProLineItems);
         sb.append('}');
         return sb.toString();
     }
@@ -76,9 +76,9 @@ public class OrderRecord extends PanacheEntityBase {
         if (timestamp != null ? !timestamp.equals(that.timestamp) : that.timestamp != null) return false;
         if (orderStatus != that.orderStatus) return false;
         if (location != that.location) return false;
-        if (baristaLineItems != null ? !baristaLineItems.equals(that.baristaLineItems) : that.baristaLineItems != null)
+        if (QDCA10LineItems != null ? !QDCA10LineItems.equals(that.QDCA10LineItems) : that.QDCA10LineItems != null)
             return false;
-        return kitchenLineItems != null ? kitchenLineItems.equals(that.kitchenLineItems) : that.kitchenLineItems == null;
+        return QDCA10ProLineItems != null ? QDCA10ProLineItems.equals(that.QDCA10ProLineItems) : that.QDCA10ProLineItems == null;
     }
 
     @Override
@@ -89,8 +89,8 @@ public class OrderRecord extends PanacheEntityBase {
         result = 31 * result + (timestamp != null ? timestamp.hashCode() : 0);
         result = 31 * result + (orderStatus != null ? orderStatus.hashCode() : 0);
         result = 31 * result + (location != null ? location.hashCode() : 0);
-        result = 31 * result + (baristaLineItems != null ? baristaLineItems.hashCode() : 0);
-        result = 31 * result + (kitchenLineItems != null ? kitchenLineItems.hashCode() : 0);
+        result = 31 * result + (QDCA10LineItems != null ? QDCA10LineItems.hashCode() : 0);
+        result = 31 * result + (QDCA10ProLineItems != null ? QDCA10ProLineItems.hashCode() : 0);
         return result;
     }
 
@@ -142,19 +142,19 @@ public class OrderRecord extends PanacheEntityBase {
         this.location = location;
     }
 
-    public List<LineItem> getBaristaLineItems() {
-        return baristaLineItems;
+    public List<LineItem> getQDCA10LineItems() {
+        return QDCA10LineItems;
     }
 
-    public void setBaristaLineItems(List<LineItem> baristaLineItems) {
-        this.baristaLineItems = baristaLineItems;
+    public void setQDCA10LineItems(List<LineItem> QDCA10LineItems) {
+        this.QDCA10LineItems = QDCA10LineItems;
     }
 
-    public List<LineItem> getKitchenLineItems() {
-        return kitchenLineItems;
+    public List<LineItem> getQDCA10ProLineItems() {
+        return QDCA10ProLineItems;
     }
 
-    public void setKitchenLineItems(List<LineItem> kitchenLineItems) {
-        this.kitchenLineItems = kitchenLineItems;
+    public void setQDCA10ProLineItems(List<LineItem> QDCA10ProLineItems) {
+        this.QDCA10ProLineItems = QDCA10ProLineItems;
     }
 }

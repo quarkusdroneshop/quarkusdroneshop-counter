@@ -23,7 +23,7 @@ public class TestUtil {
                 OrderSource.WEB,
                 Location.ATLANTA,
                 UUID.randomUUID().toString(),
-                Optional.of(stubSingleBaristaItem()),
+                Optional.of(stubSingleQDCA10Item()),
                 Optional.empty());
     }
 
@@ -31,12 +31,12 @@ public class TestUtil {
         return stubPlaceOrderCommand(UUID.randomUUID().toString());
     };
 
-    private static List<CommandItem> stubSingleBaristaItem() {
-        return Arrays.asList(new CommandItem(Item.COFFEE_BLACK, "Foo", BigDecimal.valueOf(3.25)));
+    private static List<CommandItem> stubSingleQDCA10Item() {
+        return Arrays.asList(new CommandItem(Item.QDC_A101, "Foo", BigDecimal.valueOf(135.50)));
     }
 
-    private static List<CommandItem> stubSingleKitchenItem() {
-        return Arrays.asList(new CommandItem(Item.CROISSANT, "Foo", BigDecimal.valueOf(3.25)));
+    private static List<CommandItem> stubSingleQDCA10ProItem() {
+        return Arrays.asList(new CommandItem(Item.QDC_A105_Pro01, "Foo", BigDecimal.valueOf(553.00)));
     }
 
     public static Order stubOrder() {
@@ -52,7 +52,7 @@ public class TestUtil {
 
         Order order = Order.fromOrderRecord(orderRecord);
 
-        order.addBaristaLineItem(new LineItem(Item.COFFEE_BLACK, "Rocky", BigDecimal.valueOf(3.00), LineItemStatus.PLACED, orderRecord));
+        order.getQDCA10LineItems(new LineItem(Item.QDC_A101, "Rocky", BigDecimal.valueOf(3.00), LineItemStatus.PLACED, orderRecord));
         return order;
     }
 
@@ -69,7 +69,7 @@ public class TestUtil {
         order.setOrderStatus(OrderStatus.IN_PROGRESS);
 
         orderEventResult.setOrder(order);
-        orderEventResult.setBaristaTickets(TestUtil.stubBaristaTickets());
+        orderEventResult.setQDCA10Tickets(TestUtil.stubQDCA10Tickets());
         orderEventResult.setOutboxEvents(mockOrderInEvent());
         return orderEventResult;
     }
@@ -78,8 +78,8 @@ public class TestUtil {
         return Arrays.asList(OrderCreatedEvent.of(stubOrder()));
     }
 
-    private static List<OrderTicket> stubBaristaTickets() {
-        return Arrays.asList(new OrderTicket(UUID.randomUUID().toString(), UUID.randomUUID().toString(), Item.COFFEE_BLACK, "Rocky"));
+    private static List<OrderTicket> stubQDCA10Tickets() {
+        return Arrays.asList(new OrderTicket(UUID.randomUUID().toString(), UUID.randomUUID().toString(), Item.QDC_A101, "Rocky"));
     }
 
     public static TicketUp stubOrderTicketUp() {
@@ -87,13 +87,13 @@ public class TestUtil {
         return new TicketUp(
                 UUID.randomUUID().toString(),
                 UUID.randomUUID().toString(),
-                Item.COFFEE_BLACK,
+                Item.QDC_A101,
                 "Capt. Kirk",
                 "Mr. Spock"
         );
     }
 
-    public static PlaceOrderCommand stubPlaceOrderCommandSingleQDCA105Pro01() {
+    public static PlaceOrderCommand stubPlaceOrderCommandSingleQDCA10Pro() {
 
         return new PlaceOrderCommand(
                 UUID.randomUUID().toString(),
@@ -101,18 +101,18 @@ public class TestUtil {
                 Location.ATLANTA,
                 UUID.randomUUID().toString(),
                 Optional.empty(),
-                Optional.of(stubSingleQDCA105Pro01Item()));
+                Optional.of(stubSingleQDCA10ProItem()));
 
     }
 
-    public static PlaceOrderCommand stubPlaceOrderCommandQDCA101AndQDCA105Pro01() {
+    public static PlaceOrderCommand stubPlaceOrderCommandQDCA10AndQDCA10Pro() {
 
         return new PlaceOrderCommand(
                 UUID.randomUUID().toString(),
                 OrderSource.WEB,
                 Location.ATLANTA,
                 UUID.randomUUID().toString(),
-                Optional.of(stubSingleQDCA101Item()),
-                Optional.of(stubSingleQDCA105Pro01Item()));
+                Optional.of(stubSingleQDCA10Item()),
+                Optional.of(stubSingleQDCA10ProItem()));
     }
 }

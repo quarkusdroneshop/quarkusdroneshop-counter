@@ -7,11 +7,11 @@ import java.math.BigDecimal;
  */
 public enum Item {
 
-    //Beverages
-    CAPPUCCINO(BigDecimal.valueOf(4.50)), COFFEE_BLACK(BigDecimal.valueOf(3.00)), COFFEE_WITH_ROOM(BigDecimal.valueOf(3.00)), ESPRESSO(BigDecimal.valueOf(3.50)), ESPRESSO_DOUBLE(BigDecimal.valueOf(4.50)), LATTE(BigDecimal.valueOf(4.50)),
+    //QD-A10 SERIES
+    QDC_A101(BigDecimal.valueOf(135.50)), QDC_A102(BigDecimal.valueOf(155.50)), QDC_A103(BigDecimal.valueOf(144.00)), QDC_A104_AC(BigDecimal.valueOf(256.25)), QDC_A104_AT(BigDecimal.valueOf(305.75)),
 
-    //Food
-    CAKEPOP(BigDecimal.valueOf(2.50)), CROISSANT(BigDecimal.valueOf(3.25)), MUFFIN(BigDecimal.valueOf(3.00)), CROISSANT_CHOCOLATE(BigDecimal.valueOf(3.50));
+    //QD-A10Pro SERIES
+    QDC_A105_Pro01(BigDecimal.valueOf(553.00)), QDC_A105_Pro02(BigDecimal.valueOf(633.25)), QDC_A105_Pro03(BigDecimal.valueOf(735.50)), QDC_A105_Pro04(BigDecimal.valueOf(955.50));
 
     private BigDecimal price;
 

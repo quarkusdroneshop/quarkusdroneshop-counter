@@ -14,29 +14,29 @@ public class OrderCreationTest {
         Order order = Order.fromPlaceOrderCommand(placeOrderCommand);
         assertNotNull(order);
         assertNotNull(order.getOrderId());
-        assertEquals(1, order.getBaristaLineItems().get().size());
-        assertFalse(order.getKitchenLineItems().isPresent());
+        assertEquals(1, order.getQDCA10LineItems().get().size());
+        assertFalse(order.getQDCA10ProLineItems().isPresent());
     }
 
     @Test
     public void testOrderCreationWithSingleQDCA105Pro01() {
 
-        PlaceOrderCommand placeOrderCommand = TestUtil.stubPlaceOrderCommandSingleQDCA105Pro01();
+        PlaceOrderCommand placeOrderCommand = TestUtil.stubPlaceOrderCommandSingleQDCA10Pro();
         Order order = Order.fromPlaceOrderCommand(placeOrderCommand);
         assertNotNull(order);
         assertNotNull(order.getOrderId());
-        assertEquals(1, order.getKitchenLineItems().get().size());
-        assertFalse(order.getBaristaLineItems().isPresent());
+        assertEquals(1, order.getQDCA10ProLineItems().get().size());
+        assertFalse(order.getQDCA10LineItems().isPresent());
     }
 
     @Test
-    public void testOrderCreationWithBeverageAndKitchenItems() {
+    public void testOrderCreationWithQdca10AndQdcA10proItems() {
 
-        PlaceOrderCommand placeOrderCommand = TestUtil.stubPlaceOrderCommandBlackCoffeeAndQDCA105Pro01();
+        PlaceOrderCommand placeOrderCommand = TestUtil.stubPlaceOrderCommandQDCA10AndQDCA10Pro();
         Order order = Order.fromPlaceOrderCommand(placeOrderCommand);
         assertNotNull(order);
         assertNotNull(order.getOrderId());
-        assertEquals(1, order.getBaristaLineItems().get().size());
-        assertEquals(1, order.getKitchenLineItems().get().size());
+        assertEquals(1, order.getQDCA10LineItems().get().size());
+        assertEquals(1, order.getQDCA10ProLineItems().get().size());
     }
 }

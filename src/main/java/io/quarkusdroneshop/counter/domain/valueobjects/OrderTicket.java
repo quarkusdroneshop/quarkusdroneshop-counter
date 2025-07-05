@@ -5,7 +5,7 @@ import io.quarkusdroneshop.counter.domain.Item;
 import java.time.Instant;
 
 /**
- * Java representation of the JSON sent and received from Barista and Kitchen
+ * Java representation of the JSON sent and received from QDCA10 and QDCA10Pro
  *
  */
 public class OrderTicket {

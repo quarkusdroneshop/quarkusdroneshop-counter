@@ -16,9 +16,9 @@ public class OrderEventResult {
 
   private List<ExportedEvent> outboxEvents;
 
-  private List<OrderTicket> baristaTickets;
+  private List<OrderTicket> QDCA10Tickets;
 
-  private List<OrderTicket> kitchenTickets;
+  private List<OrderTicket> QDCA10ProTickets;
 
   private List<OrderUpdate> orderUpdates;
 
@@ -43,26 +43,26 @@ public class OrderEventResult {
     this.orderUpdates.add(orderUpdate);
   }
 
-  public void addBaristaTicket(final OrderTicket orderTicket) {
-    if (this.baristaTickets == null) {
-      this.baristaTickets = new ArrayList<>();
+  public void addQDCA10Ticket(final OrderTicket orderTicket) {
+    if (this.QDCA10Tickets == null) {
+      this.QDCA10Tickets = new ArrayList<>();
     }
-    this.baristaTickets.add(orderTicket);
+    this.QDCA10Tickets.add(orderTicket);
   }
 
-  public void addKitchenTicket(final OrderTicket orderTicket) {
-    if (this.kitchenTickets == null) {
-      this.kitchenTickets = new ArrayList<>();
+  public void addQDCA10ProTicket(final OrderTicket orderTicket) {
+    if (this.QDCA10ProTickets == null) {
+      this.QDCA10ProTickets = new ArrayList<>();
     }
-    this.kitchenTickets.add(orderTicket);
+    this.QDCA10ProTickets.add(orderTicket);
   }
 
-  public Optional<List<OrderTicket>> getBaristaTickets() {
-    return Optional.ofNullable(this.baristaTickets);
+  public Optional<List<OrderTicket>> getQDCA10Tickets() {
+    return Optional.ofNullable(this.QDCA10Tickets);
   }
 
-  public Optional<List<OrderTicket>> getKitchenTickets() {
-    return Optional.ofNullable(this.kitchenTickets);
+  public Optional<List<OrderTicket>> getQDCA10ProTickets() {
+    return Optional.ofNullable(this.QDCA10ProTickets);
   }
 
 
@@ -72,8 +72,8 @@ public class OrderEventResult {
     return "OrderEventResult{" +
       "order=" + order +
       ", outboxEvents=" + outboxEvents +
-      ", baristaTickets=" + baristaTickets +
-      ", kitchenTickets=" + kitchenTickets +
+      ", QDCA10Tickets=" + QDCA10Tickets +
+      ", QDCA10ProTickets=" + QDCA10ProTickets +
       ", orderUpdates=" + orderUpdates +
       '}';
   }
@@ -87,9 +87,9 @@ public class OrderEventResult {
 
     if (getOrder() != null ? !getOrder().equals(that.getOrder()) : that.getOrder() != null) return false;
     if (outboxEvents != null ? !outboxEvents.equals(that.outboxEvents) : that.outboxEvents != null) return false;
-    if (baristaTickets != null ? !baristaTickets.equals(that.baristaTickets) : that.baristaTickets != null)
+    if (QDCA10Tickets != null ? !QDCA10Tickets.equals(that.QDCA10Tickets) : that.QDCA10Tickets != null)
       return false;
-    if (kitchenTickets != null ? !kitchenTickets.equals(that.kitchenTickets) : that.kitchenTickets != null)
+    if (QDCA10ProTickets != null ? !QDCA10ProTickets.equals(that.QDCA10ProTickets) : that.QDCA10ProTickets != null)
       return false;
     return orderUpdates != null ? orderUpdates.equals(that.orderUpdates) : that.orderUpdates == null;
   }
@@ -98,8 +98,8 @@ public class OrderEventResult {
   public int hashCode() {
     int result = getOrder() != null ? getOrder().hashCode() : 0;
     result = 31 * result + (outboxEvents != null ? outboxEvents.hashCode() : 0);
-    result = 31 * result + (baristaTickets != null ? baristaTickets.hashCode() : 0);
-    result = 31 * result + (kitchenTickets != null ? kitchenTickets.hashCode() : 0);
+    result = 31 * result + (QDCA10Tickets != null ? QDCA10Tickets.hashCode() : 0);
+    result = 31 * result + (QDCA10ProTickets != null ? QDCA10ProTickets.hashCode() : 0);
     result = 31 * result + (orderUpdates != null ? orderUpdates.hashCode() : 0);
     return result;
   }
@@ -112,12 +112,12 @@ public class OrderEventResult {
     this.outboxEvents = outboxEvents;
   }
 
-  public void setBaristaTickets(List<OrderTicket> baristaTickets) {
-    this.baristaTickets = baristaTickets;
+  public void setQDCA10Tickets(List<OrderTicket> QDCA10Tickets) {
+    this.QDCA10Tickets = QDCA10Tickets;
   }
 
-  public void setKitchenTickets(List<OrderTicket> kitchenTickets) {
-    this.kitchenTickets = kitchenTickets;
+  public void setQDCA10ProTickets(List<OrderTicket> QDCA10ProTickets) {
+    this.QDCA10ProTickets = QDCA10ProTickets;
   }
 
   public List<OrderUpdate> getOrderUpdates() {

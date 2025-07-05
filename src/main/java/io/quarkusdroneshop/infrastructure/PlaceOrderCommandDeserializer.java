@@ -22,8 +22,8 @@ public class PlaceOrderCommandDeserializer extends ObjectMapperDeserializer<Plac
         @JsonProperty("orderSource") final OrderSource orderSource,
         @JsonProperty("location") final Location location,
         @JsonProperty("rewardsId") final String loyaltyMemberId,
-        @JsonProperty("baristaItems") Optional<List<LineItem>> baristaLineItems,
-        @JsonProperty("kitchenItems") Optional<List<LineItem>> kitchenLineItems) {
+        @JsonProperty("QDCA10Items") Optional<List<LineItem>> QDCA10LineItems,
+        @JsonProperty("QDCA10ProItems") Optional<List<LineItem>> QDCA10ProLineItems) {
 *//*
 
 

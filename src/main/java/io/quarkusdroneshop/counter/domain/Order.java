@@ -40,39 +40,39 @@ public class Order {
   public OrderEventResult applyOrderTicketUp(final TicketUp ticketUp) {
 
     // set the LineItem's new status
-    if (this.getBaristaLineItems().isPresent()) {
-      this.getBaristaLineItems().get().stream().forEach(lineItem -> {
+    if (this.getQDCA10LineItems().isPresent()) {
+      this.getQDCA10LineItems().get().stream().forEach(lineItem -> {
         if(lineItem.getItemId().equals(ticketUp.lineItemId)){
           lineItem.setLineItemStatus(LineItemStatus.FULFILLED);
         }
       });
     }
-    if (this.getKitchenLineItems().isPresent()) {
-      this.getKitchenLineItems().get().stream().forEach(lineItem -> {
+    if (this.getQDCA10ProLineItems().isPresent()) {
+      this.getQDCA10ProLineItems().get().stream().forEach(lineItem -> {
         if(lineItem.getItemId().equals(ticketUp.lineItemId)){
           lineItem.setLineItemStatus(LineItemStatus.FULFILLED);
         }
       });
     }
 
-    // if there are both barista and kitchen items concatenate them before checking status
-    if (this.getBaristaLineItems().isPresent() && this.getKitchenLineItems().isPresent()) {
+    // if there are both QDCA10 and QDCA10Pro items concatenate them before checking status
+    if (this.getQDCA10LineItems().isPresent() && this.getQDCA10ProLineItems().isPresent()) {
       // check the status of the Order itself and update if necessary
-      if(Stream.concat(this.getBaristaLineItems().get().stream(), this.getKitchenLineItems().get().stream())
+      if(Stream.concat(this.getQDCA10LineItems().get().stream(), this.getQDCA10ProLineItems().get().stream())
               .allMatch(lineItem -> {
                 return lineItem.getLineItemStatus().equals(LineItemStatus.FULFILLED);
               })){
         this.setOrderStatus(OrderStatus.FULFILLED);
       };
-    } else if (this.getBaristaLineItems().isPresent()) {
-      if(this.getBaristaLineItems().get().stream()
+    } else if (this.getQDCA10LineItems().isPresent()) {
+      if(this.getQDCA10LineItems().get().stream()
               .allMatch(lineItem -> {
                 return lineItem.getLineItemStatus().equals(LineItemStatus.FULFILLED);
               })){
         this.setOrderStatus(OrderStatus.FULFILLED);
       };
-    }else if (this.getKitchenLineItems().isPresent()) {
-      if(this.getKitchenLineItems().get().stream()
+    }else if (this.getQDCA10ProLineItems().isPresent()) {
+      if(this.getQDCA10ProLineItems().get().stream()
               .allMatch(lineItem -> {
                 return lineItem.getLineItemStatus().equals(LineItemStatus.FULFILLED);
               })){
@@ -115,19 +115,19 @@ public class Order {
       order.setLoyaltyMemberId(placeOrderCommand.getLoyaltyMemberId().get());
     }
 
-    if (placeOrderCommand.getBaristaLineItems().isPresent()) {
-      placeOrderCommand.getBaristaLineItems().get().forEach(commandItem -> {
-        logger.debug("createOrderFromCommand adding baristaItem from {}", commandItem.toString());
+    if (placeOrderCommand.getQDCA10LineItems().isPresent()) {
+      placeOrderCommand.getQDCA10LineItems().get().forEach(commandItem -> {
+        logger.debug("createOrderFromCommand adding QDCA10Item from {}", commandItem.toString());
         LineItem lineItem = new LineItem(commandItem.getItem(), commandItem.getName(), commandItem.getPrice(), LineItemStatus.IN_PROGRESS, order.getOrderRecord());
-        order.addBaristaLineItem(lineItem);
+        order.getQDCA10LineItems(lineItem);
       });
     }
 
-    if (placeOrderCommand.getKitchenLineItems().isPresent()) {
-      logger.debug("createOrderFromCommand adding kitchenOrders {}", placeOrderCommand.getKitchenLineItems().get().size());
-      placeOrderCommand.getKitchenLineItems().get().forEach(commandItem -> {
+    if (placeOrderCommand.getQDCA10ProLineItems().isPresent()) {
+      logger.debug("createOrderFromCommand adding QDCA10ProOrders {}", placeOrderCommand.getQDCA10ProLineItems().get().size());
+      placeOrderCommand.getQDCA10ProLineItems().get().forEach(commandItem -> {
         LineItem lineItem = new LineItem(commandItem.getItem(), commandItem.getName(), commandItem.getPrice(), LineItemStatus.IN_PROGRESS, order.getOrderRecord());
-        order.addKitchenLineItem(lineItem);
+        order.addQDCA10ProLineItem(lineItem);
       });
     }
 
@@ -138,14 +138,14 @@ public class Order {
 
     List<OrderUpdate> orderUpdates = new ArrayList<>();
 
-    // create required BaristaTicket, KitchenTicket, and OrderUpdate value objects
-    if (order.getBaristaLineItems().isPresent()) {
-      order.getBaristaLineItems().get().forEach(lineItem -> {
+    // create required QDCA10Ticket, QDCA10ProTicket, and OrderUpdate value objects
+    if (order.getQDCA10LineItems().isPresent()) {
+      order.getQDCA10LineItems().get().forEach(lineItem -> {
         orderUpdates.add(new OrderUpdate(order.getOrderId(), lineItem.getItemId(), lineItem.getName(), lineItem.getItem(), OrderStatus.IN_PROGRESS));
       });
     }
-    if (order.getKitchenLineItems().isPresent()) {
-      order.getKitchenLineItems().get().forEach(lineItem -> {
+    if (order.getQDCA10ProLineItems().isPresent()) {
+      order.getQDCA10ProLineItems().get().forEach(lineItem -> {
         orderUpdates.add(new OrderUpdate(order.getOrderId(), lineItem.getItemId(), lineItem.getName(), lineItem.getItem(), OrderStatus.IN_PROGRESS));
       });
     }
@@ -174,13 +174,13 @@ public class Order {
     OrderEventResult orderEventResult = new OrderEventResult();
     orderEventResult.setOrder(order);
 
-    // create required BaristaTicket, KitchenTicket, and OrderUpdate value objects
-    if (order.getBaristaLineItems().isPresent()) {
-      orderEventResult.setBaristaTickets(createOrderTickets(order.getOrderId(), order.getBaristaLineItems().get()));
+    // create required QDCA10Ticket, QDCA10ProTicket, and OrderUpdate value objects
+    if (order.getQDCA10LineItems().isPresent()) {
+      orderEventResult.setQDCA10Tickets(createOrderTickets(order.getOrderId(), order.getQDCA10LineItems().get()));
     }
 
-    if (order.getKitchenLineItems().isPresent()) {
-      orderEventResult.setKitchenTickets(createOrderTickets(order.getOrderId(), order.getKitchenLineItems().get()));
+    if (order.getQDCA10ProLineItems().isPresent()) {
+      orderEventResult.setQDCA10ProTickets(createOrderTickets(order.getOrderId(), order.getQDCA10ProLineItems().get()));
     }
 
     // add updates
@@ -203,15 +203,15 @@ public class Order {
    *
    * @param lineItem
    */
-  public void addBaristaLineItem(LineItem lineItem) {
-    if (getBaristaLineItems().isPresent()) {
+  public void getQDCA10LineItems(LineItem lineItem) {
+    if (getQDCA10LineItems().isPresent()) {
       lineItem.setOrder(this.orderRecord);
-      this.getBaristaLineItems().get().add(lineItem);
+      this.getQDCA10LineItems().get().add(lineItem);
     }else{
-      if (this.orderRecord.getBaristaLineItems() == null) {
-        this.orderRecord.setBaristaLineItems(new ArrayList<LineItem>(){{ add(lineItem); }});
+      if (this.orderRecord.getQDCA10LineItems() == null) {
+        this.orderRecord.setQDCA10LineItems(new ArrayList<LineItem>(){{ add(lineItem); }});
       }else{
-        this.orderRecord.getBaristaLineItems().add(lineItem);
+        this.orderRecord.getQDCA10LineItems().add(lineItem);
       }
     }
   }
@@ -221,33 +221,33 @@ public class Order {
    *
    * @param lineItem
    */
-  public void addKitchenLineItem(LineItem lineItem) {
-    if (this.getKitchenLineItems().isPresent()) {
+  public void addQDCA10ProLineItem(LineItem lineItem) {
+    if (this.getQDCA10ProLineItems().isPresent()) {
       lineItem.setOrder(this.orderRecord);
-      this.getKitchenLineItems().get().add(lineItem);
+      this.getQDCA10ProLineItems().get().add(lineItem);
     }else {
-      if (this.orderRecord.getKitchenLineItems() == null) {
-        this.orderRecord.setKitchenLineItems(new ArrayList<LineItem>(){{ add(lineItem); }});
+      if (this.orderRecord.getQDCA10ProLineItems() == null) {
+        this.orderRecord.setQDCA10ProLineItems(new ArrayList<LineItem>(){{ add(lineItem); }});
       }else{
-        this.orderRecord.getKitchenLineItems().add(lineItem);
+        this.orderRecord.getQDCA10ProLineItems().add(lineItem);
       }
     }
   }
 
-  public Optional<List<LineItem>> getBaristaLineItems() {
-    return Optional.ofNullable(this.orderRecord.getBaristaLineItems());
+  public Optional<List<LineItem>> getQDCA10LineItems() {
+    return Optional.ofNullable(this.orderRecord.getQDCA10LineItems());
   }
 
-  public void setBaristaLineItems(List<LineItem> baristaLineItems) {
-    this.orderRecord.setBaristaLineItems(baristaLineItems);
+  public void setQDCA10LineItems(List<LineItem> QDCA10LineItems) {
+    this.orderRecord.setQDCA10LineItems(QDCA10LineItems);
   }
 
-  public Optional<List<LineItem>> getKitchenLineItems() {
-    return Optional.ofNullable(this.orderRecord.getKitchenLineItems());
+  public Optional<List<LineItem>> getQDCA10ProLineItems() {
+    return Optional.ofNullable(this.orderRecord.getQDCA10ProLineItems());
   }
 
-  public void setKitchenLineItems(List<LineItem> kitchenLineItems) {
-    this.orderRecord.setKitchenLineItems(kitchenLineItems);
+  public void setQDCA10ProLineItems(List<LineItem> QDCA10ProLineItems) {
+    this.orderRecord.setQDCA10ProLineItems(QDCA10ProLineItems);
   }
 
   public Optional<String> getLoyaltyMemberId() {
@@ -270,15 +270,15 @@ public class Order {
     this.orderRecord.setTimestamp(Instant.now());
   }
 
-  public Order(final String orderId, final OrderSource orderSource, final Location location, final String loyaltyMemberId, final Instant timestamp, final OrderStatus orderStatus, final List<LineItem> baristaLineItems, final List<LineItem> kitchenLineItems) {
+  public Order(final String orderId, final OrderSource orderSource, final Location location, final String loyaltyMemberId, final Instant timestamp, final OrderStatus orderStatus, final List<LineItem> QDCA10LineItems, final List<LineItem> QDCA10ProLineItems) {
     this.orderRecord.setOrderId(orderId);
     this.orderRecord.setOrderSource(orderSource);
     this.orderRecord.setLocation(location);
     this.orderRecord.setLoyaltyMemberId(loyaltyMemberId);
     this.orderRecord.setTimestamp(timestamp);
     this.orderRecord.setOrderStatus(orderStatus);
-    this.orderRecord.setBaristaLineItems(baristaLineItems);
-    this.orderRecord.setKitchenLineItems(kitchenLineItems);
+    this.orderRecord.setQDCA10LineItems(QDCA10LineItems);
+    this.orderRecord.setQDCA10ProLineItems(QDCA10ProLineItems);
   }
 
   @Override
@@ -290,8 +290,8 @@ public class Order {
             .add("timestamp=" + orderRecord.getTimestamp())
             .add("orderStatus=" + orderRecord.getOrderStatus())
             .add("location=" + orderRecord.getLocation())
-            .add("baristaLineItems=" + orderRecord.getBaristaLineItems())
-            .add("kitchenLineItems=" + orderRecord.getKitchenLineItems())
+            .add("QDCA10LineItems=" + orderRecord.getQDCA10LineItems())
+            .add("QDCA10ProLineItems=" + orderRecord.getQDCA10ProLineItems())
             .toString();
   }
 

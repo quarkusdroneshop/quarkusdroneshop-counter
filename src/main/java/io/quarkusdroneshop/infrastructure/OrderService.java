@@ -34,11 +34,11 @@ public class OrderService {
     @Inject
     Event<ExportedEvent<?, ?>> event;
 
-    @Channel("barista")
-    Emitter<OrderTicket> baristaEmitter;
+    @Channel("QDCA10")
+    Emitter<OrderTicket> QDCA10Emitter;
 
-    @Channel("kitchen")
-    Emitter<OrderTicket> kitchenEmitter;
+    @Channel("QDCA10Pro")
+    Emitter<OrderTicket> QDCA10ProEmitter;
 
     @Channel("web-updates")
     Emitter<OrderUpdate> orderUpdateEmitter;
@@ -59,16 +59,16 @@ public class OrderService {
             event.fire(exportedEvent);
         });
 
-        if (orderEventResult.getBaristaTickets().isPresent()) {
-            orderEventResult.getBaristaTickets().get().forEach(baristaTicket -> {
-                logger.debug("Sending Ticket to Barista Service: {}", baristaTicket);
-                baristaEmitter.send(baristaTicket);
+        if (orderEventResult.getQDCA10Tickets().isPresent()) {
+            orderEventResult.getQDCA10Tickets().get().forEach(QDCA10Ticket -> {
+                logger.debug("Sending Ticket to QDCA10 Service: {}", QDCA10Ticket);
+                QDCA10Emitter.send(QDCA10Ticket);
             });
         }
 
-        if (orderEventResult.getKitchenTickets().isPresent()) {
-            orderEventResult.getKitchenTickets().get().forEach(kitchenTicket -> {
-                kitchenEmitter.send(kitchenTicket);
+        if (orderEventResult.getQDCA10ProTickets().isPresent()) {
+            orderEventResult.getQDCA10ProTickets().get().forEach(QDCA10ProTicket -> {
+                QDCA10ProEmitter.send(QDCA10ProTicket);
             });
         }
 
@@ -107,8 +107,8 @@ public class OrderService {
                 "threadContext=" + threadContext +
                 ", orderRepository=" + orderRepository +
                 ", event=" + event +
-                ", baristaEmitter=" + baristaEmitter +
-                ", kitchenEmitter=" + kitchenEmitter +
+                ", QDCA10Emitter=" + QDCA10Emitter +
+                ", QDCA10ProEmitter=" + QDCA10ProEmitter +
                 ", orderUpdateEmitter=" + orderUpdateEmitter +
                 '}';
     }
