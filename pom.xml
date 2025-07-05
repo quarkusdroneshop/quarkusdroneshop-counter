@@ -3,7 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.quarkusdroneshop</groupId>
-  <artifactId>quarkuscoffeeshop-counter</artifactId>
+  <artifactId>quarkusdroneshop-counter</artifactId>
   <version>5.2.1</version>
   <properties>
     <compiler-plugin.version>3.8.1</compiler-plugin.version>

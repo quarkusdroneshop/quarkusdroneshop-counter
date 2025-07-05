@@ -93,7 +93,7 @@ public class TestUtil {
         );
     }
 
-    public static PlaceOrderCommand stubPlaceOrderCommandSingleCroissant() {
+    public static PlaceOrderCommand stubPlaceOrderCommandSingleQDCA105Pro01() {
 
         return new PlaceOrderCommand(
                 UUID.randomUUID().toString(),
@@ -101,18 +101,18 @@ public class TestUtil {
                 Location.ATLANTA,
                 UUID.randomUUID().toString(),
                 Optional.empty(),
-                Optional.of(stubSingleKitchenItem()));
+                Optional.of(stubSingleQDCA105Pro01Item()));
 
     }
 
-    public static PlaceOrderCommand stubPlaceOrderCommandBlackCoffeeAndCroissant() {
+    public static PlaceOrderCommand stubPlaceOrderCommandQDCA101AndQDCA105Pro01() {
 
         return new PlaceOrderCommand(
                 UUID.randomUUID().toString(),
                 OrderSource.WEB,
                 Location.ATLANTA,
                 UUID.randomUUID().toString(),
-                Optional.of(stubSingleBaristaItem()),
-                Optional.of(stubSingleKitchenItem()));
+                Optional.of(stubSingleQDCA101Item()),
+                Optional.of(stubSingleQDCA105Pro01Item()));
     }
 }

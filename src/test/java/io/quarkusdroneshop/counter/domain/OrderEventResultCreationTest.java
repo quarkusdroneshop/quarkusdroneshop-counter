@@ -10,36 +10,36 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class OrderEventResultCreationTest {
 
     @Test
-    public void testOrderCreationWithSingleBeverage() {
+    public void testOrderCreationWithSingleQDCA101() {
 
         PlaceOrderCommand placeOrderCommand = TestUtil.stubPlaceOrderCommand();
         OrderEventResult orderEventResult = Order.createFromCommand(placeOrderCommand);
         assertNotNull(orderEventResult.getOrder());
         assertNotNull(orderEventResult.getOrder().getOrderId());
-        assertEquals(1, orderEventResult.getOrder().getBaristaLineItems().get().size());
-        assertFalse(orderEventResult.getOrder().getKitchenLineItems().isPresent());
+        assertEquals(1, orderEventResult.getOrder().getQDCA101LineItems().get().size());
+        assertFalse(orderEventResult.getOrder().getQDCA101Pro01LineItems().isPresent());
     }
 
     @Test
-    public void testOrderCreationWithSingleCroissant() {
+    public void testOrderCreationWithSingleQDCA105Pro01() {
 
-        PlaceOrderCommand placeOrderCommand = TestUtil.stubPlaceOrderCommandSingleCroissant();
+        PlaceOrderCommand placeOrderCommand = TestUtil.stubPlaceOrderCommandSingleQDCA105Pro01();
         OrderEventResult orderEventResult = Order.createFromCommand(placeOrderCommand);
         assertNotNull(orderEventResult.getOrder());
         assertNotNull(orderEventResult.getOrder().getOrderId());
-        assertEquals(1, orderEventResult.getOrder().getKitchenLineItems().get().size());
-        assertFalse(orderEventResult.getOrder().getBaristaLineItems().isPresent());
+        assertEquals(1, orderEventResult.getOrder().getQDCA101Pro01Items().get().size());
+        assertFalse(orderEventResult.getOrder().getQDCA101LineItems().isPresent());
     }
 
     @Test
-    public void testOrderCreationWithBeverageAndKitchenItems() {
+    public void testOrderCreationWithQDCA101AndQDCA105Pro01tems() {
 
-        PlaceOrderCommand placeOrderCommand = TestUtil.stubPlaceOrderCommandBlackCoffeeAndCroissant();
+        PlaceOrderCommand placeOrderCommand = TestUtil.stubPlaceOrderCommandBlackCoffeeAndQDCA105Pro01();
         OrderEventResult orderEventResult = Order.createFromCommand(placeOrderCommand);
         assertNotNull(orderEventResult.getOrder());
         assertNotNull(orderEventResult.getOrder().getOrderId());
-        assertEquals(1, orderEventResult.getOrder().getBaristaLineItems().get().size());
-        assertEquals(1, orderEventResult.getOrder().getKitchenLineItems().get().size());
+        assertEquals(1, orderEventResult.getOrder().getQDCA101LineItems().get().size());
+        assertEquals(1, orderEventResult.getOrder().getQDCA105Pro01LineItems().get().size());
     }
 
 }

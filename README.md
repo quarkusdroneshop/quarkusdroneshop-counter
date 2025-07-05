@@ -1,5 +1,5 @@
 # Docs
-Please see the Github Pages Site for complete documentation: [quarkuscoffeeshop.github.io](https://quarkuscoffeeshop.github.io)
+Please see the Github Pages Site for complete documentation: [quarkusdroneshop.github.io](https://quarkusdroneshop.github.io)
 
 # About 
 
@@ -22,13 +22,13 @@ Grab the supporting files
 
 ### Supporting infrastructure
 
-Clone the quarkuscoffeeshop-support project (in another directory)
+Clone the quarkusdroneshop-support project (in another directory)
 
 ```shell
-git clone https://github.com/quarkuscoffeeshop/quarkuscoffeeshop-support.git
+git clone https://github.com/quarkusdroneshop/quarkusdroneshop-support.git
 ```
 
-From inside the quarkuscoffeeshop-support project (on MacOS or Linux) run:
+From inside the quarkusdroneshop-support project (on MacOS or Linux) run:
 
 ```shell
 docker-compose up
@@ -38,7 +38,7 @@ This will start PostgreSQL, PGAdmin, Kafka and Zookeeper
 
 ### Counter microservice
 
-From the quarkuscoffeeshop-counter directory you can start the counter microservice with:
+From the quarkusdroneshop-counter directory you can start the counter microservice with:
 
 ```shell
 ./mvnw clean compile quarkus:dev
@@ -69,20 +69,20 @@ kafka-console-producer --broker-list localhost:9092 --topic <<TOPIC_NAME>>
 ```
 
 ```shell
-docker build -f src/main/docker/Dockerfile.native -t <<DOCKER_HUB_ID>>/quarkuscoffeeshop-counter .
+docker build -f src/main/docker/Dockerfile.native -t <<DOCKER_HUB_ID>>/quarkusdroneshop-counter .
 ```
 ```shell
 export KAFKA_BOOTSTRAP_URLS=localhost:9092 \
-PGSQL_URL="jdbc:postgresql://localhost:5432/coffeeshopdb?currentSchema=coffeeshop" \
-PGSQL_USER="coffeeshopuser" \
+PGSQL_URL="jdbc:postgresql://localhost:5432/droneshopdb?currentSchema=droneshop" \
+PGSQL_USER="droneshopuser" \
 PGSQL_PASS="redhat-21"
 ```
 
 ```shell
-docker run -i --network="host" -e PGSQL_URL=${PGSQL_URL} -e PGSQL_USER=${PGSQL_USER} -e PGSQL_PASS=${PGSQL_PASS} e KAFKA_BOOTSTRAP_URLS=${KAFKA_BOOTSTRAP_URLS} <<DOCKER_HUB_ID>>/quarkuscoffeeshop-counter:latest
+docker run -i --network="host" -e PGSQL_URL=${PGSQL_URL} -e PGSQL_USER=${PGSQL_USER} -e PGSQL_PASS=${PGSQL_PASS} e KAFKA_BOOTSTRAP_URLS=${KAFKA_BOOTSTRAP_URLS} <<DOCKER_HUB_ID>>/quarkusdroneshop-counter:latest
 ```
 
 ```shell
 docker images -a | grep counter
-docker tag <<RESULT>> <<DOCKER_HUB_ID>>/quarkuscoffeeshop-counter:<<VERSION>>
+docker tag <<RESULT>> <<DOCKER_HUB_ID>>/quarkusdroneshop-counter:<<VERSION>>
 ```

@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class OrderCreationTest {
 
     @Test
-    public void testOrderCreationWithSingleBeverage() {
+    public void testOrderCreationWithSingleQDCA10() {
 
         PlaceOrderCommand placeOrderCommand = TestUtil.stubPlaceOrderCommand();
         Order order = Order.fromPlaceOrderCommand(placeOrderCommand);
@@ -19,9 +19,9 @@ public class OrderCreationTest {
     }
 
     @Test
-    public void testOrderCreationWithSingleCroissant() {
+    public void testOrderCreationWithSingleQDCA105Pro01() {
 
-        PlaceOrderCommand placeOrderCommand = TestUtil.stubPlaceOrderCommandSingleCroissant();
+        PlaceOrderCommand placeOrderCommand = TestUtil.stubPlaceOrderCommandSingleQDCA105Pro01();
         Order order = Order.fromPlaceOrderCommand(placeOrderCommand);
         assertNotNull(order);
         assertNotNull(order.getOrderId());
@@ -32,7 +32,7 @@ public class OrderCreationTest {
     @Test
     public void testOrderCreationWithBeverageAndKitchenItems() {
 
-        PlaceOrderCommand placeOrderCommand = TestUtil.stubPlaceOrderCommandBlackCoffeeAndCroissant();
+        PlaceOrderCommand placeOrderCommand = TestUtil.stubPlaceOrderCommandBlackCoffeeAndQDCA105Pro01();
         Order order = Order.fromPlaceOrderCommand(placeOrderCommand);
         assertNotNull(order);
         assertNotNull(order.getOrderId());
