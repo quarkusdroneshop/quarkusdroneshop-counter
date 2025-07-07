@@ -14,8 +14,8 @@ public class OrderCreationTest {
         Order order = Order.fromPlaceOrderCommand(placeOrderCommand);
         assertNotNull(order);
         assertNotNull(order.getOrderId());
-        assertEquals(1, order.getQDCA10LineItems().get().size());
-        assertFalse(order.getQDCA10ProLineItems().isPresent());
+        assertEquals(1, order.getQdca10LineItems().get().size());
+        assertFalse(order.getQdca10proLineItems().isPresent());
     }
 
     @Test
@@ -25,8 +25,8 @@ public class OrderCreationTest {
         Order order = Order.fromPlaceOrderCommand(placeOrderCommand);
         assertNotNull(order);
         assertNotNull(order.getOrderId());
-        assertEquals(1, order.getQDCA10ProLineItems().get().size());
-        assertFalse(order.getQDCA10LineItems().isPresent());
+        assertEquals(1, order.getQdca10proLineItems().get().size());
+        assertFalse(order.getQdca10LineItems().isPresent());
     }
 
     @Test
@@ -36,7 +36,7 @@ public class OrderCreationTest {
         Order order = Order.fromPlaceOrderCommand(placeOrderCommand);
         assertNotNull(order);
         assertNotNull(order.getOrderId());
-        assertEquals(1, order.getQDCA10LineItems().get().size());
-        assertEquals(1, order.getQDCA10ProLineItems().get().size());
+        assertEquals(1, order.getQdca10LineItems().get().size());
+        assertEquals(1, order.getQdca10proLineItems().get().size());
     }
 }

@@ -13,7 +13,6 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Stream;
 
-
 public class Order {
 
   @Transient
@@ -30,61 +29,43 @@ public class Order {
     return order;
   }
 
-  /**
-   * Each time a TicketUp is received the Order should be checked for completion.
-   * An Order is complete when every LineItem is fulfilled.
-   *
-   * @param ticketUp
-   * @return OrderEventResult
-   */
   public OrderEventResult applyOrderTicketUp(final TicketUp ticketUp) {
-
-    // set the LineItem's new status
-    if (this.getQDCA10LineItems().isPresent()) {
-      this.getQDCA10LineItems().get().stream().forEach(lineItem -> {
-        if(lineItem.getItemId().equals(ticketUp.lineItemId)){
+    if (this.getQdca10LineItems().isPresent()) {
+      this.getQdca10LineItems().get().stream().forEach(lineItem -> {
+        if (lineItem.getItemId().equals(ticketUp.lineItemId)) {
           lineItem.setLineItemStatus(LineItemStatus.FULFILLED);
         }
       });
     }
-    if (this.getQDCA10ProLineItems().isPresent()) {
-      this.getQDCA10ProLineItems().get().stream().forEach(lineItem -> {
-        if(lineItem.getItemId().equals(ticketUp.lineItemId)){
+    if (this.getQdca10proLineItems().isPresent()) {
+      this.getQdca10proLineItems().get().stream().forEach(lineItem -> {
+        if (lineItem.getItemId().equals(ticketUp.lineItemId)) {
           lineItem.setLineItemStatus(LineItemStatus.FULFILLED);
         }
       });
     }
 
-    // if there are both QDCA10 and QDCA10Pro items concatenate them before checking status
-    if (this.getQDCA10LineItems().isPresent() && this.getQDCA10ProLineItems().isPresent()) {
-      // check the status of the Order itself and update if necessary
-      if(Stream.concat(this.getQDCA10LineItems().get().stream(), this.getQDCA10ProLineItems().get().stream())
-              .allMatch(lineItem -> {
-                return lineItem.getLineItemStatus().equals(LineItemStatus.FULFILLED);
-              })){
+    if (this.getQdca10LineItems().isPresent() && this.getQdca10proLineItems().isPresent()) {
+      if (Stream.concat(this.getQdca10LineItems().get().stream(), this.getQdca10proLineItems().get().stream())
+              .allMatch(lineItem -> lineItem.getLineItemStatus().equals(LineItemStatus.FULFILLED))) {
         this.setOrderStatus(OrderStatus.FULFILLED);
-      };
-    } else if (this.getQDCA10LineItems().isPresent()) {
-      if(this.getQDCA10LineItems().get().stream()
-              .allMatch(lineItem -> {
-                return lineItem.getLineItemStatus().equals(LineItemStatus.FULFILLED);
-              })){
+      }
+    } else if (this.getQdca10LineItems().isPresent()) {
+      if (this.getQdca10LineItems().get().stream()
+              .allMatch(lineItem -> lineItem.getLineItemStatus().equals(LineItemStatus.FULFILLED))) {
         this.setOrderStatus(OrderStatus.FULFILLED);
-      };
-    }else if (this.getQDCA10ProLineItems().isPresent()) {
-      if(this.getQDCA10ProLineItems().get().stream()
-              .allMatch(lineItem -> {
-                return lineItem.getLineItemStatus().equals(LineItemStatus.FULFILLED);
-              })){
+      }
+    } else if (this.getQdca10proLineItems().isPresent()) {
+      if (this.getQdca10proLineItems().get().stream()
+              .allMatch(lineItem -> lineItem.getLineItemStatus().equals(LineItemStatus.FULFILLED))) {
         this.setOrderStatus(OrderStatus.FULFILLED);
-      };
+      }
     }
 
-    // create the domain event
     OrderUpdatedEvent orderUpdatedEvent = OrderUpdatedEvent.of(this);
 
-    // create the update value object
-    OrderUpdate orderUpdate = new OrderUpdate(ticketUp.getOrderId(), ticketUp.getLineItemId(), ticketUp.getName(), ticketUp.getItem(), OrderStatus.FULFILLED, ticketUp.madeBy);
+    OrderUpdate orderUpdate = new OrderUpdate(ticketUp.getOrderId(), ticketUp.getLineItemId(), ticketUp.getName(),
+            ticketUp.getItem(), OrderStatus.FULFILLED, ticketUp.madeBy);
 
     OrderEventResult orderEventResult = new OrderEventResult();
     orderEventResult.setOrder(this);
@@ -95,58 +76,51 @@ public class Order {
     return orderEventResult;
   }
 
-  /**
-   * Create a new Order from a PlaceOrderCommand
-   *
-   * @param placeOrderCommand
-   * @return
-   */
   protected static Order fromPlaceOrderCommand(final PlaceOrderCommand placeOrderCommand) {
-
     logger.debug("creating a new Order from: {}", placeOrderCommand);
-
-    // build the order from the PlaceOrderCommand
     Order order = new Order(placeOrderCommand.getId());
     order.setOrderSource(placeOrderCommand.getOrderSource());
     order.setLocation(placeOrderCommand.getLocation());
     order.setTimestamp(placeOrderCommand.getTimestamp());
     order.setOrderStatus(OrderStatus.IN_PROGRESS);
+
     if (placeOrderCommand.getLoyaltyMemberId().isPresent()) {
       order.setLoyaltyMemberId(placeOrderCommand.getLoyaltyMemberId().get());
     }
 
-    if (placeOrderCommand.getQDCA10LineItems().isPresent()) {
-      placeOrderCommand.getQDCA10LineItems().get().forEach(commandItem -> {
-        logger.debug("createOrderFromCommand adding QDCA10Item from {}", commandItem.toString());
-        LineItem lineItem = new LineItem(commandItem.getItem(), commandItem.getName(), commandItem.getPrice(), LineItemStatus.IN_PROGRESS, order.getOrderRecord());
-        order.getQDCA10LineItems(lineItem);
+    if (placeOrderCommand.getQdca10LineItems().isPresent()) {
+      placeOrderCommand.getQdca10LineItems().get().forEach(commandItem -> {
+        logger.info("createOrderFromCommand adding QDCA10Item from {}", commandItem.toString());
+        LineItem lineItem = new LineItem(commandItem.getItem(), commandItem.getName(), commandItem.getPrice(),
+                LineItemStatus.IN_PROGRESS, order.getOrderRecord());
+        order.addQdca10LineItem(lineItem);
       });
     }
 
-    if (placeOrderCommand.getQDCA10ProLineItems().isPresent()) {
-      logger.debug("createOrderFromCommand adding QDCA10ProOrders {}", placeOrderCommand.getQDCA10ProLineItems().get().size());
-      placeOrderCommand.getQDCA10ProLineItems().get().forEach(commandItem -> {
-        LineItem lineItem = new LineItem(commandItem.getItem(), commandItem.getName(), commandItem.getPrice(), LineItemStatus.IN_PROGRESS, order.getOrderRecord());
+    if (placeOrderCommand.getQdca10proLineItems().isPresent()) {
+      logger.info("createOrderFromCommand adding QDCA10ProOrders {}",
+              placeOrderCommand.getQdca10proLineItems().get().size());
+      placeOrderCommand.getQdca10proLineItems().get().forEach(commandItem -> {
+        LineItem lineItem = new LineItem(commandItem.getItem(), commandItem.getName(), commandItem.getPrice(),
+                LineItemStatus.IN_PROGRESS, order.getOrderRecord());
         order.addQDCA10ProLineItem(lineItem);
       });
     }
-
     return order;
   }
 
   private static List<OrderUpdate> createOrderUpdates(Order order) {
-
     List<OrderUpdate> orderUpdates = new ArrayList<>();
-
-    // create required QDCA10Ticket, QDCA10ProTicket, and OrderUpdate value objects
-    if (order.getQDCA10LineItems().isPresent()) {
-      order.getQDCA10LineItems().get().forEach(lineItem -> {
-        orderUpdates.add(new OrderUpdate(order.getOrderId(), lineItem.getItemId(), lineItem.getName(), lineItem.getItem(), OrderStatus.IN_PROGRESS));
+    if (order.getQdca10LineItems().isPresent()) {
+      order.getQdca10LineItems().get().forEach(lineItem -> {
+        orderUpdates.add(new OrderUpdate(order.getOrderId(), lineItem.getItemId(), lineItem.getName(),
+                lineItem.getItem(), OrderStatus.IN_PROGRESS));
       });
     }
-    if (order.getQDCA10ProLineItems().isPresent()) {
-      order.getQDCA10ProLineItems().get().forEach(lineItem -> {
-        orderUpdates.add(new OrderUpdate(order.getOrderId(), lineItem.getItemId(), lineItem.getName(), lineItem.getItem(), OrderStatus.IN_PROGRESS));
+    if (order.getQdca10proLineItems().isPresent()) {
+      order.getQdca10proLineItems().get().forEach(lineItem -> {
+        orderUpdates.add(new OrderUpdate(order.getOrderId(), lineItem.getItemId(), lineItem.getName(),
+                lineItem.getItem(), OrderStatus.IN_PROGRESS));
       });
     }
     return orderUpdates;
@@ -159,95 +133,60 @@ public class Order {
     });
     return orderTickets;
   }
-  /**
-   * Creates and returns a new OrderEventResult containing the Order aggregate built from the PlaceOrderCommand
-   * and an OrderCreatedEvent
-   *
-   * @param placeOrderCommand PlaceOrderCommand
-   * @return OrderEventResult
-   */
+
   public static OrderEventResult createFromCommand(final PlaceOrderCommand placeOrderCommand) {
-
     Order order = Order.fromPlaceOrderCommand(placeOrderCommand);
-
-    // create the return value
     OrderEventResult orderEventResult = new OrderEventResult();
     orderEventResult.setOrder(order);
-
-    // create required QDCA10Ticket, QDCA10ProTicket, and OrderUpdate value objects
-    if (order.getQDCA10LineItems().isPresent()) {
-      orderEventResult.setQDCA10Tickets(createOrderTickets(order.getOrderId(), order.getQDCA10LineItems().get()));
+    if (order.getQdca10LineItems().isPresent()) {
+      orderEventResult.setQdca10Tickets(createOrderTickets(order.getOrderId(), order.getQdca10LineItems().get()));
     }
-
-    if (order.getQDCA10ProLineItems().isPresent()) {
-      orderEventResult.setQDCA10ProTickets(createOrderTickets(order.getOrderId(), order.getQDCA10ProLineItems().get()));
+    if (order.getQdca10proLineItems().isPresent()) {
+      orderEventResult.setQdca10proTickets(createOrderTickets(order.getOrderId(), order.getQdca10proLineItems().get()));
     }
-
-    // add updates
     orderEventResult.setOrderUpdates(createOrderUpdates(order));
-
     orderEventResult.addEvent(OrderCreatedEvent.of(order));
-
-    // if this order was placed by a Loyalty Member add the appropriate event
     if (placeOrderCommand.getLoyaltyMemberId().isPresent()) {
       orderEventResult.addEvent(LoyaltyMemberPurchaseEvent.of(order));
     }
-
     logger.debug("returning {}", orderEventResult);
     return orderEventResult;
   }
 
-
-  /**
-   * Convenience method to prevent Null Pointer Exceptions
-   *
-   * @param lineItem
-   */
-  public void getQDCA10LineItems(LineItem lineItem) {
-    if (getQDCA10LineItems().isPresent()) {
-      lineItem.setOrder(this.orderRecord);
-      this.getQDCA10LineItems().get().add(lineItem);
-    }else{
-      if (this.orderRecord.getQDCA10LineItems() == null) {
-        this.orderRecord.setQDCA10LineItems(new ArrayList<LineItem>(){{ add(lineItem); }});
-      }else{
-        this.orderRecord.getQDCA10LineItems().add(lineItem);
-      }
+  public void addQdca10LineItem(LineItem lineItem) {
+    lineItem.setOrder(this.orderRecord);
+    if (this.orderRecord.getQdca10LineItems() == null) {
+      this.orderRecord.setQdca10LineItems(new ArrayList<>());
     }
+    this.orderRecord.getQdca10LineItems().add(lineItem);
   }
 
-  /**
-   * Convenience method to prevent Null Pointer Exceptions
-   *
-   * @param lineItem
-   */
   public void addQDCA10ProLineItem(LineItem lineItem) {
-    if (this.getQDCA10ProLineItems().isPresent()) {
-      lineItem.setOrder(this.orderRecord);
-      this.getQDCA10ProLineItems().get().add(lineItem);
-    }else {
-      if (this.orderRecord.getQDCA10ProLineItems() == null) {
-        this.orderRecord.setQDCA10ProLineItems(new ArrayList<LineItem>(){{ add(lineItem); }});
-      }else{
-        this.orderRecord.getQDCA10ProLineItems().add(lineItem);
+    lineItem.setOrder(this.orderRecord);
+    if (this.getQdca10proLineItems().isPresent()) {
+      this.getQdca10proLineItems().get().add(lineItem);
+    } else {
+      if (this.orderRecord.getQdca10proLineItems() == null) {
+        this.orderRecord.setQdca10proLineItems(new ArrayList<>());
       }
+      this.orderRecord.getQdca10proLineItems().add(lineItem);
     }
   }
 
-  public Optional<List<LineItem>> getQDCA10LineItems() {
-    return Optional.ofNullable(this.orderRecord.getQDCA10LineItems());
+  public Optional<List<LineItem>> getQdca10LineItems() {
+    return Optional.ofNullable(this.orderRecord.getQdca10LineItems());
   }
 
-  public void setQDCA10LineItems(List<LineItem> QDCA10LineItems) {
-    this.orderRecord.setQDCA10LineItems(QDCA10LineItems);
+  public void setQdca10LineItems(List<LineItem> Qdca10LineItems) {
+    this.orderRecord.setQdca10LineItems(Qdca10LineItems);
   }
 
-  public Optional<List<LineItem>> getQDCA10ProLineItems() {
-    return Optional.ofNullable(this.orderRecord.getQDCA10ProLineItems());
+  public Optional<List<LineItem>> getQdca10proLineItems() {
+    return Optional.ofNullable(this.orderRecord.getQdca10proLineItems());
   }
 
-  public void setQDCA10ProLineItems(List<LineItem> QDCA10ProLineItems) {
-    this.orderRecord.setQDCA10ProLineItems(QDCA10ProLineItems);
+  public void setQdca10proLineItems(List<LineItem> Qdca10proLineItems) {
+    this.orderRecord.setQdca10proLineItems(Qdca10proLineItems);
   }
 
   public Optional<String> getLoyaltyMemberId() {
@@ -264,21 +203,23 @@ public class Order {
     this.orderRecord.setTimestamp(Instant.now());
   }
 
-  public Order(final String orderId){
+  public Order(final String orderId) {
     this.orderRecord = new OrderRecord();
     this.orderRecord.setOrderId(orderId);
     this.orderRecord.setTimestamp(Instant.now());
   }
 
-  public Order(final String orderId, final OrderSource orderSource, final Location location, final String loyaltyMemberId, final Instant timestamp, final OrderStatus orderStatus, final List<LineItem> QDCA10LineItems, final List<LineItem> QDCA10ProLineItems) {
+  public Order(final String orderId, final OrderSource orderSource, final Location location,
+               final String loyaltyMemberId, final Instant timestamp, final OrderStatus orderStatus,
+               final List<LineItem> Qdca10LineItems, final List<LineItem> Qdca10proLineItems) {
     this.orderRecord.setOrderId(orderId);
     this.orderRecord.setOrderSource(orderSource);
     this.orderRecord.setLocation(location);
     this.orderRecord.setLoyaltyMemberId(loyaltyMemberId);
     this.orderRecord.setTimestamp(timestamp);
     this.orderRecord.setOrderStatus(orderStatus);
-    this.orderRecord.setQDCA10LineItems(QDCA10LineItems);
-    this.orderRecord.setQDCA10ProLineItems(QDCA10ProLineItems);
+    this.orderRecord.setQdca10LineItems(Qdca10LineItems);
+    this.orderRecord.setQdca10proLineItems(Qdca10proLineItems);
   }
 
   @Override
@@ -290,8 +231,8 @@ public class Order {
             .add("timestamp=" + orderRecord.getTimestamp())
             .add("orderStatus=" + orderRecord.getOrderStatus())
             .add("location=" + orderRecord.getLocation())
-            .add("QDCA10LineItems=" + orderRecord.getQDCA10LineItems())
-            .add("QDCA10ProLineItems=" + orderRecord.getQDCA10ProLineItems())
+            .add("Qdca10LineItems=" + orderRecord.getQdca10LineItems())
+            .add("Qdca10proLineItems=" + orderRecord.getQdca10proLineItems())
             .toString();
   }
 
@@ -299,9 +240,7 @@ public class Order {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-
     Order order = (Order) o;
-
     return orderRecord != null ? orderRecord.equals(order.orderRecord) : order.orderRecord == null;
   }
 

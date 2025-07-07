@@ -34,11 +34,11 @@ public class OrderService {
     @Inject
     Event<ExportedEvent<?, ?>> event;
 
-    @Channel("QDCA10")
-    Emitter<OrderTicket> QDCA10Emitter;
+    @Channel("qdca10")
+    Emitter<OrderTicket> qdca10Emitter;
 
-    @Channel("QDCA10Pro")
-    Emitter<OrderTicket> QDCA10ProEmitter;
+    @Channel("qdca10pro")
+    Emitter<OrderTicket> qdca10proEmitter;
 
     @Channel("web-updates")
     Emitter<OrderUpdate> orderUpdateEmitter;
@@ -58,23 +58,25 @@ public class OrderService {
             logger.debug("Firing event: {}", exportedEvent);
             event.fire(exportedEvent);
         });
-
-        if (orderEventResult.getQDCA10Tickets().isPresent()) {
-            orderEventResult.getQDCA10Tickets().get().forEach(QDCA10Ticket -> {
+        
+        if (orderEventResult.getOrderUpdates().isEmpty()) {
+            logger.warn("⚠️ No OrderUpdates generated in onOrderIn");
+        } else {
+            orderEventResult.getOrderUpdates().forEach(orderUpdate -> {
+                orderUpdateEmitter.send(orderUpdate);
+            });
+        }
+        if (orderEventResult.getQdca10Tickets().isPresent()) {
+            orderEventResult.getQdca10Tickets().get().forEach(QDCA10Ticket -> {
                 logger.debug("Sending Ticket to QDCA10 Service: {}", QDCA10Ticket);
-                QDCA10Emitter.send(QDCA10Ticket);
+                qdca10Emitter.send(QDCA10Ticket);
             });
         }
-
-        if (orderEventResult.getQDCA10ProTickets().isPresent()) {
-            orderEventResult.getQDCA10ProTickets().get().forEach(QDCA10ProTicket -> {
-                QDCA10ProEmitter.send(QDCA10ProTicket);
+        if (orderEventResult.getQdca10proTickets().isPresent()) {
+            orderEventResult.getQdca10proTickets().get().forEach(QDCA10ProTicket -> {
+                qdca10proEmitter.send(QDCA10ProTicket);
             });
         }
-
-        orderEventResult.getOrderUpdates().forEach(orderUpdate -> {
-            orderUpdateEmitter.send(orderUpdate);
-        });
 
     }
 
@@ -84,7 +86,6 @@ public class OrderService {
         logger.debug("onOrderUp: {}", ticketUp);
         Order order = orderRepository.findById(ticketUp.getOrderId());
 
-        // null のときはSkip
         if (order == null) {
             logger.error("Order not found for ID: {}", ticketUp.getOrderId());
             throw new NotFoundException("Order not found for ID: " + ticketUp.getOrderId());
@@ -92,10 +93,14 @@ public class OrderService {
 
         OrderEventResult orderEventResult = order.applyOrderTicketUp(ticketUp);
         logger.debug("OrderEventResult returned: {}", orderEventResult);
-        orderRepository.persist(orderEventResult.getOrder());
-        orderEventResult.getOrderUpdates().forEach(orderUpdate -> {
-            orderUpdateEmitter.send(orderUpdate);
-        });
+
+        if (orderEventResult.getOrderUpdates().isEmpty()) {
+            logger.warn("⚠️ No OrderUpdates generated");
+        } else {
+            orderEventResult.getOrderUpdates().forEach(orderUpdate -> {
+                orderUpdateEmitter.send(orderUpdate);
+            });
+        }
         orderEventResult.getOutboxEvents().forEach(exportedEvent -> {
             event.fire(exportedEvent);
         });
@@ -107,8 +112,8 @@ public class OrderService {
                 "threadContext=" + threadContext +
                 ", orderRepository=" + orderRepository +
                 ", event=" + event +
-                ", QDCA10Emitter=" + QDCA10Emitter +
-                ", QDCA10ProEmitter=" + QDCA10ProEmitter +
+                ", QDCA10Emitter=" + qdca10Emitter +
+                ", QDCA10ProEmitter=" + qdca10proEmitter +
                 ", orderUpdateEmitter=" + orderUpdateEmitter +
                 '}';
     }

@@ -51,12 +51,12 @@ public class LineItemStatusTest {
 
     //     Order order = orderRepository.findById(orderId);
     //     assertNotNull(order);
-    //     assertTrue(order.getQDCA10LineItems().isPresent());
-    //     assertEquals(1, order.getQDCA10LineItems().get().size());
-    //     assertEquals(LineItemStatus.IN_PROGRESS, order.getQDCA10LineItems().get().get(0).getLineItemStatus());
+    //     assertTrue(order.getQdca10LineItems().isPresent());
+    //     assertEquals(1, order.getQdca10LineItems().get().size());
+    //     assertEquals(LineItemStatus.IN_PROGRESS, order.getQdca10LineItems().get().get(0).getLineItemStatus());
 
 
-    //     LineItem lineItem = order.getQDCA10LineItems().get().get(0);
+    //     LineItem lineItem = order.getQdca10LineItems().get().get(0);
     //     final TicketUp ticketUp = new TicketUp(
     //             orderId,
     //             lineItem.getItemId(),
@@ -71,9 +71,9 @@ public class LineItemStatusTest {
 
     //     Order updatedOrder = orderRepository.findById(orderId);
     //     assertNotNull(updatedOrder);
-    //     assertTrue(updatedOrder.getQDCA10LineItems().isPresent());
-    //     assertEquals(1, updatedOrder.getQDCA10LineItems().get().size());
-    //     assertEquals(LineItemStatus.FULFILLED, updatedOrder.getQDCA10LineItems().get().get(0).getLineItemStatus());
+    //     assertTrue(updatedOrder.getQdca10LineItems().isPresent());
+    //     assertEquals(1, updatedOrder.getQdca10LineItems().get().size());
+    //     assertEquals(LineItemStatus.FULFILLED, updatedOrder.getQdca10LineItems().get().get(0).getLineItemStatus());
     // }
 }
 

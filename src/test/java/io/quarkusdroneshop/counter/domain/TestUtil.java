@@ -51,8 +51,7 @@ public class TestUtil {
                 null);
 
         Order order = Order.fromOrderRecord(orderRecord);
-
-        order.getQDCA10LineItems(new LineItem(Item.QDC_A101, "Rocky", BigDecimal.valueOf(3.00), LineItemStatus.PLACED, orderRecord));
+        order.addQdca10LineItem(new LineItem(Item.QDC_A101, "Rocky", BigDecimal.valueOf(135.50), LineItemStatus.PLACED, orderRecord));
         return order;
     }
 
@@ -69,7 +68,7 @@ public class TestUtil {
         order.setOrderStatus(OrderStatus.IN_PROGRESS);
 
         orderEventResult.setOrder(order);
-        orderEventResult.setQDCA10Tickets(TestUtil.stubQDCA10Tickets());
+        orderEventResult.setQdca10Tickets(TestUtil.stubQdca10Tickets());
         orderEventResult.setOutboxEvents(mockOrderInEvent());
         return orderEventResult;
     }
@@ -78,7 +77,7 @@ public class TestUtil {
         return Arrays.asList(OrderCreatedEvent.of(stubOrder()));
     }
 
-    private static List<OrderTicket> stubQDCA10Tickets() {
+    private static List<OrderTicket> stubQdca10Tickets() {
         return Arrays.asList(new OrderTicket(UUID.randomUUID().toString(), UUID.randomUUID().toString(), Item.QDC_A101, "Rocky"));
     }
 

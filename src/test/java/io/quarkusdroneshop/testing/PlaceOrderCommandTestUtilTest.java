@@ -16,7 +16,7 @@ public class PlaceOrderCommandTestUtilTest {
         PlaceOrderCommand placeOrderCommand = new PlaceOrderCommandTestUtil().withBlackCoffee().build();
         assertNotNull(placeOrderCommand);
         assertNotNull(placeOrderCommand.getId());
-        assertEquals(1, placeOrderCommand.getQDCA10LineItems().get().size());
-        assertEquals(Item.QDC_A101, placeOrderCommand.getQDCA10LineItems().get().get(0).item);
+        assertEquals(1, placeOrderCommand.getQdca10LineItems().get().size());
+        assertEquals(Item.QDC_A101, placeOrderCommand.getQdca10LineItems().get().get(0).item);
     }
 }

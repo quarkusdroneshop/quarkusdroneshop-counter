@@ -16,9 +16,9 @@ public class OrderEventResult {
 
   private List<ExportedEvent> outboxEvents;
 
-  private List<OrderTicket> QDCA10Tickets;
+  private List<OrderTicket> Qdca10Tickets;
 
-  private List<OrderTicket> QDCA10ProTickets;
+  private List<OrderTicket> Qdca10proTickets;
 
   private List<OrderUpdate> orderUpdates;
 
@@ -44,25 +44,25 @@ public class OrderEventResult {
   }
 
   public void addQDCA10Ticket(final OrderTicket orderTicket) {
-    if (this.QDCA10Tickets == null) {
-      this.QDCA10Tickets = new ArrayList<>();
+    if (this.Qdca10Tickets == null) {
+      this.Qdca10Tickets = new ArrayList<>();
     }
-    this.QDCA10Tickets.add(orderTicket);
+    this.Qdca10Tickets.add(orderTicket);
   }
 
   public void addQDCA10ProTicket(final OrderTicket orderTicket) {
-    if (this.QDCA10ProTickets == null) {
-      this.QDCA10ProTickets = new ArrayList<>();
+    if (this.Qdca10proTickets == null) {
+      this.Qdca10proTickets = new ArrayList<>();
     }
-    this.QDCA10ProTickets.add(orderTicket);
+    this.Qdca10proTickets.add(orderTicket);
   }
 
-  public Optional<List<OrderTicket>> getQDCA10Tickets() {
-    return Optional.ofNullable(this.QDCA10Tickets);
+  public Optional<List<OrderTicket>> getQdca10Tickets() {
+    return Optional.ofNullable(this.Qdca10Tickets);
   }
 
-  public Optional<List<OrderTicket>> getQDCA10ProTickets() {
-    return Optional.ofNullable(this.QDCA10ProTickets);
+  public Optional<List<OrderTicket>> getQdca10proTickets() {
+    return Optional.ofNullable(this.Qdca10proTickets);
   }
 
 
@@ -72,8 +72,8 @@ public class OrderEventResult {
     return "OrderEventResult{" +
       "order=" + order +
       ", outboxEvents=" + outboxEvents +
-      ", QDCA10Tickets=" + QDCA10Tickets +
-      ", QDCA10ProTickets=" + QDCA10ProTickets +
+      ", Qdca10Tickets=" + Qdca10Tickets +
+      ", Qdca10proTickets=" + Qdca10proTickets +
       ", orderUpdates=" + orderUpdates +
       '}';
   }
@@ -87,9 +87,9 @@ public class OrderEventResult {
 
     if (getOrder() != null ? !getOrder().equals(that.getOrder()) : that.getOrder() != null) return false;
     if (outboxEvents != null ? !outboxEvents.equals(that.outboxEvents) : that.outboxEvents != null) return false;
-    if (QDCA10Tickets != null ? !QDCA10Tickets.equals(that.QDCA10Tickets) : that.QDCA10Tickets != null)
+    if (Qdca10Tickets != null ? !Qdca10Tickets.equals(that.Qdca10Tickets) : that.Qdca10Tickets != null)
       return false;
-    if (QDCA10ProTickets != null ? !QDCA10ProTickets.equals(that.QDCA10ProTickets) : that.QDCA10ProTickets != null)
+    if (Qdca10proTickets != null ? !Qdca10proTickets.equals(that.Qdca10proTickets) : that.Qdca10proTickets != null)
       return false;
     return orderUpdates != null ? orderUpdates.equals(that.orderUpdates) : that.orderUpdates == null;
   }
@@ -98,8 +98,8 @@ public class OrderEventResult {
   public int hashCode() {
     int result = getOrder() != null ? getOrder().hashCode() : 0;
     result = 31 * result + (outboxEvents != null ? outboxEvents.hashCode() : 0);
-    result = 31 * result + (QDCA10Tickets != null ? QDCA10Tickets.hashCode() : 0);
-    result = 31 * result + (QDCA10ProTickets != null ? QDCA10ProTickets.hashCode() : 0);
+    result = 31 * result + (Qdca10Tickets != null ? Qdca10Tickets.hashCode() : 0);
+    result = 31 * result + (Qdca10proTickets != null ? Qdca10proTickets.hashCode() : 0);
     result = 31 * result + (orderUpdates != null ? orderUpdates.hashCode() : 0);
     return result;
   }
@@ -112,12 +112,12 @@ public class OrderEventResult {
     this.outboxEvents = outboxEvents;
   }
 
-  public void setQDCA10Tickets(List<OrderTicket> QDCA10Tickets) {
-    this.QDCA10Tickets = QDCA10Tickets;
+  public void setQdca10Tickets(List<OrderTicket> Qdca10Tickets) {
+    this.Qdca10Tickets = Qdca10Tickets;
   }
 
-  public void setQDCA10ProTickets(List<OrderTicket> QDCA10ProTickets) {
-    this.QDCA10ProTickets = QDCA10ProTickets;
+  public void setQdca10proTickets(List<OrderTicket> Qdca10proTickets) {
+    this.Qdca10proTickets = Qdca10proTickets;
   }
 
   public List<OrderUpdate> getOrderUpdates() {

@@ -34,23 +34,23 @@ public class OrderCreatedEvent implements ExportedEvent<String, JsonNode> {
                 .put("orderSource", order.getOrderSource().toString())
                 .put("timestamp", order.getTimestamp().toString());
 
-        if (order.getQDCA10LineItems().isPresent()) {
-            ArrayNode QDCA10LineItems = asJson.putArray("QDCA10LineItems") ;
-            for (LineItem lineItem : order.getQDCA10LineItems().get()) {
+        if (order.getQdca10LineItems().isPresent()) {
+            ArrayNode Qdca10LineItems = asJson.putArray("Qdca10LineItems") ;
+            for (LineItem lineItem : order.getQdca10LineItems().get()) {
                 ObjectNode lineAsJon = mapper.createObjectNode()
                         .put("item", lineItem.getItem().toString())
                         .put("name", lineItem.getName());
-                QDCA10LineItems.add(lineAsJon);
+                Qdca10LineItems.add(lineAsJon);
             }
         }
 
-        if (order.getQDCA10ProLineItems().isPresent()) {
-            ArrayNode QDCA10ProLineItems = asJson.putArray("QDCA10ProLineItems") ;
-            for (LineItem lineItem : order.getQDCA10ProLineItems().get()) {
+        if (order.getQdca10proLineItems().isPresent()) {
+            ArrayNode Qdca10proLineItems = asJson.putArray("Qdca10proLineItems") ;
+            for (LineItem lineItem : order.getQdca10proLineItems().get()) {
                 ObjectNode lineAsJon = mapper.createObjectNode()
                         .put("item", lineItem.getItem().toString())
                         .put("name", lineItem.getName());
-                QDCA10ProLineItems.add(lineAsJon);
+                Qdca10proLineItems.add(lineAsJon);
             }
         }
 

@@ -47,12 +47,12 @@ public class OrderStatusTest {
 
     //     Order order = orderRepository.findById(orderId);
     //     assertNotNull(order);
-    //     assertTrue(order.getQDCA10LineItems().isPresent());
-    //     assertEquals(1, order.getQDCA10LineItems().get().size());
+    //     assertTrue(order.getQdca10LineItems().isPresent());
+    //     assertEquals(1, order.getQdca10LineItems().get().size());
     //     assertEquals(OrderStatus.IN_PROGRESS, order.getOrderStatus());
 
 
-    //     LineItem lineItem = order.getQDCA10LineItems().get().get(0);
+    //     LineItem lineItem = order.getQdca10LineItems().get().get(0);
     //     final TicketUp ticketUp = new TicketUp(
     //             orderId,
     //             lineItem.getItemId(),
@@ -67,8 +67,8 @@ public class OrderStatusTest {
 
     //     Order updatedOrder = orderRepository.findById(orderId);
     //     assertNotNull(updatedOrder);
-    //     assertTrue(updatedOrder.getQDCA10LineItems().isPresent());
-    //     assertEquals(1, updatedOrder.getQDCA10LineItems().get().size());
+    //     assertTrue(updatedOrder.getQdca10LineItems().isPresent());
+    //     assertEquals(1, updatedOrder.getQdca10LineItems().get().size());
     //     assertEquals(OrderStatus.FULFILLED, updatedOrder.getOrderStatus());
     // }
 }

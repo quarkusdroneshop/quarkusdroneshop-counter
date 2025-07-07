@@ -24,9 +24,9 @@ public class PlaceOrderCommandTestUtil {
 
     private String loyaltyMemberId;
 
-    private List<CommandItem> QDCA10LineItems;
+    private List<CommandItem> Qdca10LineItems;
 
-    private List<CommandItem> QDCA10ProLineItems;
+    private List<CommandItem> Qdca10proLineItems;
 
     private Instant timestamp;
 
@@ -34,13 +34,13 @@ public class PlaceOrderCommandTestUtil {
         this.id = UUID.randomUUID().toString();
     }
 
-    public PlaceOrderCommandTestUtil(String id, OrderSource orderSource, Location location, String loyaltyMemberId, List<CommandItem> QDCA10LineItems, List<CommandItem> QDCA10ProLineItems, Instant timestamp) {
+    public PlaceOrderCommandTestUtil(String id, OrderSource orderSource, Location location, String loyaltyMemberId, List<CommandItem> Qdca10LineItems, List<CommandItem> Qdca10proLineItems, Instant timestamp) {
         this.id = id;
         this.orderSource = orderSource;
         this.location = location;
         this.loyaltyMemberId = loyaltyMemberId;
-        this.QDCA10LineItems = QDCA10LineItems;
-        this.QDCA10ProLineItems = QDCA10ProLineItems;
+        this.Qdca10LineItems = Qdca10LineItems;
+        this.Qdca10proLineItems = Qdca10proLineItems;
         this.timestamp = timestamp;
     }
 
@@ -54,15 +54,15 @@ public class PlaceOrderCommandTestUtil {
     }
 
     public PlaceOrderCommandTestUtil withBlackCoffee() {
-        if (this.QDCA10LineItems == null) {
-            this.QDCA10LineItems = new ArrayList<>();
+        if (this.Qdca10LineItems == null) {
+            this.Qdca10LineItems = new ArrayList<>();
         }
-        this.QDCA10LineItems.add(new CommandItem(Item.QDC_A101, "Jerry", BigDecimal.valueOf(3.50)));
+        this.Qdca10LineItems.add(new CommandItem(Item.QDC_A101, "Jerry", BigDecimal.valueOf(3.50)));
         return this;
     }
 
     public void withBlackCoffeeFor(final String name) {
-        this.QDCA10LineItems.add(new CommandItem(Item.QDC_A101, name, BigDecimal.valueOf(3.50)));
+        this.Qdca10LineItems.add(new CommandItem(Item.QDC_A101, name, BigDecimal.valueOf(3.50)));
     }
 
     public PlaceOrderCommand build() {
@@ -71,8 +71,8 @@ public class PlaceOrderCommandTestUtil {
             this.orderSource,
             this.location,
             this.loyaltyMemberId,
-            Optional.ofNullable(this.QDCA10LineItems),
-            Optional.ofNullable(this.QDCA10ProLineItems)
+            Optional.ofNullable(this.Qdca10LineItems),
+            Optional.ofNullable(this.Qdca10proLineItems)
         );
     }
 }
