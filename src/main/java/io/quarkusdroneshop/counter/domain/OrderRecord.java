@@ -28,23 +28,23 @@ public class OrderRecord extends PanacheEntityBase {
     private Location location;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "order", cascade = CascadeType.ALL)
-    private List<LineItem> Qdca10LineItems;
+    private List<LineItem> qdca10LineItems;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "order", cascade = CascadeType.ALL)
-    private List<LineItem> Qdca10proLineItems;
+    private List<LineItem> qdca10proLineItems;
 
     public OrderRecord() {
     }
 
-    public OrderRecord(String orderId, OrderSource orderSource, String loyaltyMemberId, Instant timestamp, OrderStatus orderStatus, Location location, List<LineItem> Qdca10LineItems, List<LineItem> Qdca10proLineItems) {
+    public OrderRecord(String orderId, OrderSource orderSource, String loyaltyMemberId, Instant timestamp, OrderStatus orderStatus, Location location, List<LineItem> qdca10LineItems, List<LineItem> qdca10proLineItems) {
         this.orderId = orderId;
         this.orderSource = orderSource;
         this.loyaltyMemberId = loyaltyMemberId;
         this.timestamp = timestamp;
         this.orderStatus = orderStatus;
         this.location = location;
-        this.Qdca10LineItems = Qdca10LineItems;
-        this.Qdca10proLineItems = Qdca10proLineItems;
+        this.qdca10LineItems = qdca10LineItems;
+        this.qdca10proLineItems = qdca10proLineItems;
     }
 
     @Override
@@ -56,8 +56,8 @@ public class OrderRecord extends PanacheEntityBase {
         sb.append(", timestamp=").append(timestamp);
         sb.append(", orderStatus=").append(orderStatus);
         sb.append(", location=").append(location);
-        sb.append(", Qdca10LineItems=").append(Qdca10LineItems);
-        sb.append(", Qdca10proLineItems=").append(Qdca10proLineItems);
+        sb.append(", Qdca10LineItems=").append(qdca10LineItems);
+        sb.append(", Qdca10proLineItems=").append(qdca10proLineItems);
         sb.append('}');
         return sb.toString();
     }
@@ -76,9 +76,9 @@ public class OrderRecord extends PanacheEntityBase {
         if (timestamp != null ? !timestamp.equals(that.timestamp) : that.timestamp != null) return false;
         if (orderStatus != that.orderStatus) return false;
         if (location != that.location) return false;
-        if (Qdca10LineItems != null ? !Qdca10LineItems.equals(that.Qdca10LineItems) : that.Qdca10LineItems != null)
+        if (qdca10LineItems != null ? !qdca10LineItems.equals(that.qdca10LineItems) : that.qdca10LineItems != null)
             return false;
-        return Qdca10proLineItems != null ? Qdca10proLineItems.equals(that.Qdca10proLineItems) : that.Qdca10proLineItems == null;
+        return qdca10proLineItems != null ? qdca10proLineItems.equals(that.qdca10proLineItems) : that.qdca10proLineItems == null;
     }
 
     @Override
@@ -89,8 +89,8 @@ public class OrderRecord extends PanacheEntityBase {
         result = 31 * result + (timestamp != null ? timestamp.hashCode() : 0);
         result = 31 * result + (orderStatus != null ? orderStatus.hashCode() : 0);
         result = 31 * result + (location != null ? location.hashCode() : 0);
-        result = 31 * result + (Qdca10LineItems != null ? Qdca10LineItems.hashCode() : 0);
-        result = 31 * result + (Qdca10proLineItems != null ? Qdca10proLineItems.hashCode() : 0);
+        result = 31 * result + (qdca10LineItems != null ? qdca10LineItems.hashCode() : 0);
+        result = 31 * result + (qdca10proLineItems != null ? qdca10proLineItems.hashCode() : 0);
         return result;
     }
 
@@ -143,18 +143,18 @@ public class OrderRecord extends PanacheEntityBase {
     }
 
     public List<LineItem> getQdca10LineItems() {
-        return Qdca10LineItems;
+        return qdca10LineItems;
     }
 
-    public void setQdca10LineItems(List<LineItem> Qdca10LineItems) {
-        this.Qdca10LineItems = Qdca10LineItems;
+    public void setQdca10LineItems(List<LineItem> qdca10LineItems) {
+        this.qdca10LineItems = qdca10LineItems;
     }
 
     public List<LineItem> getQdca10proLineItems() {
-        return Qdca10proLineItems;
+        return qdca10proLineItems;
     }
 
-    public void setQdca10proLineItems(List<LineItem> Qdca10proLineItems) {
-        this.Qdca10proLineItems = Qdca10proLineItems;
+    public void setQdca10proLineItems(List<LineItem> qdca10proLineItems) {
+        this.qdca10proLineItems = qdca10proLineItems;
     }
 }

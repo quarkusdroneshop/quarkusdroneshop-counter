@@ -112,8 +112,8 @@ public class OrderService {
                 "threadContext=" + threadContext +
                 ", orderRepository=" + orderRepository +
                 ", event=" + event +
-                ", QDCA10Emitter=" + qdca10Emitter +
-                ", QDCA10ProEmitter=" + qdca10proEmitter +
+                ", qdca10Emitter=" + qdca10Emitter +
+                ", qdca10proEmitter=" + qdca10proEmitter +
                 ", orderUpdateEmitter=" + orderUpdateEmitter +
                 '}';
     }
