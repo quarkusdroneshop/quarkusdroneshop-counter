@@ -3,11 +3,14 @@ package io.quarkusdroneshop.infrastructure;
 import io.quarkusdroneshop.counter.domain.commands.PlaceOrderCommand;
 import io.quarkusdroneshop.counter.domain.valueobjects.OrderEventResult;
 import io.quarkusdroneshop.counter.domain.valueobjects.TicketUp;
+import io.quarkusdroneshop.counter.domain.valueobjects.DashboardUpdate;
 import io.smallrye.reactive.messaging.annotations.Blocking;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -18,6 +21,10 @@ public class KafkaService {
 
     @Inject
     OrderService orderService;
+
+    @Inject
+    @Channel("web-updates")
+    Emitter<DashboardUpdate> webUpdatesEmitter;
 
     @Incoming("orders-in")
     @Blocking

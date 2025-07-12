@@ -30,14 +30,22 @@ public class TicketUp {
         @JsonProperty("lineItemId") String lineItemId,
         @JsonProperty("item") Item item,
         @JsonProperty("name") String name,
-        @JsonProperty("timestamp") String timestamp,
+        @JsonProperty("timestamp") Object timestamp,
         @JsonProperty("madeBy") String madeBy
     ) {
         this.orderId = orderId;
         this.lineItemId = lineItemId;
         this.item = item;
         this.name = name;
-        this.timestamp = Instant.parse(timestamp);
+    
+        if (timestamp instanceof String) {
+            this.timestamp = Instant.parse((String) timestamp);
+        } else if (timestamp instanceof Number) {
+            this.timestamp = Instant.ofEpochMilli(((Number) timestamp).longValue());
+        } else {
+            this.timestamp = Instant.now(); // fallback
+        }
+    
         this.madeBy = madeBy;
     }
 

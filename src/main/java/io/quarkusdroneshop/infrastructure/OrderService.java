@@ -3,7 +3,10 @@ package io.quarkusdroneshop.infrastructure;
 import io.debezium.outbox.quarkus.ExportedEvent;
 import io.quarkusdroneshop.counter.domain.Order;
 import io.quarkusdroneshop.counter.domain.OrderRepository;
+import io.quarkusdroneshop.counter.domain.OrderStatus;
+import io.quarkusdroneshop.counter.domain.Item;
 import io.quarkusdroneshop.counter.domain.commands.PlaceOrderCommand;
+import io.quarkusdroneshop.counter.domain.valueobjects.DashboardUpdate;
 import io.quarkusdroneshop.counter.domain.valueobjects.OrderEventResult;
 import io.quarkusdroneshop.counter.domain.valueobjects.OrderTicket;
 import io.quarkusdroneshop.counter.domain.valueobjects.OrderUpdate;
@@ -41,7 +44,7 @@ public class OrderService {
     Emitter<OrderTicket> qdca10proEmitter;
 
     @Channel("web-updates")
-    Emitter<OrderUpdate> orderUpdateEmitter;
+    Emitter<DashboardUpdate> dashboardUpdateEmitter;
 
     // トランザクション内処理
     @Transactional
@@ -80,8 +83,17 @@ public class OrderService {
 
     // Kafka送信をトランザクション外で実行
     public void sendOrderUpdate(OrderUpdate update) {
-        logger.debug("Sending OrderUpdate: {}", update);
-        orderUpdateEmitter.send(update);
+        logger.debug("Sending DashboardUpdate: {}", update);
+    
+        DashboardUpdate dashboardUpdate = new DashboardUpdate(
+            update.getOrderId(),
+            update.getItemId(),
+            update.getName(),
+            update.getItem(),
+            update.getStatus(),
+            update.getMadeBy().orElse("unknown")  // Optional<String> なので orElse で補完
+        );
+        dashboardUpdateEmitter.send(dashboardUpdate);
     }
 
     public void sendQdca10(OrderTicket ticket) {
@@ -102,7 +114,7 @@ public class OrderService {
                 ", event=" + event +
                 ", qdca10Emitter=" + qdca10Emitter +
                 ", qdca10proEmitter=" + qdca10proEmitter +
-                ", orderUpdateEmitter=" + orderUpdateEmitter +
+                ", orderUpdateEmitter=" + dashboardUpdateEmitter +
                 '}';
     }
 }
