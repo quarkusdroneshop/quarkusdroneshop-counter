@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TicketUp {
@@ -18,6 +19,7 @@ public class TicketUp {
 
     public String name;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     public Instant timestamp;
 
     public String madeBy;
