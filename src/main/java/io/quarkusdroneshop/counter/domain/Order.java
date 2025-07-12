@@ -231,8 +231,8 @@ public class Order {
             .add("timestamp=" + orderRecord.getTimestamp())
             .add("orderStatus=" + orderRecord.getOrderStatus())
             .add("location=" + orderRecord.getLocation())
-            .add("Qdca10LineItems=" + orderRecord.getQdca10LineItems())
-            .add("Qdca10proLineItems=" + orderRecord.getQdca10proLineItems())
+            .add("qdca10LineItems=" + orderRecord.getQdca10LineItems())
+            .add("qdca10proLineItems=" + orderRecord.getQdca10proLineItems())
             .toString();
   }
 
