@@ -28,14 +28,14 @@ public class TicketUp {
         @JsonProperty("lineItemId") String lineItemId,
         @JsonProperty("item") Item item,
         @JsonProperty("name") String name,
-        @JsonProperty("timestamp") Instant timestamp,
+        @JsonProperty("timestamp") String timestamp,
         @JsonProperty("madeBy") String madeBy
     ) {
         this.orderId = orderId;
         this.lineItemId = lineItemId;
         this.item = item;
         this.name = name;
-        this.timestamp = timestamp;
+        this.timestamp = Instant.parse(timestamp);
         this.madeBy = madeBy;
     }
 
