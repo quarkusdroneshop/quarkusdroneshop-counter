@@ -18,15 +18,15 @@ public class OrderServiceMock extends OrderService {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderServiceMock.class);
 
-    @Override
-    public void onOrderIn(final PlaceOrderCommand placeOrderCommand){
+    // @Override
+    // public void onOrderIn(final PlaceOrderCommand placeOrderCommand){
 
-        logger.info("onOrderIn called on Mock: {}", placeOrderCommand);
-    }
+    //     logger.info("onOrderIn called on Mock: {}", placeOrderCommand);
+    // }
 
-    @Override
-    public void onOrderUp(final TicketUp ticketUp) {
+    // @Override
+    // public void onOrderUp(final TicketUp ticketUp) {
 
-        logger.info("onOrderUp called on Mock: {}", ticketUp);
-    }
+    //     logger.info("onOrderUp called on Mock: {}", ticketUp);
+    // }
 }
