@@ -43,47 +43,27 @@ public class OrderService {
     @Channel("web-updates")
     Emitter<OrderUpdate> orderUpdateEmitter;
 
-    
-    public void onOrderIn(final PlaceOrderCommand placeOrderCommand) {
+    // トランザクション内処理
+    @Transactional
+    public OrderEventResult onOrderInTx(final PlaceOrderCommand placeOrderCommand) {
+        logger.debug("onOrderInTx: {}", placeOrderCommand);
 
-        logger.debug("onOrderIn {}", placeOrderCommand);
+        OrderEventResult result = Order.createFromCommand(placeOrderCommand);
 
-        OrderEventResult orderEventResult = Order.createFromCommand(placeOrderCommand);
+        orderRepository.persist(result.getOrder());
 
-        logger.debug("OrderEventResult returned: {}", orderEventResult);
-
-        orderRepository.persist(orderEventResult.getOrder());
-
-        orderEventResult.getOutboxEvents().forEach(exportedEvent -> {
+        result.getOutboxEvents().forEach(exportedEvent -> {
             logger.debug("Firing event: {}", exportedEvent);
             event.fire(exportedEvent);
         });
-        
-        if (orderEventResult.getOrderUpdates().isEmpty()) {
-            logger.warn("⚠️ No OrderUpdates generated in onOrderIn");
-        } else {
-            orderEventResult.getOrderUpdates().forEach(orderUpdate -> {
-                orderUpdateEmitter.send(orderUpdate);
-            });
-        }
-        if (orderEventResult.getQdca10Tickets().isPresent()) {
-            orderEventResult.getQdca10Tickets().get().forEach(QDCA10Ticket -> {
-                logger.debug("Sending Ticket to QDCA10 Service: {}", QDCA10Ticket);
-                qdca10Emitter.send(QDCA10Ticket);
-            });
-        }
-        if (orderEventResult.getQdca10proTickets().isPresent()) {
-            orderEventResult.getQdca10proTickets().get().forEach(QDCA10ProTicket -> {
-                qdca10proEmitter.send(QDCA10ProTicket);
-            });
-        }
 
+        return result;
     }
 
+    // トランザクション内処理（orders-up）
     @Transactional
-    public void onOrderUp(final TicketUp ticketUp) {
-
-        logger.debug("onOrderUp: {}", ticketUp);
+    public OrderEventResult onOrderUpTx(final TicketUp ticketUp) {
+        logger.debug("onOrderUpTx: {}", ticketUp);
         Order order = orderRepository.findById(ticketUp.getOrderId());
 
         if (order == null) {
@@ -91,19 +71,27 @@ public class OrderService {
             throw new NotFoundException("Order not found for ID: " + ticketUp.getOrderId());
         }
 
-        OrderEventResult orderEventResult = order.applyOrderTicketUp(ticketUp);
-        logger.debug("OrderEventResult returned: {}", orderEventResult);
+        OrderEventResult result = order.applyOrderTicketUp(ticketUp);
 
-        if (orderEventResult.getOrderUpdates().isEmpty()) {
-            logger.warn("⚠️ No OrderUpdates generated");
-        } else {
-            orderEventResult.getOrderUpdates().forEach(orderUpdate -> {
-                orderUpdateEmitter.send(orderUpdate);
-            });
-        }
-        orderEventResult.getOutboxEvents().forEach(exportedEvent -> {
-            event.fire(exportedEvent);
-        });
+        result.getOutboxEvents().forEach(event::fire);
+
+        return result;
+    }
+
+    // Kafka送信をトランザクション外で実行
+    public void sendOrderUpdate(OrderUpdate update) {
+        logger.debug("Sending OrderUpdate: {}", update);
+        orderUpdateEmitter.send(update);
+    }
+
+    public void sendQdca10(OrderTicket ticket) {
+        logger.debug("Sending QDCA10 Ticket: {}", ticket);
+        qdca10Emitter.send(ticket);
+    }
+
+    public void sendQdca10pro(OrderTicket ticket) {
+        logger.debug("Sending QDCA10Pro Ticket: {}", ticket);
+        qdca10proEmitter.send(ticket);
     }
 
     @Override
@@ -117,5 +105,4 @@ public class OrderService {
                 ", orderUpdateEmitter=" + orderUpdateEmitter +
                 '}';
     }
-
 }

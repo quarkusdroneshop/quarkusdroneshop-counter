@@ -5,26 +5,46 @@ import io.quarkusdroneshop.counter.domain.Item;
 import java.time.Instant;
 import java.util.StringJoiner;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class TicketUp {
 
-    public final String orderId;
+    public String orderId;
 
-    public final String lineItemId;
+    public String lineItemId;
 
-    public final Item item;
+    public Item item;
 
-    public final String name;
+    public String name;
 
-    public final Instant timestamp;
+    public Instant timestamp;
 
-    public final String madeBy;
+    public String madeBy;
+
+    @JsonCreator
+    public TicketUp(
+        @JsonProperty("orderId") String orderId,
+        @JsonProperty("lineItemId") String lineItemId,
+        @JsonProperty("item") Item item,
+        @JsonProperty("name") String name,
+        @JsonProperty("timestamp") Instant timestamp,
+        @JsonProperty("madeBy") String madeBy
+    ) {
+        this.orderId = orderId;
+        this.lineItemId = lineItemId;
+        this.item = item;
+        this.name = name;
+        this.timestamp = timestamp;
+        this.madeBy = madeBy;
+    }
 
     public TicketUp(String orderId, String lineItemId, Item item, String name, String madeBy) {
         this.orderId = orderId;
         this.lineItemId = lineItemId;
         this.item = item;
         this.name = name;
-        this.timestamp = Instant.now();
+        this.timestamp = timestamp != null ? timestamp : Instant.now();
         this.madeBy = madeBy;
     }
 
