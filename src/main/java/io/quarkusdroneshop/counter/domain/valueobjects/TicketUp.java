@@ -1,21 +1,25 @@
 package io.quarkusdroneshop.counter.domain.valueobjects;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.quarkusdroneshop.counter.domain.Item;
 
 import java.time.Instant;
 import java.util.StringJoiner;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class TicketUp {
 
     public String orderId;
+
     public String lineItemId;
+
     public Item item;
+
     public String name;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING) // ISO-8601で書き出すよう指定
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     public Instant timestamp;
 
     public String madeBy;
@@ -26,14 +30,14 @@ public class TicketUp {
         @JsonProperty("lineItemId") String lineItemId,
         @JsonProperty("item") Item item,
         @JsonProperty("name") String name,
-        @JsonProperty("timestamp") Instant timestamp,
+        @JsonProperty("timestamp") String timestamp,
         @JsonProperty("madeBy") String madeBy
     ) {
         this.orderId = orderId;
         this.lineItemId = lineItemId;
         this.item = item;
         this.name = name;
-        this.timestamp = timestamp;
+        this.timestamp = Instant.parse(timestamp);
         this.madeBy = madeBy;
     }
 
@@ -42,7 +46,7 @@ public class TicketUp {
         this.lineItemId = lineItemId;
         this.item = item;
         this.name = name;
-        this.timestamp = Instant.now(); // 正しく初期化
+        this.timestamp = timestamp != null ? timestamp : Instant.now();
         this.madeBy = madeBy;
     }
 
