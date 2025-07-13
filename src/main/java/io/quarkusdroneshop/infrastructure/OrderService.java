@@ -109,7 +109,8 @@ public class OrderService {
         }
 
         OrderEventResult result = order.applyOrderTicketUp(ticketUp);
-
+        logger.debug("order.applyOrderTicketUp returned updates: {}", result.getOrderUpdates());
+        
         result.getOutboxEvents().forEach(event::fire);
 
         return result;
