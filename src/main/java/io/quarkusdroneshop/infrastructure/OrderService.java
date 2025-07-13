@@ -1,10 +1,12 @@
 package io.quarkusdroneshop.infrastructure;
 
 import io.debezium.outbox.quarkus.ExportedEvent;
+import io.quarkusdroneshop.counter.domain.LineItem;
 import io.quarkusdroneshop.counter.domain.Order;
 import io.quarkusdroneshop.counter.domain.OrderRepository;
 import io.quarkusdroneshop.counter.domain.OrderStatus;
 import io.quarkusdroneshop.counter.domain.Item;
+import io.quarkusdroneshop.counter.domain.OrderRecord;
 import io.quarkusdroneshop.counter.domain.commands.PlaceOrderCommand;
 import io.quarkusdroneshop.counter.domain.valueobjects.DashboardUpdate;
 import io.quarkusdroneshop.counter.domain.valueobjects.OrderEventResult;
@@ -16,6 +18,7 @@ import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
@@ -51,10 +54,41 @@ public class OrderService {
     public OrderEventResult onOrderInTx(final PlaceOrderCommand placeOrderCommand) {
         logger.debug("onOrderInTx: {}", placeOrderCommand);
 
+        // Orderドメインオブジェクトを作成
         OrderEventResult result = Order.createFromCommand(placeOrderCommand);
+        Order order = result.getOrder();
 
-        orderRepository.persist(result.getOrder());
+        // OrderRecord（JPAエンティティ）を作成
+        OrderRecord orderRecord = new OrderRecord();
+        orderRecord.setOrderId(order.getOrderId());
+        orderRecord.setOrderSource(order.getOrderSource());
+        orderRecord.setLoyaltyMemberId(order.getLoyaltyMemberId().orElse(null));
+        orderRecord.setTimestamp(order.getTimestamp());
+        orderRecord.setOrderStatus(OrderStatus.PLACED);
+        orderRecord.setLocation(order.getLocation());
 
+        // qdca10LineItemsの設定（親子関係のリンクも忘れずに）
+        if (order.getQdca10LineItems().isPresent()) {
+            List<LineItem> lineItems = order.getQdca10LineItems().get();
+            for (LineItem item : lineItems) {
+                item.setOrder(orderRecord);
+            }
+            orderRecord.setQdca10LineItems(lineItems);
+        }
+
+        // qdca10proLineItemsの設定
+        if (order.getQdca10proLineItems().isPresent()) {
+            List<LineItem> lineItems = order.getQdca10proLineItems().get();
+            for (LineItem item : lineItems) {
+                item.setOrder(orderRecord);
+            }
+            orderRecord.setQdca10proLineItems(lineItems);
+        }
+
+        // OrderRecordエンティティの永続化
+        orderRepository.persist(orderRecord);
+
+        // Outboxイベントの発火
         result.getOutboxEvents().forEach(exportedEvent -> {
             logger.debug("Firing event: {}", exportedEvent);
             event.fire(exportedEvent);
