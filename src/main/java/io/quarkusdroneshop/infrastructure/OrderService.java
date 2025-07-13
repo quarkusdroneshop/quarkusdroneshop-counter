@@ -125,7 +125,7 @@ public class OrderService {
             update.getName(),
             update.getItem(),
             update.getStatus(),
-            update.getMadeBy().orElse("unknown")  // Optional<String> なので orElse で補完
+            update.getMadeBy().orElse("")  // Optional<String> なので orElse で補完
         );
         dashboardUpdateEmitter.send(dashboardUpdate);
     }

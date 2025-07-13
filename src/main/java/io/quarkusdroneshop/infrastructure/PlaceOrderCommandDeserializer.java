@@ -24,7 +24,7 @@ public class PlaceOrderCommandDeserializer extends ObjectMapperDeserializer<Plac
         @JsonProperty("rewardsId") final String loyaltyMemberId,
         @JsonProperty("QDCA10Items") Optional<List<LineItem>> Qdca10LineItems,
         @JsonProperty("QDCA10ProItems") Optional<List<LineItem>> Qdca10proLineItems) {
-/*
+*//*
 
 
         JsonNode node = jp.getCodec().readTree(jp);
