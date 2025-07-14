@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @JsonIgnoreProperties(value = { "orderId" })
 @Entity
-@Table(name = "LineItems")
+@Table(name = "lineItems")
 public class LineItem extends PanacheEntityBase {
 
   @JsonIgnore
