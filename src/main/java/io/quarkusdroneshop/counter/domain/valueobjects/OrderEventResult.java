@@ -2,15 +2,24 @@ package io.quarkusdroneshop.counter.domain.valueobjects;
 
 import io.debezium.outbox.quarkus.ExportedEvent;
 import io.quarkusdroneshop.counter.domain.Order;
+import io.quarkusdroneshop.infrastructure.OrderService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+import javax.ws.rs.NotFoundException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Value object returned from an Order.  Contains the Order aggregate and a List ExportedEvent
  */
 public class OrderEventResult {
+
+  final Logger logger = LoggerFactory.getLogger(OrderEventResult.class);
 
   private Order order;
 
@@ -43,14 +52,14 @@ public class OrderEventResult {
     this.orderUpdates.add(orderUpdate);
   }
 
-  public void addQDCA10Ticket(final OrderTicket orderTicket) {
+  public void addQdca10Ticket(final OrderTicket orderTicket) {
     if (this.Qdca10Tickets == null) {
       this.Qdca10Tickets = new ArrayList<>();
     }
     this.Qdca10Tickets.add(orderTicket);
   }
 
-  public void addQDCA10ProTicket(final OrderTicket orderTicket) {
+  public void addQDdca10proTicket(final OrderTicket orderTicket) {
     if (this.Qdca10proTickets == null) {
       this.Qdca10proTickets = new ArrayList<>();
     }
@@ -64,8 +73,6 @@ public class OrderEventResult {
   public Optional<List<OrderTicket>> getQdca10proTickets() {
     return Optional.ofNullable(this.Qdca10proTickets);
   }
-
-
 
   @Override
   public String toString() {
@@ -131,4 +138,5 @@ public class OrderEventResult {
   public void setOrder(final Order order) {
     this.order = order;
   }
+  
 }

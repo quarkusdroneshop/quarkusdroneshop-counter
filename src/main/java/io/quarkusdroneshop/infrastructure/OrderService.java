@@ -25,6 +25,7 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.NotFoundException;
+import java.util.Optional;
 
 @ApplicationScoped
 public class OrderService {
@@ -101,20 +102,50 @@ public class OrderService {
     @Transactional
     public OrderEventResult onOrderUpTx(final TicketUp ticketUp) {
         logger.debug("onOrderUpTx: {}", ticketUp);
-        Order order = orderRepository.findById(ticketUp.getOrderId());
-
-        if (order == null) {
+    
+        Optional<OrderRecord> orderRecordOpt = orderRepository.findByIdOptional(ticketUp.getOrderId());
+        if (orderRecordOpt.isEmpty()) {
             logger.error("Order not found for ID: {}", ticketUp.getOrderId());
             throw new NotFoundException("Order not found for ID: " + ticketUp.getOrderId());
         }
-
+        OrderRecord orderRecord = orderRecordOpt.get();
+    
+        Order order = Order.fromOrderRecord(orderRecord);
+    
         OrderEventResult result = order.applyOrderTicketUp(ticketUp);
-        logger.debug("order.applyOrderTicketUp returned updates: {}", result.getOrderUpdates());
-        
+    
         result.getOutboxEvents().forEach(event::fire);
-
+    
+        if (result.getOrderUpdates() != null) {
+            result.getOrderUpdates().forEach(this::sendOrderUpdate);
+        }
         return result;
     }
+
+    // @Transactional
+    // public OrderEventResult onOrderUpTx(final TicketUp ticketUp) {
+    //     logger.debug("onOrderUpTx: {}", ticketUp);
+    
+    //     Optional<OrderRecord> orderRecordOpt = orderRepository.findByIdOptional(ticketUp.getOrderId());
+    //     if (orderRecordOpt.isEmpty()) {
+    //         logger.error("Order not found for ID: {}", ticketUp.getOrderId());
+    //         throw new NotFoundException("Order not found for ID: " + ticketUp.getOrderId());
+    //     }
+    
+    //     OrderRecord orderRecord = orderRecordOpt.get();
+    //     Order order = Order.fromOrderRecord(orderRecord);
+    
+    //     OrderEventResult result = order.applyOrderTicketUp(ticketUp);
+    
+    //     result.getOutboxEvents().forEach(event::fire);
+    
+    //     if (result.getOrderUpdates() != null) {
+    //         result.getOrderUpdates().forEach(this::sendOrderUpdate);
+    //     }
+    
+    //     return result;
+    // }
+
 
     // Kafka送信をトランザクション外で実行
     public void sendOrderUpdate(OrderUpdate update) {
