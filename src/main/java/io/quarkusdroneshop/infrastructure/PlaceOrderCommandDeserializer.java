@@ -1,5 +1,10 @@
 package io.quarkusdroneshop.infrastructure;
 
+import java.io.IOException;
+
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+
 import io.quarkus.kafka.client.serialization.ObjectMapperDeserializer;
 import io.quarkusdroneshop.counter.domain.commands.PlaceOrderCommand;
 

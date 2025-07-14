@@ -5,7 +5,6 @@ import io.quarkusdroneshop.counter.domain.LineItem;
 import io.quarkusdroneshop.counter.domain.Order;
 import io.quarkusdroneshop.counter.domain.OrderRepository;
 import io.quarkusdroneshop.counter.domain.OrderStatus;
-import io.quarkusdroneshop.counter.domain.Item;
 import io.quarkusdroneshop.counter.domain.OrderRecord;
 import io.quarkusdroneshop.counter.domain.commands.PlaceOrderCommand;
 import io.quarkusdroneshop.counter.domain.valueobjects.DashboardUpdate;
@@ -103,7 +102,8 @@ public class OrderService {
     public OrderEventResult onOrderUpTx(final TicketUp ticketUp) {
         logger.debug("onOrderUpTx: {}", ticketUp);
     
-        Optional<OrderRecord> orderRecordOpt = orderRepository.findByIdOptional(ticketUp.getOrderId());
+        Long orderId = Long.parseLong(ticketUp.getOrderId());
+        Optional<OrderRecord> orderRecordOpt = orderRepository.findByIdOptional(orderId);
         if (orderRecordOpt.isEmpty()) {
             logger.error("Order not found for ID: {}", ticketUp.getOrderId());
             throw new NotFoundException("Order not found for ID: " + ticketUp.getOrderId());

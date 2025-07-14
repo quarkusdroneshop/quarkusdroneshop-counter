@@ -65,7 +65,7 @@ public class Order {
     OrderUpdatedEvent orderUpdatedEvent = OrderUpdatedEvent.of(this);
 
     OrderUpdate orderUpdate = new OrderUpdate(ticketUp.getOrderId(), ticketUp.getLineItemId(), ticketUp.getName(),
-            ticketUp.getItem(), OrderStatus.FULFILLED, ticketUp.madeBy);
+            ticketUp.getItem(), this.getOrderStatus(), ticketUp.madeBy);
 
     OrderEventResult orderEventResult = new OrderEventResult();
     orderEventResult.setOrder(this);

@@ -7,7 +7,7 @@ import java.time.Instant;
 import java.util.List;
 
 @Entity
-@Table(name = "Orders")
+@Table(name = "orders")
 public class OrderRecord extends PanacheEntityBase {
 
     @Id
