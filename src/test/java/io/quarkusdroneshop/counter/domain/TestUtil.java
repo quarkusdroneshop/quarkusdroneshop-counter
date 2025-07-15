@@ -41,7 +41,7 @@ public class TestUtil {
 
     public static Order stubOrder() {
         OrderRecord orderRecord = new OrderRecord(
-                UUID.randomUUID().toString(),
+                UUID.randomUUID(),
                 OrderSource.COUNTER,
                 null,
                 Instant.now(),

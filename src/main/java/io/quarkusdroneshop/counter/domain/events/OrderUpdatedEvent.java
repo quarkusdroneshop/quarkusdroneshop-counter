@@ -30,7 +30,7 @@ public class OrderUpdatedEvent implements ExportedEvent<String, JsonNode> {
   public static OrderUpdatedEvent of(final Order order) {
 
     ObjectNode asJson = mapper.createObjectNode()
-      .put("orderId", order.getOrderId())
+      .put("orderId", order.getOrderId().toString())
       .put("orderSource", order.getOrderSource().toString())
       .put("timestamp", order.getTimestamp().toString());
 
@@ -57,7 +57,7 @@ public class OrderUpdatedEvent implements ExportedEvent<String, JsonNode> {
     }
 
     return new OrderUpdatedEvent(
-      order.getOrderId(),
+      order.getOrderId().toString(), 
       asJson,
       order.getTimestamp());
   }

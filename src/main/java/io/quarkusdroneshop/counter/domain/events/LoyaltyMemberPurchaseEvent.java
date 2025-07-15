@@ -32,7 +32,7 @@ public class LoyaltyMemberPurchaseEvent  implements ExportedEvent<String, JsonNo
     public static LoyaltyMemberPurchaseEvent of(final Order order){
         ObjectNode asJson = mapper.createObjectNode()
                 .put("loyaltyMemberId", order.getLoyaltyMemberId().get())
-                .put("orderId", order.getOrderId())
+                .put("orderId", order.getOrderId().toString())
                 .put("orderSource", order.getOrderSource().toString())
                 .put("timestamp", order.getTimestamp().toString());
 
@@ -58,7 +58,7 @@ public class LoyaltyMemberPurchaseEvent  implements ExportedEvent<String, JsonNo
 
         return new LoyaltyMemberPurchaseEvent(
                 order.getLoyaltyMemberId().get(),
-                order.getOrderId(),
+                order.getOrderId().toString(),
                 asJson,
                 order.getTimestamp());
     }

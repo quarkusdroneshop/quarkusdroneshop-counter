@@ -5,6 +5,7 @@ import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import javax.persistence.*;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "orders")
@@ -12,7 +13,7 @@ public class OrderRecord extends PanacheEntityBase {
 
     @Id
     @Column(nullable = false, unique = true, name = "order_id")
-    private String orderId;
+    private UUID orderId;
 
     @Enumerated(EnumType.STRING)
     private OrderSource orderSource;
@@ -36,7 +37,7 @@ public class OrderRecord extends PanacheEntityBase {
     public OrderRecord() {
     }
 
-    public OrderRecord(String orderId, OrderSource orderSource, String loyaltyMemberId, Instant timestamp, OrderStatus orderStatus, Location location, List<LineItem> qdca10LineItems, List<LineItem> qdca10proLineItems) {
+    public OrderRecord(UUID orderId, OrderSource orderSource, String loyaltyMemberId, Instant timestamp, OrderStatus orderStatus, Location location, List<LineItem> qdca10LineItems, List<LineItem> qdca10proLineItems) {
         this.orderId = orderId;
         this.orderSource = orderSource;
         this.loyaltyMemberId = loyaltyMemberId;
@@ -94,11 +95,11 @@ public class OrderRecord extends PanacheEntityBase {
         return result;
     }
 
-    public String getOrderId() {
+    public UUID getOrderId() {
         return orderId;
     }
 
-    public void setOrderId(String orderId) {
+    public void setOrderId(UUID orderId) {
         this.orderId = orderId;
     }
 

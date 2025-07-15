@@ -18,6 +18,7 @@ import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.List;
+import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
@@ -102,8 +103,9 @@ public class OrderService {
     public OrderEventResult onOrderUpTx(final TicketUp ticketUp) {
         logger.debug("onOrderUpTx: {}", ticketUp);
     
-        Long orderId = Long.parseLong(ticketUp.getOrderId());
-        Optional<OrderRecord> orderRecordOpt = orderRepository.findByIdOptional(orderId);
+        String orderIdString = ticketUp.getOrderId();  // 文字列UUIDを受け取る
+        UUID orderIdUuid = UUID.fromString(orderIdString);  // String → UUID変換
+        Optional<OrderRecord> orderRecordOpt = orderRepository.findByIdOptional(orderIdUuid);
         if (orderRecordOpt.isEmpty()) {
             logger.error("Order not found for ID: {}", ticketUp.getOrderId());
             throw new NotFoundException("Order not found for ID: " + ticketUp.getOrderId());
@@ -121,31 +123,6 @@ public class OrderService {
         }
         return result;
     }
-
-    // @Transactional
-    // public OrderEventResult onOrderUpTx(final TicketUp ticketUp) {
-    //     logger.debug("onOrderUpTx: {}", ticketUp);
-    
-    //     Optional<OrderRecord> orderRecordOpt = orderRepository.findByIdOptional(ticketUp.getOrderId());
-    //     if (orderRecordOpt.isEmpty()) {
-    //         logger.error("Order not found for ID: {}", ticketUp.getOrderId());
-    //         throw new NotFoundException("Order not found for ID: " + ticketUp.getOrderId());
-    //     }
-    
-    //     OrderRecord orderRecord = orderRecordOpt.get();
-    //     Order order = Order.fromOrderRecord(orderRecord);
-    
-    //     OrderEventResult result = order.applyOrderTicketUp(ticketUp);
-    
-    //     result.getOutboxEvents().forEach(event::fire);
-    
-    //     if (result.getOrderUpdates() != null) {
-    //         result.getOrderUpdates().forEach(this::sendOrderUpdate);
-    //     }
-    
-    //     return result;
-    // }
-
 
     // Kafka送信をトランザクション外で実行
     public void sendOrderUpdate(OrderUpdate update) {
