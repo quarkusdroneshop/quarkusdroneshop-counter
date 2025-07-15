@@ -100,29 +100,30 @@ public class OrderService {
 
     // トランザクション内処理（orders-up）
     @Transactional
-    public OrderEventResult onOrderUpTx(final TicketUp ticketUp) {
-        logger.debug("onOrderUpTx: {}", ticketUp);
-    
-        String orderIdString = ticketUp.getOrderId();  // 文字列UUIDを受け取る
-        UUID orderIdUuid = UUID.fromString(orderIdString);  // String → UUID変換
-        Optional<OrderRecord> orderRecordOpt = orderRepository.findByIdOptional(orderIdUuid);
-        if (orderRecordOpt.isEmpty()) {
-            logger.error("Order not found for ID: {}", ticketUp.getOrderId());
-            throw new NotFoundException("Order not found for ID: " + ticketUp.getOrderId());
-        }
-        OrderRecord orderRecord = orderRecordOpt.get();
-    
-        Order order = Order.fromOrderRecord(orderRecord);
-    
-        OrderEventResult result = order.applyOrderTicketUp(ticketUp);
-    
-        result.getOutboxEvents().forEach(event::fire);
-    
-        if (result.getOrderUpdates() != null) {
-            result.getOrderUpdates().forEach(this::sendOrderUpdate);
-        }
-        return result;
+public OrderEventResult onOrderUpTx(final TicketUp ticketUp) {
+    logger.debug("onOrderUpTx: {}", ticketUp);
+    Optional<OrderRecord> orderRecordOpt = orderRepository.findByIdOptional(ticketUp.getOrderId());
+    if (orderRecordOpt.isEmpty()) {
+        logger.error("Order not found for ID: {}", ticketUp.getOrderId());
+        throw new NotFoundException("Order not found for ID: " + ticketUp.getOrderId());
     }
+    OrderRecord orderRecord = orderRecordOpt.get();
+    Order order = Order.fromOrderRecord(orderRecord);
+
+    OrderEventResult result = order.applyOrderTicketUp(ticketUp);
+
+    // ドメインモデルのステータスをJPAエンティティに反映し更新
+    orderRecord.setOrderStatus(order.getOrderStatus());
+    // もし他のフィールドも更新していればここで反映する
+
+    orderRepository.persist(orderRecord); // 変更をDBに反映
+
+    result.getOutboxEvents().forEach(event::fire);
+    if (result.getOrderUpdates() != null) {
+        result.getOrderUpdates().forEach(this::sendOrderUpdate);
+    }
+    return result;
+}
 
     // Kafka送信をトランザクション外で実行
     public void sendOrderUpdate(OrderUpdate update) {

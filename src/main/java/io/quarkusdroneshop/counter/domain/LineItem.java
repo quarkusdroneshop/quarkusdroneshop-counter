@@ -5,16 +5,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
 import javax.persistence.*;
-
-import org.hibernate.annotations.GenericGenerator;
-
 import java.math.BigDecimal;
 import java.util.StringJoiner;
 import java.util.UUID;
 
 @JsonIgnoreProperties(value = { "orderId" })
 @Entity
-@Table(name = "lineItems", schema = "droneshop")
+@Table(name = "lineItems")
 public class LineItem extends PanacheEntityBase {
 
   @JsonIgnore
@@ -23,10 +20,8 @@ public class LineItem extends PanacheEntityBase {
   OrderRecord order;
 
   @Id
-  @GeneratedValue(generator = "UUID")
-  @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-  @Column(name = "item_id", updatable = false, nullable = false)
-  private UUID itemId;
+  @Column(nullable = false, unique = true)
+  private String itemId;
 
   @Enumerated(EnumType.STRING)
   private Item item;
@@ -39,11 +34,11 @@ public class LineItem extends PanacheEntityBase {
   private LineItemStatus lineItemStatus;
 
   public LineItem() {
-    //this.itemId = UUID.randomUUID();
+    this.itemId = UUID.randomUUID().toString();
   }
 
   public LineItem(Item item, String name, BigDecimal price, LineItemStatus lineItemStatus, OrderRecord order) {
-    this.itemId = UUID.randomUUID();
+    this.itemId = UUID.randomUUID().toString();
     this.item = item;
     this.name = name;
     this.price = price;
@@ -121,7 +116,7 @@ public class LineItem extends PanacheEntityBase {
     this.order = order;
   }
 
-  public UUID getItemId() {
+  public String getItemId() {
     return this.itemId;
   }
 }

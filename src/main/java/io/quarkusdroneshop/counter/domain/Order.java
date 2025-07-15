@@ -20,48 +20,71 @@ public class Order {
 
   private OrderRecord orderRecord;
 
-  public Order() {
-    this.orderRecord = new OrderRecord();
-    this.orderRecord.setOrderId(UUID.randomUUID());
-    this.orderRecord.setTimestamp(Instant.now());
-  }
-
-  public Order(final String orderId) {
-    this.orderRecord = new OrderRecord();
-    this.orderRecord.setOrderId(UUID.fromString(orderId));
-    this.orderRecord.setTimestamp(Instant.now());
-  }
-
-  public static Order fromOrderRecord(OrderRecord orderRecord) {
-    if (orderRecord == null) {
-      throw new IllegalArgumentException("OrderRecord must not be null");
+  public OrderEventResult applyOrderTicketUp(final TicketUp ticketUp) {
+    // ステータスは古いかもしれないが、LineItem更新は続ける
+    if (this.getQdca10LineItems().isPresent()) {
+      this.getQdca10LineItems().get().stream().forEach(lineItem -> {
+          if (lineItem.getItemId().toString().equals(ticketUp.getLineItemId().toString())) {
+              logger.debug("Matched LineItem ID: {}", lineItem.getItemId());
+              lineItem.setLineItemStatus(LineItemStatus.FULFILLED);
+          }
+      });
     }
-    Order order = new Order();
-    order.orderRecord = orderRecord;
-    return order;
-  }
 
-  public static OrderEventResult createFromCommand(final PlaceOrderCommand placeOrderCommand) {
-    Order order = fromPlaceOrderCommand(placeOrderCommand);
-    OrderEventResult result = new OrderEventResult();
-    result.setOrder(order);
+    // 該当LineItemのステータス更新
+    if (this.getQdca10LineItems().isPresent()) {
+        this.getQdca10LineItems().get().stream().forEach(lineItem -> {
+          if (lineItem.getItemId().toString().equals(ticketUp.getLineItemId().toString())) {
+            logger.debug("Matched LineItem ID: {}", lineItem.getItemId());
+            lineItem.setLineItemStatus(LineItemStatus.FULFILLED);
+          }
+        });
+    }
+    if (this.getQdca10proLineItems().isPresent()) {
+        this.getQdca10proLineItems().get().stream().forEach(lineItem -> {
+          if (lineItem.getItemId().toString().equals(ticketUp.getLineItemId().toString())) {
+            logger.debug("Matched LineItem ID: {}", lineItem.getItemId());
+            lineItem.setLineItemStatus(LineItemStatus.FULFILLED);
+          }
+        });
+    }
 
-    placeOrderCommand.getLoyaltyMemberId().ifPresent(id ->
-        result.addEvent(LoyaltyMemberPurchaseEvent.of(order))
+    // 全LineItemがFULFILLEDなら、OrderもFULFILLEDに更新
+    if (this.getQdca10LineItems().isPresent() && this.getQdca10proLineItems().isPresent()) {
+        if (Stream.concat(this.getQdca10LineItems().get().stream(), this.getQdca10proLineItems().get().stream())
+                .allMatch(lineItem -> lineItem.getLineItemStatus().equals(LineItemStatus.FULFILLED))) {
+            this.setOrderStatus(OrderStatus.FULFILLED);
+        }
+    } else if (this.getQdca10LineItems().isPresent()) {
+        if (this.getQdca10LineItems().get().stream()
+                .allMatch(lineItem -> lineItem.getLineItemStatus().equals(LineItemStatus.FULFILLED))) {
+            this.setOrderStatus(OrderStatus.FULFILLED);
+        }
+    } else if (this.getQdca10proLineItems().isPresent()) {
+        if (this.getQdca10proLineItems().get().stream()
+                .allMatch(lineItem -> lineItem.getLineItemStatus().equals(LineItemStatus.FULFILLED))) {
+            this.setOrderStatus(OrderStatus.FULFILLED);
+        }
+    }
+
+    // イベント生成
+    OrderUpdatedEvent orderUpdatedEvent = OrderUpdatedEvent.of(this);
+    OrderUpdate orderUpdate = new OrderUpdate(
+            ticketUp.getOrderId().toString(),
+            ticketUp.getLineItemId().toString(),
+            ticketUp.getName(),
+            ticketUp.getItem(),
+            this.getOrderStatus(),
+            ticketUp.madeBy
     );
 
-    order.getQdca10LineItems().ifPresent(items ->
-        result.setQdca10Tickets(createOrderTickets(order.getOrderId().toString(), items))
-    );
-    order.getQdca10proLineItems().ifPresent(items ->
-        result.setQdca10proTickets(createOrderTickets(order.getOrderId().toString(), items))
-    );
-
-    result.setOrderUpdates(createOrderUpdates(order));
-    result.addEvent(OrderCreatedEvent.of(order));
-
-    logger.debug("returning {}", result);
-    return result;
+    OrderEventResult orderEventResult = new OrderEventResult();
+    orderEventResult.setOrder(this);
+    orderEventResult.addEvent(orderUpdatedEvent);
+    orderEventResult.setOrderUpdates(new ArrayList<>() {{
+        add(orderUpdate);
+    }});
+    return orderEventResult;
   }
 
   protected static Order fromPlaceOrderCommand(final PlaceOrderCommand placeOrderCommand) {
@@ -72,156 +95,217 @@ public class Order {
     order.setTimestamp(placeOrderCommand.getTimestamp());
     order.setOrderStatus(OrderStatus.IN_PROGRESS);
 
-    placeOrderCommand.getLoyaltyMemberId().ifPresent(order::setLoyaltyMemberId);
+    if (placeOrderCommand.getLoyaltyMemberId().isPresent()) {
+      order.setLoyaltyMemberId(placeOrderCommand.getLoyaltyMemberId().get());
+    }
 
-    placeOrderCommand.getQdca10LineItems().ifPresent(items ->
-      items.forEach(item -> {
-        LineItem lineItem = new LineItem(item.getItem(), item.getName(), item.getPrice(), LineItemStatus.IN_PROGRESS, null);
+    if (placeOrderCommand.getQdca10LineItems().isPresent()) {
+      placeOrderCommand.getQdca10LineItems().get().forEach(commandItem -> {
+        logger.info("createOrderFromCommand adding QDCA10Item from {}", commandItem.toString());
+        LineItem lineItem = new LineItem(commandItem.getItem(), commandItem.getName(), commandItem.getPrice(),
+                LineItemStatus.IN_PROGRESS, order.getOrderRecord());
         order.addQdca10LineItem(lineItem);
-      })
-    );
+      });
+    }
 
-    placeOrderCommand.getQdca10proLineItems().ifPresent(items ->
-      items.forEach(item -> {
-        LineItem lineItem = new LineItem(item.getItem(), item.getName(), item.getPrice(), LineItemStatus.IN_PROGRESS, null);
+    if (placeOrderCommand.getQdca10proLineItems().isPresent()) {
+      logger.info("createOrderFromCommand adding QDCA10ProOrders {}",
+              placeOrderCommand.getQdca10proLineItems().get().size());
+      placeOrderCommand.getQdca10proLineItems().get().forEach(commandItem -> {
+        LineItem lineItem = new LineItem(commandItem.getItem(), commandItem.getName(), commandItem.getPrice(),
+                LineItemStatus.IN_PROGRESS, order.getOrderRecord());
         order.addQDCA10ProLineItem(lineItem);
-      })
-    );
-
+      });
+    }
     return order;
   }
 
-  public OrderEventResult applyOrderTicketUp(final TicketUp ticketUp) {
-    getQdca10LineItems().orElse(Collections.emptyList())
-      .forEach(lineItem -> {
-        if (lineItem.getItemId().equals(ticketUp.lineItemId)) {
-          lineItem.setLineItemStatus(LineItemStatus.FULFILLED);
-        }
-      });
-
-    getQdca10proLineItems().orElse(Collections.emptyList())
-      .forEach(lineItem -> {
-        if (lineItem.getItemId().equals(ticketUp.lineItemId)) {
-          lineItem.setLineItemStatus(LineItemStatus.FULFILLED);
-        }
-      });
-
-    boolean allFulfilled = Stream.concat(
-        getQdca10LineItems().orElse(Collections.emptyList()).stream(),
-        getQdca10proLineItems().orElse(Collections.emptyList()).stream()
-    ).allMatch(item -> item.getLineItemStatus() == LineItemStatus.FULFILLED);
-
-    if (allFulfilled) {
-      setOrderStatus(OrderStatus.FULFILLED);
-    }
-
-    OrderEventResult result = new OrderEventResult();
-    result.setOrder(this);
-    result.addEvent(OrderUpdatedEvent.of(this));
-    result.setOrderUpdates(Collections.singletonList(
-        new OrderUpdate(
-            ticketUp.getOrderId(),
-            ticketUp.getLineItemId(),
-            ticketUp.getName(),
-            ticketUp.getItem(),
-            getOrderStatus(),
-            ticketUp.madeBy
-        )
-    ));
-    return result;
-  }
-
   private static List<OrderUpdate> createOrderUpdates(Order order) {
-    List<OrderUpdate> updates = new ArrayList<>();
-    order.getQdca10LineItems().orElse(Collections.emptyList()).forEach(lineItem ->
-        updates.add(new OrderUpdate(
-            order.getOrderId().toString(),
-            lineItem.getItemId().toString(),
-            lineItem.getName(),
-            lineItem.getItem(),
-            OrderStatus.IN_PROGRESS
-        ))
-    );
-    order.getQdca10proLineItems().orElse(Collections.emptyList()).forEach(lineItem ->
-        updates.add(new OrderUpdate(
-            order.getOrderId().toString(),
-            lineItem.getItemId().toString(),
-            lineItem.getName(),
-            lineItem.getItem(),
-            OrderStatus.IN_PROGRESS
-        ))
-    );
-    return updates;
+    List<OrderUpdate> orderUpdates = new ArrayList<>();
+    if (order.getQdca10LineItems().isPresent()) {
+      order.getQdca10LineItems().get().forEach(lineItem -> {
+        orderUpdates.add(new OrderUpdate(order.getOrderId().toString(), lineItem.getItemId(), lineItem.getName(),
+                lineItem.getItem(), OrderStatus.IN_PROGRESS));
+      });
+    }
+    if (order.getQdca10proLineItems().isPresent()) {
+      order.getQdca10proLineItems().get().forEach(lineItem -> {
+        orderUpdates.add(new OrderUpdate(order.getOrderId().toString(), lineItem.getItemId(), lineItem.getName(),
+                lineItem.getItem(), OrderStatus.IN_PROGRESS));
+      });
+    }
+    return orderUpdates;
   }
 
   private static List<OrderTicket> createOrderTickets(String orderId, List<LineItem> lineItems) {
-    List<OrderTicket> tickets = new ArrayList<>(lineItems.size());
-    lineItems.forEach(item -> tickets.add(new OrderTicket(
-        orderId,
-        item.getItemId().toString(),
-        item.getItem(),
-        item.getName()
-    )));
-    return tickets;
+    List<OrderTicket> orderTickets = new ArrayList<>(lineItems.size());
+    lineItems.forEach(lineItem -> {
+      orderTickets.add(new OrderTicket(orderId, lineItem.getItemId(), lineItem.getItem(), lineItem.getName()));
+    });
+    return orderTickets;
   }
 
-  public void addQdca10LineItem(LineItem item) {
-    item.setOrder(this.orderRecord);
-    if (orderRecord.getQdca10LineItems() == null) {
-      orderRecord.setQdca10LineItems(new ArrayList<>());
+  public static OrderEventResult createFromCommand(final PlaceOrderCommand placeOrderCommand) {
+    Order order = Order.fromPlaceOrderCommand(placeOrderCommand);
+    OrderEventResult orderEventResult = new OrderEventResult();
+    orderEventResult.setOrder(order);
+    if (order.getQdca10LineItems().isPresent()) {
+      orderEventResult.setQdca10Tickets(createOrderTickets(order.getOrderId().toString(), order.getQdca10LineItems().get()));
     }
-    orderRecord.getQdca10LineItems().add(item);
-  }
-
-  public void addQDCA10ProLineItem(LineItem item) {
-    item.setOrder(this.orderRecord);
-    if (orderRecord.getQdca10proLineItems() == null) {
-      orderRecord.setQdca10proLineItems(new ArrayList<>());
+    if (order.getQdca10proLineItems().isPresent()) {
+      orderEventResult.setQdca10proTickets(createOrderTickets(order.getOrderId().toString(), order.getQdca10proLineItems().get()));
     }
-    orderRecord.getQdca10proLineItems().add(item);
+    orderEventResult.setOrderUpdates(createOrderUpdates(order));
+    orderEventResult.addEvent(OrderCreatedEvent.of(order));
+    if (placeOrderCommand.getLoyaltyMemberId().isPresent()) {
+      orderEventResult.addEvent(LoyaltyMemberPurchaseEvent.of(order));
+    }
+    logger.debug("returning {}", orderEventResult);
+    return orderEventResult;
   }
 
-  public UUID getOrderId() { return orderRecord.getOrderId(); }
-  public OrderSource getOrderSource() { return orderRecord.getOrderSource(); }
-  public void setOrderSource(OrderSource orderSource) { orderRecord.setOrderSource(orderSource); }
-  public Location getLocation() { return orderRecord.getLocation(); }
-  public void setLocation(Location location) { orderRecord.setLocation(location); }
-  public OrderStatus getOrderStatus() { return orderRecord.getOrderStatus(); }
-  public void setOrderStatus(OrderStatus status) { orderRecord.setOrderStatus(status); }
-  public Instant getTimestamp() { return orderRecord.getTimestamp(); }
-  public void setTimestamp(Instant timestamp) { orderRecord.setTimestamp(timestamp); }
-  public Optional<String> getLoyaltyMemberId() { return Optional.ofNullable(orderRecord.getLoyaltyMemberId()); }
-  public void setLoyaltyMemberId(String id) { orderRecord.setLoyaltyMemberId(id); }
-  public Optional<List<LineItem>> getQdca10LineItems() { return Optional.ofNullable(orderRecord.getQdca10LineItems()); }
-  public void setQdca10LineItems(List<LineItem> items) { orderRecord.setQdca10LineItems(items); }
-  public Optional<List<LineItem>> getQdca10proLineItems() { return Optional.ofNullable(orderRecord.getQdca10proLineItems()); }
-  public void setQdca10proLineItems(List<LineItem> items) { orderRecord.setQdca10proLineItems(items); }
-  protected OrderRecord getOrderRecord() { return orderRecord; }
+  public void addQdca10LineItem(LineItem lineItem) {
+    lineItem.setOrder(this.orderRecord);
+    if (this.orderRecord.getQdca10LineItems() == null) {
+      this.orderRecord.setQdca10LineItems(new ArrayList<>());
+    }
+    this.orderRecord.getQdca10LineItems().add(lineItem);
+  }
+
+  public void addQDCA10ProLineItem(LineItem lineItem) {
+    lineItem.setOrder(this.orderRecord);
+    if (this.getQdca10proLineItems().isPresent()) {
+      this.getQdca10proLineItems().get().add(lineItem);
+    } else {
+      if (this.orderRecord.getQdca10proLineItems() == null) {
+        this.orderRecord.setQdca10proLineItems(new ArrayList<>());
+      }
+      this.orderRecord.getQdca10proLineItems().add(lineItem);
+    }
+  }
+
+  public static Order fromOrderRecord(OrderRecord orderRecord) {
+    if (orderRecord == null) {
+        throw new IllegalArgumentException("OrderRecord must not be null");
+    }
+    Order order = new Order();
+    order.orderRecord = orderRecord;
+    return order;
+  }
+
+  public Optional<List<LineItem>> getQdca10LineItems() {
+    return Optional.ofNullable(this.orderRecord.getQdca10LineItems());
+  }
+
+  public void setQdca10LineItems(List<LineItem> Qdca10LineItems) {
+    this.orderRecord.setQdca10LineItems(Qdca10LineItems);
+  }
+
+  public Optional<List<LineItem>> getQdca10proLineItems() {
+    return Optional.ofNullable(this.orderRecord.getQdca10proLineItems());
+  }
+
+  public void setQdca10proLineItems(List<LineItem> Qdca10proLineItems) {
+    this.orderRecord.setQdca10proLineItems(Qdca10proLineItems);
+  }
+
+  public Optional<String> getLoyaltyMemberId() {
+    return Optional.ofNullable(this.orderRecord.getLoyaltyMemberId());
+  }
+
+  public void setLoyaltyMemberId(String loyaltyMemberId) {
+    this.orderRecord.setLoyaltyMemberId(loyaltyMemberId);
+  }
+
+  public Order() {
+    this.orderRecord = new OrderRecord();
+    this.orderRecord.setOrderId(UUID.randomUUID());
+    this.orderRecord.setTimestamp(Instant.now());
+  }
+
+  public Order(final String orderId) {
+    this.orderRecord = new OrderRecord();
+    this.orderRecord.setOrderId(UUID.randomUUID());
+    this.orderRecord.setTimestamp(Instant.now());
+  }
+
+  public Order(final String orderId, final OrderSource orderSource, final Location location,
+               final String loyaltyMemberId, final Instant timestamp, final OrderStatus orderStatus,
+               final List<LineItem> Qdca10LineItems, final List<LineItem> Qdca10proLineItems) {
+    this.orderRecord.setOrderId(UUID.randomUUID());
+    this.orderRecord.setOrderSource(orderSource);
+    this.orderRecord.setLocation(location);
+    this.orderRecord.setLoyaltyMemberId(loyaltyMemberId);
+    this.orderRecord.setTimestamp(timestamp);
+    this.orderRecord.setOrderStatus(orderStatus);
+    this.orderRecord.setQdca10LineItems(Qdca10LineItems);
+    this.orderRecord.setQdca10proLineItems(Qdca10proLineItems);
+  }
 
   @Override
   public String toString() {
     return new StringJoiner(", ", Order.class.getSimpleName() + "[", "]")
-        .add("orderId=" + orderRecord.getOrderId())
-        .add("orderSource=" + orderRecord.getOrderSource())
-        .add("loyaltyMemberId=" + orderRecord.getLoyaltyMemberId())
-        .add("timestamp=" + orderRecord.getTimestamp())
-        .add("orderStatus=" + orderRecord.getOrderStatus())
-        .add("location=" + orderRecord.getLocation())
-        .add("qdca10LineItems=" + orderRecord.getQdca10LineItems())
-        .add("qdca10proLineItems=" + orderRecord.getQdca10proLineItems())
-        .toString();
+            .add("orderId='" + orderRecord.getOrderId() + "'")
+            .add("orderSource=" + orderRecord.getOrderSource())
+            .add("loyaltyMemberId='" + orderRecord.getLoyaltyMemberId() + "'")
+            .add("timestamp=" + orderRecord.getTimestamp())
+            .add("orderStatus=" + orderRecord.getOrderStatus())
+            .add("location=" + orderRecord.getLocation())
+            .add("qdca10LineItems=" + orderRecord.getQdca10LineItems())
+            .add("qdca10proLineItems=" + orderRecord.getQdca10proLineItems())
+            .toString();
   }
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof Order)) return false;
-    Order that = (Order) o;
-    return Objects.equals(orderRecord, that.orderRecord);
+    if (o == null || getClass() != o.getClass()) return false;
+    Order order = (Order) o;
+    return orderRecord != null ? orderRecord.equals(order.orderRecord) : order.orderRecord == null;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(orderRecord);
+    return orderRecord != null ? orderRecord.hashCode() : 0;
+  }
+
+  public UUID getOrderId() {
+    return this.orderRecord.getOrderId();
+  }
+
+  public OrderSource getOrderSource() {
+    return this.orderRecord.getOrderSource();
+  }
+
+  public void setOrderSource(OrderSource orderSource) {
+    this.orderRecord.setOrderSource(orderSource);
+  }
+
+  public Location getLocation() {
+    return this.orderRecord.getLocation();
+  }
+
+  public void setLocation(Location location) {
+    this.orderRecord.setLocation(location);
+  }
+
+  public OrderStatus getOrderStatus() {
+    return this.orderRecord.getOrderStatus();
+  }
+
+  public void setOrderStatus(OrderStatus orderStatus) {
+    this.orderRecord.setOrderStatus(orderStatus);
+  }
+
+  public Instant getTimestamp() {
+    return this.orderRecord.getTimestamp();
+  }
+
+  public void setTimestamp(Instant timestamp) {
+    this.orderRecord.setTimestamp(timestamp);
+  }
+
+  protected OrderRecord getOrderRecord() {
+    return this.orderRecord;
   }
 }

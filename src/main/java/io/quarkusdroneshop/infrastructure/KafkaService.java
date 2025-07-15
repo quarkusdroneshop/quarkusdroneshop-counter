@@ -29,17 +29,15 @@ public class KafkaService {
     @Incoming("orders-in")
     @Blocking
     public void orderIn(final PlaceOrderCommand placeOrderCommand) {
-        try {
-            logger.debug("PlaceOrderCommand received: {}", placeOrderCommand);
-    
-            OrderEventResult result = orderService.onOrderInTx(placeOrderCommand);
-    
-            result.getOrderUpdates().forEach(orderService::sendOrderUpdate);
-            result.getQdca10Tickets().ifPresent(list -> list.forEach(orderService::sendQdca10));
-            result.getQdca10proTickets().ifPresent(list -> list.forEach(orderService::sendQdca10pro));
-        } catch (Exception e) {
-            logger.error("Error processing PlaceOrderCommand", e);
-        }
+        logger.debug("PlaceOrderCommand received: {}", placeOrderCommand);
+
+        // トランザクション内の処理を分離
+        OrderEventResult result = orderService.onOrderInTx(placeOrderCommand);
+
+        // トランザクション外でKafka送信
+        result.getOrderUpdates().forEach(orderService::sendOrderUpdate);
+        result.getQdca10Tickets().ifPresent(list -> list.forEach(orderService::sendQdca10));
+        result.getQdca10proTickets().ifPresent(list -> list.forEach(orderService::sendQdca10pro));
     }
 
     @Incoming("orders-up")

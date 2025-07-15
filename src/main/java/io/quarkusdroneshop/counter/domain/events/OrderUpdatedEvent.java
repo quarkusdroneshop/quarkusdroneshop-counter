@@ -57,7 +57,7 @@ public class OrderUpdatedEvent implements ExportedEvent<String, JsonNode> {
     }
 
     return new OrderUpdatedEvent(
-      order.getOrderId().toString(), 
+      order.getOrderId().toString(),
       asJson,
       order.getTimestamp());
   }

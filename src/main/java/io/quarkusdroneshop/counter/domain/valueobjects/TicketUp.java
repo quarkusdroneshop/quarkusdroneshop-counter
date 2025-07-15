@@ -1,9 +1,11 @@
 package io.quarkusdroneshop.counter.domain.valueobjects;
 
 import io.quarkusdroneshop.counter.domain.Item;
+import io.quarkusdroneshop.counter.domain.OrderStatus;
 
 import java.time.Instant;
 import java.util.StringJoiner;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -11,13 +13,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TicketUp {
 
-    public String orderId;
+    public UUID orderId;
 
-    public String lineItemId;
+    public UUID lineItemId;
 
     public Item item;
 
     public String name;
+
+    public OrderStatus status;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     public Instant timestamp;
@@ -26,8 +30,8 @@ public class TicketUp {
 
     @JsonCreator
     public TicketUp(
-        @JsonProperty("orderId") String orderId,
-        @JsonProperty("lineItemId") String lineItemId,
+        @JsonProperty("orderId") UUID orderId,
+        @JsonProperty("lineItemId") UUID lineItemId,
         @JsonProperty("item") Item item,
         @JsonProperty("name") String name,
         @JsonProperty("timestamp") Object timestamp,
@@ -49,12 +53,21 @@ public class TicketUp {
         this.madeBy = madeBy;
     }
 
-    public TicketUp(String orderId, String lineItemId, Item item, String name, String madeBy) {
+    public TicketUp(UUID orderId, UUID lineItemId, Item item, String name, String madeBy) {
         this.orderId = orderId;
         this.lineItemId = lineItemId;
         this.item = item;
         this.name = name;
         this.timestamp = timestamp != null ? timestamp : Instant.now();
+        this.madeBy = madeBy;
+    }
+
+    public TicketUp(UUID orderId, UUID lineItemId, Item item, String name, OrderStatus status, String madeBy) {
+        this.orderId = orderId;
+        this.lineItemId = lineItemId;
+        this.item = item;
+        this.name = name;
+        this.status = status;
         this.madeBy = madeBy;
     }
 
@@ -66,6 +79,7 @@ public class TicketUp {
                 .add("item=" + item)
                 .add("name='" + name + "'")
                 .add("timestamp=" + timestamp)
+                .add("status=" + status)
                 .add("madeBy='" + madeBy + "'")
                 .toString();
     }
@@ -96,11 +110,11 @@ public class TicketUp {
         return result;
     }
 
-    public String getOrderId() {
+    public UUID getOrderId() {
         return orderId;
     }
 
-    public String getLineItemId() {
+    public UUID getLineItemId() {
         return lineItemId;
     }
 
@@ -118,5 +132,9 @@ public class TicketUp {
 
     public String getMadeBy() {
         return madeBy;
+    }
+
+    public OrderStatus getStatus() {
+        return status;
     }
 }
