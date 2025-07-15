@@ -21,69 +21,56 @@ public class Order {
   private OrderRecord orderRecord;
 
   public OrderEventResult applyOrderTicketUp(final TicketUp ticketUp) {
-    // ステータスは古いかもしれないが、LineItem更新は続ける
-    if (this.getQdca10LineItems().isPresent()) {
-      this.getQdca10LineItems().get().stream().forEach(lineItem -> {
-          if (lineItem.getItemId().toString().equals(ticketUp.getLineItemId().toString())) {
-              logger.debug("Matched LineItem ID: {}", lineItem.getItemId());
-              lineItem.setLineItemStatus(LineItemStatus.FULFILLED);
-          }
-      });
-    }
+    logger.debug("applyOrderTicketUp called with: {}", ticketUp);
 
-    // 該当LineItemのステータス更新
-    if (this.getQdca10LineItems().isPresent()) {
-        this.getQdca10LineItems().get().stream().forEach(lineItem -> {
-          if (lineItem.getItemId().toString().equals(ticketUp.getLineItemId().toString())) {
+    boolean matched = false;
+
+    List<LineItem> allLineItems = new ArrayList<>();
+    getQdca10LineItems().ifPresent(allLineItems::addAll);
+    getQdca10proLineItems().ifPresent(allLineItems::addAll);
+
+    for (LineItem lineItem : allLineItems) {
+        if (lineItem.getItemId().toString().equals(ticketUp.getLineItemId().toString())) {
             logger.debug("Matched LineItem ID: {}", lineItem.getItemId());
             lineItem.setLineItemStatus(LineItemStatus.FULFILLED);
-          }
-        });
-    }
-    if (this.getQdca10proLineItems().isPresent()) {
-        this.getQdca10proLineItems().get().stream().forEach(lineItem -> {
-          if (lineItem.getItemId().toString().equals(ticketUp.getLineItemId().toString())) {
-            logger.debug("Matched LineItem ID: {}", lineItem.getItemId());
-            lineItem.setLineItemStatus(LineItemStatus.FULFILLED);
-          }
-        });
+            matched = true;
+            break;
+        }
     }
 
-    // 全LineItemがFULFILLEDなら、OrderもFULFILLEDに更新
-    if (this.getQdca10LineItems().isPresent() && this.getQdca10proLineItems().isPresent()) {
-        if (Stream.concat(this.getQdca10LineItems().get().stream(), this.getQdca10proLineItems().get().stream())
-                .allMatch(lineItem -> lineItem.getLineItemStatus().equals(LineItemStatus.FULFILLED))) {
-            this.setOrderStatus(OrderStatus.FULFILLED);
-        }
-    } else if (this.getQdca10LineItems().isPresent()) {
-        if (this.getQdca10LineItems().get().stream()
-                .allMatch(lineItem -> lineItem.getLineItemStatus().equals(LineItemStatus.FULFILLED))) {
-            this.setOrderStatus(OrderStatus.FULFILLED);
-        }
-    } else if (this.getQdca10proLineItems().isPresent()) {
-        if (this.getQdca10proLineItems().get().stream()
-                .allMatch(lineItem -> lineItem.getLineItemStatus().equals(LineItemStatus.FULFILLED))) {
-            this.setOrderStatus(OrderStatus.FULFILLED);
-        }
+    if (!matched) {
+        logger.warn("No LineItem matched for ticketUp lineItemId: {}", ticketUp.getLineItemId());
+        throw new IllegalArgumentException("LineItem not found for ID: " + ticketUp.getLineItemId());
+    }
+
+    // 全 LineItem が FULFILLED かチェックして Order 全体のステータスを更新
+    boolean allFulfilled = allLineItems.stream()
+            .allMatch(item -> item.getLineItemStatus() == LineItemStatus.FULFILLED);
+
+    if (allFulfilled) {
+        setOrderStatus(OrderStatus.FULFILLED);
     }
 
     // イベント生成
     OrderUpdatedEvent orderUpdatedEvent = OrderUpdatedEvent.of(this);
-    OrderUpdate orderUpdate = new OrderUpdate(
-            ticketUp.getOrderId().toString(),
-            ticketUp.getLineItemId().toString(),
-            ticketUp.getName(),
-            ticketUp.getItem(),
-            this.getOrderStatus(),
-            ticketUp.madeBy
-    );
+
+    // 全 LineItem に対応する OrderUpdate を生成して UI に反映
+    List<OrderUpdate> updates = new ArrayList<>();
+    for (LineItem item : allLineItems) {
+        updates.add(new OrderUpdate(
+                getOrderId().toString(),
+                item.getItemId().toString(),
+                item.getName(),
+                item.getItem(),
+                item.getLineItemStatus() == LineItemStatus.FULFILLED ? OrderStatus.FULFILLED : OrderStatus.PLACED,
+                Optional.ofNullable(ticketUp.getMadeBy()).orElse(null)
+        ));
+    }
 
     OrderEventResult orderEventResult = new OrderEventResult();
     orderEventResult.setOrder(this);
     orderEventResult.addEvent(orderUpdatedEvent);
-    orderEventResult.setOrderUpdates(new ArrayList<>() {{
-        add(orderUpdate);
-    }});
+    orderEventResult.setOrderUpdates(updates);
     return orderEventResult;
   }
 

@@ -50,16 +50,13 @@ public class OrderService {
     @Channel("web-updates")
     Emitter<DashboardUpdate> dashboardUpdateEmitter;
 
-    // トランザクション内処理
     @Transactional
     public OrderEventResult onOrderInTx(final PlaceOrderCommand placeOrderCommand) {
         logger.debug("onOrderInTx: {}", placeOrderCommand);
 
-        // Orderドメインオブジェクトを作成
         OrderEventResult result = Order.createFromCommand(placeOrderCommand);
         Order order = result.getOrder();
 
-        // OrderRecord（JPAエンティティ）を作成
         OrderRecord orderRecord = new OrderRecord();
         orderRecord.setOrderId(order.getOrderId());
         orderRecord.setOrderSource(order.getOrderSource());
@@ -68,7 +65,6 @@ public class OrderService {
         orderRecord.setOrderStatus(OrderStatus.PLACED);
         orderRecord.setLocation(order.getLocation());
 
-        // qdca10LineItemsの設定（親子関係のリンクも忘れずに）
         if (order.getQdca10LineItems().isPresent()) {
             List<LineItem> lineItems = order.getQdca10LineItems().get();
             for (LineItem item : lineItems) {
@@ -77,7 +73,6 @@ public class OrderService {
             orderRecord.setQdca10LineItems(lineItems);
         }
 
-        // qdca10proLineItemsの設定
         if (order.getQdca10proLineItems().isPresent()) {
             List<LineItem> lineItems = order.getQdca10proLineItems().get();
             for (LineItem item : lineItems) {
@@ -86,10 +81,8 @@ public class OrderService {
             orderRecord.setQdca10proLineItems(lineItems);
         }
 
-        // OrderRecordエンティティの永続化
         orderRepository.persist(orderRecord);
 
-        // Outboxイベントの発火
         result.getOutboxEvents().forEach(exportedEvent -> {
             logger.debug("Firing event: {}", exportedEvent);
             event.fire(exportedEvent);
@@ -98,44 +91,44 @@ public class OrderService {
         return result;
     }
 
-    // トランザクション内処理（orders-up）
     @Transactional
-public OrderEventResult onOrderUpTx(final TicketUp ticketUp) {
-    logger.debug("onOrderUpTx: {}", ticketUp);
-    Optional<OrderRecord> orderRecordOpt = orderRepository.findByIdOptional(ticketUp.getOrderId());
-    if (orderRecordOpt.isEmpty()) {
-        logger.error("Order not found for ID: {}", ticketUp.getOrderId());
-        throw new NotFoundException("Order not found for ID: " + ticketUp.getOrderId());
+    public OrderEventResult onOrderUpTx(final TicketUp ticketUp) {
+        logger.debug("onOrderUpTx: {}", ticketUp);
+
+        Optional<OrderRecord> orderRecordOpt = orderRepository.findByIdOptional(ticketUp.getOrderId());
+        if (orderRecordOpt.isEmpty()) {
+            logger.error("Order not found for ID: {}", ticketUp.getOrderId());
+            throw new NotFoundException("Order not found for ID: " + ticketUp.getOrderId());
+        }
+
+        OrderRecord orderRecord = orderRecordOpt.get();
+        Order order = Order.fromOrderRecord(orderRecord);
+
+        OrderEventResult result = order.applyOrderTicketUp(ticketUp);
+
+        // OrderStatus 反映（LineItem全てFULFILLEDならOrder全体もFULFILLED）
+        orderRecord.setOrderStatus(order.getOrderStatus());
+
+        orderRepository.persist(orderRecord);
+
+        result.getOutboxEvents().forEach(event::fire);
+        if (result.getOrderUpdates() != null) {
+            result.getOrderUpdates().forEach(this::sendOrderUpdate);
+        }
+
+        return result;
     }
-    OrderRecord orderRecord = orderRecordOpt.get();
-    Order order = Order.fromOrderRecord(orderRecord);
 
-    OrderEventResult result = order.applyOrderTicketUp(ticketUp);
-
-    // ドメインモデルのステータスをJPAエンティティに反映し更新
-    orderRecord.setOrderStatus(order.getOrderStatus());
-    // もし他のフィールドも更新していればここで反映する
-
-    orderRepository.persist(orderRecord); // 変更をDBに反映
-
-    result.getOutboxEvents().forEach(event::fire);
-    if (result.getOrderUpdates() != null) {
-        result.getOrderUpdates().forEach(this::sendOrderUpdate);
-    }
-    return result;
-}
-
-    // Kafka送信をトランザクション外で実行
     public void sendOrderUpdate(OrderUpdate update) {
         logger.debug("Sending DashboardUpdate: {}", update);
-    
+
         DashboardUpdate dashboardUpdate = new DashboardUpdate(
             update.getOrderId(),
             update.getItemId(),
             update.getName(),
             update.getItem(),
             update.getStatus(),
-            update.getMadeBy().orElse("")  // Optional<String> なので orElse で補完
+            update.getMadeBy().orElse("")
         );
         dashboardUpdateEmitter.send(dashboardUpdate);
     }
