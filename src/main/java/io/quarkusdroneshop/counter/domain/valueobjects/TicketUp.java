@@ -35,21 +35,21 @@ public class TicketUp {
         @JsonProperty("item") Item item,
         @JsonProperty("name") String name,
         @JsonProperty("timestamp") Object timestamp,
+        @JsonProperty("status") OrderStatus status,
         @JsonProperty("madeBy") String madeBy
     ) {
         this.orderId = orderId;
         this.lineItemId = lineItemId;
         this.item = item;
         this.name = name;
-    
+        this.status = status; // ここを追加
         if (timestamp instanceof String) {
             this.timestamp = Instant.parse((String) timestamp);
         } else if (timestamp instanceof Number) {
             this.timestamp = Instant.ofEpochMilli(((Number) timestamp).longValue());
         } else {
-            this.timestamp = Instant.now(); // fallback
+            this.timestamp = Instant.now();
         }
-    
         this.madeBy = madeBy;
     }
 
