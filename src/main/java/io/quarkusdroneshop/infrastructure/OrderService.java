@@ -122,8 +122,8 @@ public class OrderService {
         logger.debug("Sending DashboardUpdate: {}", update);
 
         DashboardUpdate dashboardUpdate = new DashboardUpdate(
-            UUID.fromString(update.getOrderId()),
-            UUID.fromString(update.getItemId()),
+            update.getOrderId(),
+            update.getItemId(),
             update.getName(),
             update.getItem(),
             update.getStatus(),
