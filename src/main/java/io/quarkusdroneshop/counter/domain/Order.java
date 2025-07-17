@@ -62,7 +62,7 @@ public class Order {
                 item.getItemId().toString(),
                 item.getName(),
                 item.getItem(),
-                item.getLineItemStatus() == LineItemStatus.FULFILLED ? OrderStatus.FULFILLED : OrderStatus.PLACED,
+                item.getLineItemStatus(),
                 Optional.ofNullable(ticketUp.getMadeBy()).orElse(null)
         ));
     }
@@ -112,13 +112,13 @@ public class Order {
     if (order.getQdca10LineItems().isPresent()) {
       order.getQdca10LineItems().get().forEach(lineItem -> {
         orderUpdates.add(new OrderUpdate(order.getOrderId().toString(), lineItem.getItemId(), lineItem.getName(),
-                lineItem.getItem(), OrderStatus.IN_PROGRESS));
+                lineItem.getItem(), LineItemStatus.IN_PROGRESS));
       });
     }
     if (order.getQdca10proLineItems().isPresent()) {
       order.getQdca10proLineItems().get().forEach(lineItem -> {
         orderUpdates.add(new OrderUpdate(order.getOrderId().toString(), lineItem.getItemId(), lineItem.getName(),
-                lineItem.getItem(), OrderStatus.IN_PROGRESS));
+                lineItem.getItem(), LineItemStatus.IN_PROGRESS));
       });
     }
     return orderUpdates;
