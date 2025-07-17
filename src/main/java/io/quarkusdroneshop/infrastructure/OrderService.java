@@ -106,7 +106,6 @@ public class OrderService {
 
         OrderEventResult result = order.applyOrderTicketUp(ticketUp);
 
-        // OrderStatus 反映（LineItem全てFULFILLEDならOrder全体もFULFILLED）
         orderRecord.setOrderStatus(order.getOrderStatus());
 
         orderRepository.persist(orderRecord);
@@ -123,8 +122,8 @@ public class OrderService {
         logger.debug("Sending DashboardUpdate: {}", update);
 
         DashboardUpdate dashboardUpdate = new DashboardUpdate(
-            update.getOrderId(),
-            update.getItemId(),
+            UUID.fromString(update.getOrderId()),
+            UUID.fromString(update.getItemId()),
             update.getName(),
             update.getItem(),
             update.getStatus(),
