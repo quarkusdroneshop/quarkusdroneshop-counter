@@ -81,7 +81,7 @@ public class OrderService {
             orderRecord.setQdca10proLineItems(lineItems);
         }
 
-        orderRepository.persist(orderRecord);
+        //orderRepository.persist(orderRecord);
 
         result.getOutboxEvents().forEach(exportedEvent -> {
             logger.debug("Firing event: {}", exportedEvent);
@@ -108,7 +108,7 @@ public class OrderService {
 
         orderRecord.setOrderStatus(order.getOrderStatus());
 
-        orderRepository.persist(orderRecord);
+        //orderRepository.persist(orderRecord);
 
         result.getOutboxEvents().forEach(event::fire);
         if (result.getOrderUpdates() != null) {
