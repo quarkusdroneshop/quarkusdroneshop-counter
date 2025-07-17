@@ -1,6 +1,7 @@
 package io.quarkusdroneshop.counter.domain.valueobjects;
 
 import io.quarkusdroneshop.counter.domain.Item;
+import io.quarkusdroneshop.counter.domain.LineItemStatus;
 import io.quarkusdroneshop.counter.domain.OrderStatus;
 
 import java.util.Optional;
@@ -16,11 +17,11 @@ public class OrderUpdate {
 
   public final Item item;
 
-  public final OrderStatus status;
+  private final LineItemStatus status;
 
   public final String madeBy;
 
-  public OrderUpdate(final String orderId, final String itemId, final String name, final Item item, final OrderStatus status) {
+  public OrderUpdate(final String orderId, final String itemId, final String name, final Item item, final LineItemStatus status) {
     this.orderId = orderId;
     this.itemId = itemId;
     this.name = name;
@@ -29,7 +30,7 @@ public class OrderUpdate {
     this.madeBy = null;
   }
 
-  public OrderUpdate(final String orderId, final String itemId, final String name, final Item item, final OrderStatus status, final String madeBy) {
+  public OrderUpdate(final String orderId, final String itemId, final String name, final Item item, final LineItemStatus status, final String madeBy) {
     this.orderId = orderId;
     this.itemId = itemId;
     this.name = name;
@@ -96,7 +97,7 @@ public class OrderUpdate {
     return item;
   }
 
-  public OrderStatus getStatus() {
+  public LineItemStatus getStatus() {
     return status;
   }
 

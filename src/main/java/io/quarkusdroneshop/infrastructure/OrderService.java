@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
@@ -26,6 +27,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.NotFoundException;
 import java.util.Optional;
+import java.util.Collections;
 
 @ApplicationScoped
 public class OrderService {
@@ -92,32 +94,37 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderEventResult onOrderUpTx(final TicketUp ticketUp) {
-        logger.debug("onOrderUpTx: {}", ticketUp);
+    public OrderEventResult onOrderUpTx(TicketUp ticketUp) {
+        logger.debug("Handling TicketUp: {}", ticketUp);
 
-        Optional<OrderRecord> orderRecordOpt = orderRepository.findByIdOptional(ticketUp.getOrderId());
-        if (orderRecordOpt.isEmpty()) {
-            logger.error("Order not found for ID: {}", ticketUp.getOrderId());
-            throw new NotFoundException("Order not found for ID: " + ticketUp.getOrderId());
+        // 該当注文を取得
+        OrderRecord orderRecord = orderRepository.findById(ticketUp.getOrderId());
+        if (orderRecord == null) {
+            logger.warn("Order not found for ID: {}", ticketUp.getOrderId());
+            return new OrderEventResult(Collections.emptyList());
         }
 
-        OrderRecord orderRecord = orderRecordOpt.get();
-        Order order = Order.fromOrderRecord(orderRecord);
+        // ステータス更新
+        orderRecord.setOrderStatus(OrderStatus.FULFILLED);
+        logger.debug("Order status updated to FULFILLED for ID: {}", orderRecord.getOrderId());
 
-        OrderEventResult result = order.applyOrderTicketUp(ticketUp);
+        // persistは本来不要なはずだが、明示的に保存
+        orderRepository.persist(orderRecord);
+        logger.debug("Order persisted after status update");
 
-        orderRecord.setOrderStatus(order.getOrderStatus());
+        // Update通知を作成
+        List<OrderUpdate> updates = orderRecord.getLineItems().stream()
+            .map(li -> new OrderUpdate(
+                orderRecord.getOrderId().toString(),
+                li.getItemId().toString(),
+                li.getName(),
+                li.getItem(),
+                li.getLineItemStatus(),
+                (String) null)) // ← String にキャスト
+            .collect(Collectors.toList());
+    
 
-        //orderRepository.persist(orderRecord);
-        orderRepository.flush(); // ← 明示的にトランザクション内で変更をDBに反映
-
-
-        result.getOutboxEvents().forEach(event::fire);
-        if (result.getOrderUpdates() != null) {
-            result.getOrderUpdates().forEach(this::sendOrderUpdate);
-        }
-
-        return result;
+        return new OrderEventResult(updates);
     }
 
     public void sendOrderUpdate(OrderUpdate update) {

@@ -1,6 +1,7 @@
 package io.quarkusdroneshop.counter.domain.valueobjects;
 
 import io.quarkusdroneshop.counter.domain.Item;
+import io.quarkusdroneshop.counter.domain.LineItemStatus;
 import io.quarkusdroneshop.counter.domain.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,7 +13,7 @@ public class DashboardUpdate {
     public final String itemId;
     public final String name;
     public final Item item;
-    public final OrderStatus status;
+    public final LineItemStatus status;
     public final String madeBy;
 
     @JsonCreator
@@ -21,7 +22,7 @@ public class DashboardUpdate {
         @JsonProperty("itemId") String itemId,
         @JsonProperty("name") String name,
         @JsonProperty("item") Item item,
-        @JsonProperty("status") OrderStatus status,
+        @JsonProperty("status") LineItemStatus status,
         @JsonProperty("madeBy") String madeBy
     ) {
         this.orderId = orderId;

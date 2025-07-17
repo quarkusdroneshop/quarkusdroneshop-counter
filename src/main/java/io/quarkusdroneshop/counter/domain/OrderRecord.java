@@ -4,6 +4,7 @@ import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -157,5 +158,16 @@ public class OrderRecord extends PanacheEntityBase {
 
     public void setQdca10proLineItems(List<LineItem> qdca10proLineItems) {
         this.qdca10proLineItems = qdca10proLineItems;
+    }
+    
+    public List<LineItem> getLineItems() {
+        List<LineItem> all = new ArrayList<>();
+        if (qdca10LineItems != null) {
+            all.addAll(qdca10LineItems);
+        }
+        if (qdca10proLineItems != null) {
+            all.addAll(qdca10proLineItems);
+        }
+        return all;
     }
 }

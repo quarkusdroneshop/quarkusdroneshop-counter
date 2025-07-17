@@ -38,6 +38,10 @@ public class OrderEventResult {
     return order;
   }
 
+  public OrderEventResult(List<OrderUpdate> orderUpdates) {
+    this.orderUpdates = orderUpdates;
+  }
+
   public void addEvent(final ExportedEvent event) {
     if (this.outboxEvents == null) {
       this.outboxEvents = new ArrayList<>();
