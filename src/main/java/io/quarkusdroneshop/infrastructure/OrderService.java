@@ -97,34 +97,44 @@ public class OrderService {
     @Transactional
     public OrderEventResult onOrderUpTx(TicketUp ticketUp) {
         logger.debug("Handling TicketUp: {}", ticketUp);
-
+    
         // 該当注文を取得
         OrderRecord orderRecord = orderRepository.findById(ticketUp.getOrderId());
         if (orderRecord == null) {
             logger.warn("Order not found for ID: {}", ticketUp.getOrderId());
             return new OrderEventResult(Collections.emptyList());
         }
-
-        // ステータス更新
-        orderRecord.setOrderStatus(OrderStatus.FULFILLED);
-        logger.debug("Order status updated to FULFILLED for ID: {}", orderRecord.getOrderId());
-
-        // persistは本来不要なはずだが、明示的に保存
+    
+        // ドメインオブジェクトに変換し、ステータス適用
+        Order order = Order.fromOrderRecord(orderRecord);
+        OrderEventResult result = order.applyOrderTicketUp(ticketUp);  // Order + LineItem に更新が入るはず
+    
+        // OrderRecord に変更をマージ ← ここが重要！
+        orderRecord.setOrderStatus(order.getOrderStatus());
+    
+        // 各 LineItem を FULFILLED に更新
+        if (orderRecord.getQdca10LineItems() != null) {
+            orderRecord.getQdca10LineItems().forEach(li -> li.setLineItemStatus(LineItemStatus.FULFILLED));
+        }
+        if (orderRecord.getQdca10proLineItems() != null) {
+            orderRecord.getQdca10proLineItems().forEach(li -> li.setLineItemStatus(LineItemStatus.FULFILLED));
+        }
+    
+        // 永続化（念のため明示的に）
         orderRepository.persist(orderRecord);
-        logger.debug("Order persisted after status update");
-
-        // Update通知を作成
+        logger.debug("Order and LineItems updated and persisted");
+    
+        // Update通知を作成（LineItem のステータスが FULFILLED になっていることを期待）
         List<OrderUpdate> updates = orderRecord.getLineItems().stream()
             .map(li -> new OrderUpdate(
                 orderRecord.getOrderId().toString(),
                 li.getItemId().toString(),
                 li.getName(),
                 li.getItem(),
-                li.getLineItemStatus(), // ← これでOK
+                li.getLineItemStatus(),
                 null))
             .collect(Collectors.toList());
     
-
         return new OrderEventResult(updates);
     }
 
