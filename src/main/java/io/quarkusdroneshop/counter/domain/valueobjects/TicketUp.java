@@ -5,6 +5,7 @@ import io.quarkusdroneshop.counter.domain.OrderStatus;
 
 import java.time.Instant;
 import java.util.StringJoiner;
+import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -25,6 +26,8 @@ public class TicketUp {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     public Instant timestamp;
+
+    private List<OrderUpdate> updates;
 
     public String madeBy;
 
@@ -136,5 +139,9 @@ public class TicketUp {
 
     public OrderStatus getStatus() {
         return status;
+    }
+    
+    public List<OrderUpdate> getUpdates() {
+        return updates;
     }
 }

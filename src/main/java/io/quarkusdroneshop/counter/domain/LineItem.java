@@ -119,4 +119,5 @@ public class LineItem extends PanacheEntityBase {
   public String getItemId() {
     return this.itemId;
   }
+  
 }

@@ -126,14 +126,23 @@ public class OrderService {
     
         // Update通知を作成（LineItem のステータスが FULFILLED になっていることを期待）
         List<OrderUpdate> updates = orderRecord.getLineItems().stream()
-            .map(li -> new OrderUpdate(
-                orderRecord.getOrderId().toString(),
-                li.getItemId().toString(),
-                li.getName(),
-                li.getItem(),
-                li.getLineItemStatus(),
-                ticketUp.getMadeBy()
-            ))
+            .map(li -> {
+                String madeBy = ticketUp.getUpdates().stream()
+                .filter(update -> update.getItemId().equals(li.getItemId()))
+                .map(OrderUpdate::getMadeBy)
+                .map(maybeMadeBy -> maybeMadeBy.orElse(null)) // ←ここを修正
+                .findFirst()
+                .orElse(null);
+
+                return new OrderUpdate(
+                    orderRecord.getOrderId().toString(),
+                    li.getItemId().toString(),
+                    li.getName(),
+                    li.getItem(),
+                    li.getLineItemStatus(),
+                    Optional.ofNullable(madeBy).toString()
+                );
+            })
             .collect(Collectors.toList());
     
         return new OrderEventResult(updates);
