@@ -132,7 +132,8 @@ public class OrderService {
                 li.getName(),
                 li.getItem(),
                 li.getLineItemStatus(),
-                null))
+                ticketUp.getMadeBy()
+            ))
             .collect(Collectors.toList());
     
         return new OrderEventResult(updates);
