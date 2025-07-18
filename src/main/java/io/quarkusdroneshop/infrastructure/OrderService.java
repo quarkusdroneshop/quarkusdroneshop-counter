@@ -2,6 +2,7 @@ package io.quarkusdroneshop.infrastructure;
 
 import io.debezium.outbox.quarkus.ExportedEvent;
 import io.quarkusdroneshop.counter.domain.LineItem;
+import io.quarkusdroneshop.counter.domain.LineItemStatus;
 import io.quarkusdroneshop.counter.domain.Order;
 import io.quarkusdroneshop.counter.domain.OrderRepository;
 import io.quarkusdroneshop.counter.domain.OrderStatus;
@@ -119,7 +120,9 @@ public class OrderService {
                 li.getItemId().toString(),
                 li.getName(),
                 li.getItem(),
-                li.getLineItemStatus(),
+                li.getLineItemStatus() == LineItemStatus.FULFILLED 
+                    ? LineItemStatus.FULFILLED 
+                    : LineItemStatus.PLACED, // ← 修正ポイント
                 (String) null)) // ← String にキャスト
             .collect(Collectors.toList());
     
