@@ -120,9 +120,9 @@ public class OrderService {
                 li.getItemId().toString(),
                 li.getName(),
                 li.getItem(),
-                li.getLineItemStatus() == LineItemStatus.FULFILLED 
-                    ? LineItemStatus.FULFILLED 
-                    : LineItemStatus.PLACED, // ← 修正ポイント
+                li.getLineItemStatus() == LineItemStatus.FULFILLED
+                ? LineItemStatus.FULFILLED
+                : LineItemStatus.IN_PROGRESS, // ← これなら OK
                 (String) null)) // ← String にキャスト
             .collect(Collectors.toList());
     
