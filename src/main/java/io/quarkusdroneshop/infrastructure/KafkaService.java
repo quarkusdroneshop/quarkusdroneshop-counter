@@ -43,6 +43,11 @@ public class KafkaService {
     @Incoming("orders-up")
     @Blocking
     public void orderUp(final TicketUp ticketUp) {
+        if (ticketUp == null || ticketUp.getOrderId() == null) {
+            logger.warn("Received null or invalid TicketUp message: " + ticketUp);
+            return;
+        }
+
         logger.debug("TicketUp received: {}", ticketUp);
 
         OrderEventResult result = orderService.onOrderUpTx(ticketUp);
