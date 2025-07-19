@@ -63,7 +63,7 @@ public class Order {
         item.setLineItemStatus(LineItemStatus.FULFILLED);
         updates.add(new OrderUpdate(
             getOrderId().toString(),
-            item.getItemId().toString(),
+            item.getItemId(),
             item.getName(),
             item.getItem(),
             LineItemStatus.FULFILLED,

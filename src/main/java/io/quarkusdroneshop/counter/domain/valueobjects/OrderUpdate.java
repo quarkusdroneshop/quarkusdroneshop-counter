@@ -6,6 +6,7 @@ import io.quarkusdroneshop.counter.domain.OrderStatus;
 
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

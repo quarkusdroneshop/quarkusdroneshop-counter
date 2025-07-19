@@ -106,39 +106,43 @@ public class OrderService {
             return new OrderEventResult(Collections.emptyList());
         }
     
-        // ドメインオブジェクトに変換し、ステータス適用
+        // ドメイン変換（将来の拡張のため）
         Order order = Order.fromOrderRecord(orderRecord);
-        OrderEventResult result = order.applyOrderTicketUp(ticketUp);  // Order + LineItem に更新が入るはず
     
-        // OrderRecord に変更をマージ ← ここが重要！
-        orderRecord.setOrderStatus(order.getOrderStatus());
+        // 更新する LineItem を収集（再送防止）
+        List<OrderUpdate> updates = new ArrayList<>();
+        List<LineItem> allLineItems = new ArrayList<>();
     
-        // 各 LineItem を FULFILLED に更新
         if (orderRecord.getQdca10LineItems() != null) {
-            orderRecord.getQdca10LineItems().forEach(li -> li.setLineItemStatus(LineItemStatus.FULFILLED));
+            allLineItems.addAll(orderRecord.getQdca10LineItems());
         }
         if (orderRecord.getQdca10proLineItems() != null) {
-            orderRecord.getQdca10proLineItems().forEach(li -> li.setLineItemStatus(LineItemStatus.FULFILLED));
+            allLineItems.addAll(orderRecord.getQdca10proLineItems());
         }
     
-        // 永続化（念のため明示的に）
-        orderRepository.persist(orderRecord);
-        logger.debug("Order and LineItems updated and persisted");
-            
-        // Update通知を作成（LineItem のステータスが FULFILLED になっていることを期待）
-        List<OrderUpdate> updates = orderRecord.getLineItems().stream()
-            .map(li -> {
-                return new OrderUpdate(
+        for (LineItem li : allLineItems) {
+            if (li.getLineItemStatus() != LineItemStatus.FULFILLED) {
+                li.setLineItemStatus(LineItemStatus.FULFILLED);
+                updates.add(new OrderUpdate(
                     orderRecord.getOrderId().toString(),
                     li.getItemId().toString(),
                     li.getName(),
                     li.getItem(),
-                    li.getLineItemStatus(),
+                    LineItemStatus.FULFILLED,
                     ticketUp.getMadeBy()
-                );
-            })
-            .collect(Collectors.toList());
-            System.out.println("AAAAAAAAAAA");
+                ));
+                break;
+            }
+        }
+    
+        // Order 状態も更新（変更があったときのみ）
+        if (!updates.isEmpty()) {
+            orderRecord.setOrderStatus(OrderStatus.FULFILLED);
+            orderRepository.persist(orderRecord);
+            logger.debug("Order and {} LineItems updated and persisted", updates.size());
+        } else {
+            logger.debug("No updates required (all LineItems already FULFILLED)");
+        }
     
         return new OrderEventResult(updates);
     }
