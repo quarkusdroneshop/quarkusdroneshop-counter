@@ -27,8 +27,6 @@ public class TicketUp {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     public Instant timestamp;
 
-    private List<OrderUpdate> updates;
-
     public String madeBy;
 
     @JsonCreator
@@ -139,9 +137,5 @@ public class TicketUp {
 
     public OrderStatus getStatus() {
         return status;
-    }
-    
-    public List<OrderUpdate> getUpdates() {
-        return updates;
     }
 }

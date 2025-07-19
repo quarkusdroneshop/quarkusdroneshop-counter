@@ -56,15 +56,22 @@ public class Order {
 
     // 全 LineItem に対応する OrderUpdate を生成して UI に反映
     List<OrderUpdate> updates = new ArrayList<>();
+
     for (LineItem item : allLineItems) {
+        if (item.getLineItemStatus() != LineItemStatus.FULFILLED &&
+        item.getItemId().equals(ticketUp.getLineItemId())) {
+        item.setLineItemStatus(LineItemStatus.FULFILLED);
         updates.add(new OrderUpdate(
-                getOrderId().toString(),
-                item.getItemId().toString(),
-                item.getName(),
-                item.getItem(),
-                item.getLineItemStatus(),
-                Optional.ofNullable(ticketUp.getMadeBy()).orElse(null)
+            getOrderId().toString(),
+            item.getItemId().toString(),
+            item.getName(),
+            item.getItem(),
+            LineItemStatus.FULFILLED,
+            ticketUp.getMadeBy()
         ));
+        matched = true;
+        break;
+  }
     }
 
     OrderEventResult orderEventResult = new OrderEventResult();

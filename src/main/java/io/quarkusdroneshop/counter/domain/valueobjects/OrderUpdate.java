@@ -7,6 +7,8 @@ import io.quarkusdroneshop.counter.domain.OrderStatus;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class OrderUpdate {
 
   public final String orderId;
@@ -14,7 +16,7 @@ public class OrderUpdate {
   public final String itemId;
 
   public final String name;
-
+  
   public final Item item;
 
   private final LineItemStatus status;

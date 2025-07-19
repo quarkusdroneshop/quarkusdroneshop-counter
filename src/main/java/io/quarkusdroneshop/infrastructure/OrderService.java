@@ -28,6 +28,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.NotFoundException;
 import java.util.Optional;
+import java.util.ArrayList;
 import java.util.Collections;
 
 @ApplicationScoped
@@ -123,27 +124,21 @@ public class OrderService {
         // 永続化（念のため明示的に）
         orderRepository.persist(orderRecord);
         logger.debug("Order and LineItems updated and persisted");
-    
+            
         // Update通知を作成（LineItem のステータスが FULFILLED になっていることを期待）
         List<OrderUpdate> updates = orderRecord.getLineItems().stream()
             .map(li -> {
-                String madeBy = ticketUp.getUpdates().stream()
-                .filter(update -> update.getItemId().equals(li.getItemId()))
-                .map(OrderUpdate::getMadeBy)
-                .map(maybeMadeBy -> maybeMadeBy.orElse(null)) // ←ここを修正
-                .findFirst()
-                .orElse(null);
-
                 return new OrderUpdate(
                     orderRecord.getOrderId().toString(),
                     li.getItemId().toString(),
                     li.getName(),
                     li.getItem(),
                     li.getLineItemStatus(),
-                    Optional.ofNullable(madeBy).toString()
+                    ticketUp.getMadeBy()
                 );
             })
             .collect(Collectors.toList());
+            System.out.println("AAAAAAAAAAA");
     
         return new OrderEventResult(updates);
     }
@@ -157,7 +152,7 @@ public class OrderService {
             update.getName(),
             update.getItem(),
             update.getStatus(),
-            update.getMadeBy().orElse("")
+            update.getMadeBy().orElse(null)
         );
         dashboardUpdateEmitter.send(dashboardUpdate);
     }
