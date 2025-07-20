@@ -2,7 +2,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: quarkusdroneshop-counter
-  description: デモンストレーション用のサービスです
+  description: カウンター業務のマイクロサービスです
   labels:
     app: counter
   annotations:
