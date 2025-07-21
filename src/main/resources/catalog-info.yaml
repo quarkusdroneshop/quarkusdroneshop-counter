@@ -17,6 +17,13 @@ spec:
   system: Asite
   providesApis:
     - quarkusdroneshop-counter-api
+  kubernetes:
+    serviceLocatorMethod: 'multiTenant'
+    clusters:
+      - name: a-cluster
+        url: 'https://api.cluster-2x987.2x987.sandbox1936.opentlc.com:6443'
+        skipTLSVerify: true
+        authProvider: serviceAccount
 ---
 apiVersion: backstage.io/v1alpha1
 kind: API
