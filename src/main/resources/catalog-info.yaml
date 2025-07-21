@@ -10,7 +10,7 @@ metadata:
     backstage.io/kubernetes-label-selector: 'counter'
     backstage.io/kubernetes-namespace: quarkusdroneshop-counter
   links:
-    - url: https://console-openshift-console.apps.cluster-s8k82.s8k82.sandbox744.opentlc.com/k8s/cluster/projects/sample-blog
+    - url: https://console-openshift-console.apps.cluster-s8k82.s8k82.sandbox744.opentlc.com/k8s/cluster/projects/quarkusdroneshop-demo
       title: OpenShift Console
       icon: dashboard
     - url: http://quarkusdroneshop-web-quarkusdroneshop-demo.apps.cluster-s8k82.s8k82.sandbox744.opentlc.com/
