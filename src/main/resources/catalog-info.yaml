@@ -7,6 +7,18 @@ metadata:
     app: counter
   annotations:
     github.com/project-slug: quarkusdroneshop/counter
+    backstage.io/kubernetes-label-selector: 'counter'
+    backstage.io/kubernetes-namespace: quarkusdroneshop-counter
+  links:
+    - url: https://console-openshift-console.apps.cluster-s8k82.s8k82.sandbox744.opentlc.com/k8s/cluster/projects/sample-blog
+      title: OpenShift Console
+      icon: dashboard
+    - url: http://quarkusdroneshop-web-quarkusdroneshop-demo.apps.cluster-s8k82.s8k82.sandbox744.opentlc.com/
+      title: Application Web Site
+      icon: dashboard
+    - url: https://github.com/quarkusdroneshop/quarkusdroneshop-web
+      title: App Repository
+      icon: github
 spec:
   type: website
   owner: user:default/nmushino
