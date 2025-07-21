@@ -27,16 +27,15 @@ spec:
   type: openapi
   lifecycle: production
   owner: user:default/nmushino
-  definition:
-    $text: |
-      openapi: 3.0.0
-      info:
-        title: quarkusdroneshop-counter API
-        version: 1.0.0
-      paths:
-        /counter:
-          get:
-            summary: カウンター情報を取得
-            responses:
-              '200':
-                description: OK
+  definition: |
+    openapi: 3.0.0
+    info:
+      title: quarkusdroneshop-counter API
+      version: 1.0.0
+    paths:
+      /counter:
+        get:
+          summary: カウンター情報を取得
+          responses:
+            '200':
+              description: OK
