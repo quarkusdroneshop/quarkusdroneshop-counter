@@ -9,15 +9,18 @@ metadata:
     github.com/project-slug: quarkusdroneshop/counter
     backstage.io/kubernetes-label-selector: 'app=counter'
     backstage.io/kubernetes-namespace: quarkusdroneshop-demo
+    backstage.io/kubernetes-cluster: a-cluster
 spec:
   type: service
   owner: user:default/nmushino
   lifecycle: production
-  system: Asite
+  system: a-cluster
   providesApis:
     - quarkusdroneshop-counter-api
   kubernetes:
     serviceLocatorMethod: 'multiTenant'
+    auth:
+      defaultAuthType: serviceAccount
     clusters:
       - name: a-cluster
         url: 'https://api.cluster-2x987.2x987.sandbox1936.opentlc.com:6443'
