@@ -8,7 +8,7 @@ metadata:
   annotations:
     github.com/project-slug: quarkusdroneshop/counter
     backstage.io/kubernetes-label-selector: 'app=counter'
-    backstage.io/kubernetes-namespace: quarkusdroneshop-counter
+    backstage.io/kubernetes-namespace: quarkusdroneshop-demo
 spec:
   type: service
   owner: user:default/nmushino
