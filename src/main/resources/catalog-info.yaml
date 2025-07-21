@@ -20,6 +20,7 @@ metadata:
       title: App Repository
       icon: github
 spec:
-  type: website
+  type: service
   owner: user:default/nmushino
   lifecycle: production
+  system: Asite
