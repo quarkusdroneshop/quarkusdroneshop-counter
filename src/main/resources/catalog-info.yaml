@@ -23,28 +23,5 @@ spec:
       defaultAuthType: serviceAccount
     clusters:
       - name: a-cluster
-        url: 'https://api.cluster-2x987.2x987.sandbox1936.opentlc.com:6443'
         skipTLSVerify: true
         authProvider: serviceAccount
----
-apiVersion: backstage.io/v1alpha1
-kind: API
-metadata:
-  name: quarkusdroneshop-counter-api
-  description: カウンター業務API
-spec:
-  type: openapi
-  lifecycle: production
-  owner: user:default/nmushino
-  definition: |
-    openapi: 3.0.0
-    info:
-      title: quarkusdroneshop-counter API
-      version: 1.0.0
-    paths:
-      /counter:
-        get:
-          summary: カウンター情報を取得
-          responses:
-            '200':
-              description: OK
