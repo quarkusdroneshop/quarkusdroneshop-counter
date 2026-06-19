@@ -21,9 +21,9 @@
 # docker run -i --rm -p 8080:8080 -p 5005:5005 -e JAVA_ENABLE_DEBUG="true" quarkus/todo-with-quarkus-jvm
 #
 ###
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.3
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.4
 
-ARG JAVA_PACKAGE=java-11-openjdk-headless
+ARG JAVA_PACKAGE=java-24-openjdk-headless
 ARG RUN_JAVA_VERSION=1.3.8
 ENV LANG='ja_JP.UTF-8' LANGUAGE='ja_JP:ja'
 # Install java and the run-java script
