@@ -49,7 +49,7 @@ public class LineItem extends PanacheEntityBase {
   @Override
   public String toString() {
     return new StringJoiner(", ", LineItem.class.getSimpleName() + "[", "]")
-            .add("order=" + order.getOrderId())
+            .add("order=" + (order != null ? order.getOrderId() : null))
             .add("itemId='" + itemId + "'")
             .add("item=" + item)
             .add("name='" + name + "'")
@@ -65,7 +65,6 @@ public class LineItem extends PanacheEntityBase {
 
     LineItem lineItem = (LineItem) o;
 
-    if (order != null ? !order.equals(lineItem.order) : lineItem.order != null) return false;
     if (itemId != null ? !itemId.equals(lineItem.itemId) : lineItem.itemId != null) return false;
     if (item != lineItem.item) return false;
     if (name != null ? !name.equals(lineItem.name) : lineItem.name != null) return false;
@@ -75,8 +74,7 @@ public class LineItem extends PanacheEntityBase {
 
   @Override
   public int hashCode() {
-    int result = order != null ? order.hashCode() : 0;
-    result = 31 * result + (itemId != null ? itemId.hashCode() : 0);
+    int result = itemId != null ? itemId.hashCode() : 0;
     result = 31 * result + (item != null ? item.hashCode() : 0);
     result = 31 * result + (name != null ? name.hashCode() : 0);
     result = 31 * result + (price != null ? price.hashCode() : 0);

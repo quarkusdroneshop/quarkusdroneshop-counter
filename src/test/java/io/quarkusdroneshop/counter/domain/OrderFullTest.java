@@ -139,7 +139,7 @@ public class OrderFullTest {
     }
 
     @Test
-    public void testEqualsAndHashCode() {
+    public void testEqualsAndHashCode1() {
         PlaceOrderCommand cmd = TestUtil.stubPlaceOrderCommand();
         Order a = Order.fromPlaceOrderCommand(cmd);
         assertEquals(a, a);

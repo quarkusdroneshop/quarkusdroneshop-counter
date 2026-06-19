@@ -84,11 +84,6 @@ public class LineItemTest {
         f.setAccessible(true);
         String baseItemId = (String) f.get(base);
 
-        // order differs: base has order, other has null order
-        LineItem noOrder = new LineItem(Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50), LineItemStatus.IN_PROGRESS, null);
-        f.set(noOrder, baseItemId);
-        assertNotEquals(base, noOrder);
-
         // item differs (same order, same itemId)
         LineItem diffItem = new LineItem(Item.QDC_A102, "Taro", BigDecimal.valueOf(135.50), LineItemStatus.IN_PROGRESS, rec);
         f.set(diffItem, baseItemId);
