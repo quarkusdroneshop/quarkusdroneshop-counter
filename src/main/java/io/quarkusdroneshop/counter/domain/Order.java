@@ -8,7 +8,7 @@ import io.quarkusdroneshop.counter.domain.valueobjects.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.Transient;
+import jakarta.persistence.Transient;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Stream;
@@ -54,34 +54,13 @@ public class Order {
     // イベント生成
     OrderUpdatedEvent orderUpdatedEvent = OrderUpdatedEvent.of(this);
 
-    // 全 LineItem に対応する OrderUpdate を生成して UI に反映
-    List<OrderUpdate> updates = new ArrayList<>();
-
-    for (LineItem item : allLineItems) {
-        if (item.getLineItemStatus() != LineItemStatus.FULFILLED &&
-        item.getItemId().equals(ticketUp.getLineItemId())) {
-        item.setLineItemStatus(LineItemStatus.FULFILLED);
-        updates.add(new OrderUpdate(
-            getOrderId().toString(),
-            item.getItemId(),
-            item.getName(),
-            item.getItem(),
-            LineItemStatus.FULFILLED,
-            ticketUp.getMadeBy()
-        ));
-        matched = true;
-        break;
-  }
-    }
-
     OrderEventResult orderEventResult = new OrderEventResult();
     orderEventResult.setOrder(this);
     orderEventResult.addEvent(orderUpdatedEvent);
-    orderEventResult.setOrderUpdates(updates);
     return orderEventResult;
   }
 
-  protected static Order fromPlaceOrderCommand(final PlaceOrderCommand placeOrderCommand) {
+  public static Order fromPlaceOrderCommand(final PlaceOrderCommand placeOrderCommand) {
     logger.debug("creating a new Order from: {}", placeOrderCommand);
     Order order = new Order(placeOrderCommand.getId());
     order.setOrderSource(placeOrderCommand.getOrderSource());
@@ -226,6 +205,7 @@ public class Order {
   public Order(final String orderId, final OrderSource orderSource, final Location location,
                final String loyaltyMemberId, final Instant timestamp, final OrderStatus orderStatus,
                final List<LineItem> Qdca10LineItems, final List<LineItem> Qdca10proLineItems) {
+    this.orderRecord = new OrderRecord();
     this.orderRecord.setOrderId(UUID.randomUUID());
     this.orderRecord.setOrderSource(orderSource);
     this.orderRecord.setLocation(location);

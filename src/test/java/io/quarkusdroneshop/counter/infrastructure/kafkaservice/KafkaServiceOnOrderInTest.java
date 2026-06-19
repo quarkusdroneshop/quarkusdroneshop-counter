@@ -6,14 +6,14 @@ import io.quarkus.test.junit.mockito.InjectSpy;
 import io.quarkusdroneshop.counter.domain.commands.PlaceOrderCommand;
 import io.quarkusdroneshop.infrastructure.OrderService;
 import io.quarkusdroneshop.counter.domain.TestUtil;
-import io.smallrye.reactive.messaging.connectors.InMemoryConnector;
-import io.smallrye.reactive.messaging.connectors.InMemorySource;
+import io.smallrye.reactive.messaging.memory.InMemoryConnector;
+import io.smallrye.reactive.messaging.memory.InMemorySource;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.Test;
 
-import javax.enterprise.inject.Any;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
+import jakarta.enterprise.inject.Any;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;

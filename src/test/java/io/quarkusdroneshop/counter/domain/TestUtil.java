@@ -70,6 +70,7 @@ public class TestUtil {
         orderEventResult.setOrder(order);
         orderEventResult.setQdca10Tickets(TestUtil.stubQdca10Tickets());
         orderEventResult.setOutboxEvents(mockOrderInEvent());
+        orderEventResult.setOrderUpdates(java.util.Collections.emptyList());
         return orderEventResult;
     }
 

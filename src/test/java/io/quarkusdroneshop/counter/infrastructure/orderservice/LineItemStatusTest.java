@@ -13,8 +13,8 @@ import io.quarkusdroneshop.infrastructure.OrderService;
 import io.quarkusdroneshop.counter.domain.TestUtil;
 import org.junit.jupiter.api.Test;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
