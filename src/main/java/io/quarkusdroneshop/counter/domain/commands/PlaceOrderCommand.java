@@ -3,7 +3,6 @@ package io.quarkusdroneshop.counter.domain.commands;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.quarkus.runtime.annotations.RegisterForReflection;
-import io.quarkusdroneshop.counter.domain.LineItem;
 import io.quarkusdroneshop.counter.domain.Location;
 import io.quarkusdroneshop.counter.domain.OrderSource;
 

@@ -11,6 +11,7 @@ import xml.etree.ElementTree as ET
 from datetime import date
 
 TARGET = sys.argv[1] if len(sys.argv) > 1 else "target"
+PROJECT_NAME = sys.argv[2] if len(sys.argv) > 2 else "quarkusdroneshop"
 SUREFIRE_DIR = os.path.join(TARGET, "surefire-reports")
 
 # Prefer merged report (counter uses site/jacoco-merged); fall back to standard path
@@ -196,7 +197,7 @@ html = f"""<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>quarkusdroneshop-web — テスト結果レポート</title>
+<title>{PROJECT_NAME} — テスト結果レポート</title>
 <style>
   :root {{
     --pass: #27ae60; --fail: #e74c3c; --skip: #f39c12;
@@ -274,7 +275,7 @@ html = f"""<!DOCTYPE html>
 <aside class="sidebar">
   <div class="sidebar-logo">
     <div class="project">Quarkus Droneshop</div>
-    <div class="module">quarkusdroneshop-web</div>
+    <div class="module">{PROJECT_NAME}</div>
     <div class="date">{date.today()}</div>
   </div>
   <nav>

@@ -211,6 +211,7 @@
               <arguments>
                 <argument>${project.basedir}/src/test/scripts/generate-report.py</argument>
                 <argument>${project.build.directory}</argument>
+                <argument>${project.artifactId}</argument>
               </arguments>
             </configuration>
           </execution>
