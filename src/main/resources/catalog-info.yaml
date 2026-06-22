@@ -20,6 +20,9 @@ spec:
   lifecycle: production
   system: sandbox1332
   dependsOn:
+    - component:quarkusdroneshop-qdca10
+    - component:quarkusdroneshop-qdca10pro
+    - component:quarkusdroneshop-inventory
     - resource:shop-cluster-kafka
     - resource:shop-asite-orders-in
     - resource:shop-bsite-orders-up
