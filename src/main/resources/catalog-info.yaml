@@ -6,22 +6,24 @@ metadata:
   labels:
     app: counter
   annotations:
-    github.com/project-slug: quarkusdroneshop/counter
-    backstage.io/kubernetes-label-selector: 'app=counter'
-    backstage.io/kubernetes-namespace: quarkusdroneshop-demo
-    backstage.io/kubernetes-cluster: a-cluster
+    github.com/project-slug: quarkusdroneshop/quarkusdroneshop-counter
+    backstage.io/kubernetes-id: quarkusdroneshop-counter
+    backstage.io/kubernetes-cluster: sandbox1332
+    backstage.io/kubernetes-label-selector: app.kubernetes.io/instance=quarkusdroneshop-counter
+    tektonci.io/pipeline: build-and-push-quarkusdroneshop-counter
+    tektonci.io/pipelineNamespace: quarkusdroneshop-cicd
+    tekton.dev/cicd: "true"
+    janus-idp.io/tekton: "true"
 spec:
   type: service
   owner: user:default/nmushino
   lifecycle: production
-  system: a-cluster
+  system: sandbox1332
+  dependsOn:
+    - resource:shop-cluster-kafka
+    - resource:shop-asite-orders-in
+    - resource:shop-bsite-orders-up
   providesApis:
-    - quarkusdroneshop-counter-api
-  kubernetes:
-    serviceLocatorMethod: 'multiTenant'
-    auth:
-      defaultAuthType: serviceAccount
-    clusters:
-      - name: a-cluster
-        skipTLSVerify: true
-        authProvider: serviceAccount
+    - quarkusdroneshop-counter-qdca10-in
+    - quarkusdroneshop-counter-qdca10pro-in
+    - quarkusdroneshop-counter-web-updates
