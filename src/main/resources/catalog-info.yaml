@@ -26,7 +26,10 @@ spec:
     - resource:shop-cluster-kafka
     - resource:shop-asite-orders-in
     - resource:shop-bsite-orders-up
+  consumesApis:
+    - kafka-shop-asite-orders-in
+    - kafka-shop-bsite-orders-up
   providesApis:
-    - quarkusdroneshop-counter-qdca10-in
-    - quarkusdroneshop-counter-qdca10pro-in
-    - quarkusdroneshop-counter-web-updates
+    - kafka-qdca10-in
+    - kafka-qdca10pro-in
+    - kafka-web-updates
