@@ -15,7 +15,7 @@ metadata:
     tekton.dev/cicd: "true"
     janus-idp.io/tekton: "true"
 spec:
-  type: service
+  type: microservice
   owner: user:default/nmushino
   lifecycle: production
   system: sandbox1332
