@@ -1,0 +1,27 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: quarkusdroneshop-counter
+  description: "quarkusdroneshop-counter のマイクロサービスです"
+  tags:
+    - latest
+    - b-cluster
+  labels:
+    app: counter
+  annotations:
+    backstage.io/kubernetes-id: quarkusdroneshop-counter
+    backstage.io/kubernetes-cluster: b-cluster
+    backstage.io/kubernetes-label-selector: app.kubernetes.io/instance=quarkusdroneshop-counter
+    argocd/app-selector: app.kubernetes.io/instance=quarkusdroneshop-counter
+    tektonci.io/pipeline: build-and-push-quarkusdroneshop-counter
+    tektonci.io/pipelineNamespace: quarkusdroneshop-cicd
+    tekton.dev/type: pipeline
+    tekton.dev/cicd: "true"
+    janus-idp.io/tekton: "true"
+    rhdh.redhat.com/tekton-enabled: "true"
+spec:
+  type: service
+  lifecycle: production
+  owner: user:default/nmushino
+  system: b-cluster
+
