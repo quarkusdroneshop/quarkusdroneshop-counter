@@ -12,7 +12,8 @@ metadata:
     github.com/project-slug: quarkusdroneshop/quarkusdroneshop-counter
     backstage.io/kubernetes-id: quarkusdroneshop-counter
     backstage.io/kubernetes-cluster: a-cluster
-    backstage.io/kubernetes-label-selector: app.kubernetes.io/instance=quarkusdroneshop-counter
+    backstage.io/kubernetes-namespace: quarkusdroneshop-demo
+    backstage.io/kubernetes-label-selector: app.kubernetes.io/instance=counter
     tektonci.io/pipeline: build-and-push-quarkusdroneshop-counter
     tektonci.io/pipelineNamespace: quarkusdroneshop-cicd
     tekton.dev/cicd: "true"
@@ -28,12 +29,132 @@ spec:
     - component:quarkusdroneshop-inventory
     - resource:droneshopdb-postgresql
     - resource:shop-cluster-kafka
-    - resource:shop-asite-orders-in
+    - resource:shop-orders-in
     - resource:shop-bsite-orders-up
   consumesApis:
-    - kafka-shop-asite-orders-in
+    - kafka-orders-in
     - kafka-shop-bsite-orders-up
   providesApis:
     - kafka-qdca10-in
     - kafka-qdca10pro-in
     - kafka-web-updates
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: kafka-qdca10-in
+  description: "Kafka トピック: qdca10-in（QDCA10への注文指示）"
+  annotations:
+    backstage.io/kubernetes-cluster: a-cluster
+spec:
+  type: asyncapi
+  lifecycle: production
+  owner: user:default/nmushino
+  system: a-cluster
+  definition: |
+    asyncapi: 2.6.0
+    info:
+      title: qdca10-in
+      version: 1.0.0
+      description: カウンターからQDCA10への注文チケット送信トピック
+    servers:
+      production:
+        url: shop-cluster-kafka-bootstrap:9092
+        protocol: kafka
+    channels:
+      qdca10-in:
+        description: QDCA10への注文チケットを送信するトピック
+        publish:
+          operationId: sendQdca10Order
+          message:
+            name: OrderTicket
+            contentType: application/json
+            payload:
+              type: object
+              properties:
+                orderId:
+                  type: string
+                item:
+                  type: string
+                preparedBy:
+                  type: string
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: kafka-qdca10pro-in
+  description: "Kafka トピック: qdca10pro-in（QDCA10Proへの注文指示）"
+  annotations:
+    backstage.io/kubernetes-cluster: a-cluster
+spec:
+  type: asyncapi
+  lifecycle: production
+  owner: user:default/nmushino
+  system: a-cluster
+  definition: |
+    asyncapi: 2.6.0
+    info:
+      title: qdca10pro-in
+      version: 1.0.0
+      description: カウンターからQDCA10Proへの注文チケット送信トピック
+    servers:
+      production:
+        url: shop-cluster-kafka-bootstrap:9092
+        protocol: kafka
+    channels:
+      qdca10pro-in:
+        description: QDCA10Proへの注文チケットを送信するトピック
+        publish:
+          operationId: sendQdca10proOrder
+          message:
+            name: OrderTicket
+            contentType: application/json
+            payload:
+              type: object
+              properties:
+                orderId:
+                  type: string
+                item:
+                  type: string
+                preparedBy:
+                  type: string
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: kafka-web-updates
+  description: "Kafka トピック: web-updates（注文ステータス更新）"
+  annotations:
+    backstage.io/kubernetes-cluster: a-cluster
+spec:
+  type: asyncapi
+  lifecycle: production
+  owner: user:default/nmushino
+  system: a-cluster
+  definition: |
+    asyncapi: 2.6.0
+    info:
+      title: web-updates
+      version: 1.0.0
+      description: カウンターからWebへの注文ステータス更新トピック
+    servers:
+      production:
+        url: shop-cluster-kafka-bootstrap:9092
+        protocol: kafka
+    channels:
+      web-updates:
+        description: 注文ステータス更新をWebに送信するトピック
+        publish:
+          operationId: sendWebUpdate
+          message:
+            name: DashboardUpdate
+            contentType: application/json
+            payload:
+              type: object
+              properties:
+                orderId:
+                  type: string
+                status:
+                  type: string
+                item:
+                  type: string
