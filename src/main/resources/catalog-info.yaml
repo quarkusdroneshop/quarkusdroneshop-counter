@@ -8,7 +8,7 @@ metadata:
   annotations:
     github.com/project-slug: quarkusdroneshop/quarkusdroneshop-counter
     backstage.io/kubernetes-id: quarkusdroneshop-counter
-    backstage.io/kubernetes-cluster: b-cluster
+    backstage.io/kubernetes-cluster: a-cluster
     backstage.io/kubernetes-label-selector: app.kubernetes.io/instance=quarkusdroneshop-counter
     tektonci.io/pipeline: build-and-push-quarkusdroneshop-counter
     tektonci.io/pipelineNamespace: quarkusdroneshop-cicd
@@ -18,7 +18,7 @@ spec:
   type: microservice
   owner: user:default/nmushino
   lifecycle: production
-  system: b-cluster
+  system: a-cluster
   dependsOn:
     - component:quarkusdroneshop-qdca10
     - component:quarkusdroneshop-qdca10pro
