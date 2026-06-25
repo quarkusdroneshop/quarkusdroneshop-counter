@@ -48,6 +48,11 @@ metadata:
   description: "Kafka トピック: qdca10-in（QDCA10への注文指示）"
   annotations:
     backstage.io/kubernetes-cluster: a-cluster
+    openmetadata/explore-url: "http://openmetadata-openmetadata.apps.ocp.hfczn.sandbox2320.opentlc.com/topic/external-shop-cluster-kafka-asite%3A9094.qdca10-in/schema"
+  links:
+    - url: "http://openmetadata-openmetadata.apps.ocp.hfczn.sandbox2320.opentlc.com/topic/external-shop-cluster-kafka-asite%3A9094.qdca10-in/schema"
+      title: データカタログ
+      icon: dashboard
 spec:
   type: asyncapi
   lifecycle: production
@@ -88,6 +93,11 @@ metadata:
   description: "Kafka トピック: qdca10pro-in（QDCA10Proへの注文指示）"
   annotations:
     backstage.io/kubernetes-cluster: a-cluster
+    openmetadata/explore-url: "http://openmetadata-openmetadata.apps.ocp.hfczn.sandbox2320.opentlc.com/topic/external-shop-cluster-kafka-asite%3A9094.qdca10pro-in/schema"
+  links:
+    - url: "http://openmetadata-openmetadata.apps.ocp.hfczn.sandbox2320.opentlc.com/topic/external-shop-cluster-kafka-asite%3A9094.qdca10pro-in/schema"
+      title: データカタログ
+      icon: dashboard
 spec:
   type: asyncapi
   lifecycle: production
