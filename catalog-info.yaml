@@ -1,0 +1,37 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: quarkusdroneshop-counter
+  description: "quarkusdroneshop-counter のマイクロサービスです（注文調整）"
+  tags:
+    - latest
+    - a-cluster
+  labels:
+    app: counter
+  annotations:
+    backstage.io/kubernetes-id: quarkusdroneshop-counter
+    backstage.io/kubernetes-cluster: a-cluster
+    backstage.io/kubernetes-label-selector: app.kubernetes.io/instance=quarkusdroneshop-counter
+    argocd/app-selector: app.kubernetes.io/instance=quarkusdroneshop-counter
+    tektonci.io/pipeline: build-and-push-quarkusdroneshop-counter
+    tektonci.io/pipelineNamespace: quarkusdroneshop-cicd
+    tekton.dev/type: pipeline
+    tekton.dev/cicd: "true"
+    janus-idp.io/tekton: "true"
+    rhdh.redhat.com/tekton-enabled: "true"
+    backstage.io/techdocs-ref: dir:.
+spec:
+  type: service
+  lifecycle: production
+  owner: user:default/nmushino
+  system: a-cluster
+  dependsOn:
+    - resource:shop-cluster-kafka
+    - resource:shop-orders-in
+    - resource:droneshopdb-postgresql
+  consumesApis:
+    - kafka-orders-in
+  providesApis:
+    - kafka-qdca10-in
+    - kafka-qdca10pro-in
+    - kafka-web-updates
