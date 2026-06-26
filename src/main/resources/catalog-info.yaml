@@ -35,17 +35,17 @@ spec:
     - resource:shop-orders-in
     - resource:shop-bsite-orders-up
   consumesApis:
-    - kafka-orders-in
-    - kafka-shop-bsite-orders-up
+    - kafka-asite-orders-in
+    - kafka-bsite-orders-up
   providesApis:
-    - kafka-qdca10-in
-    - kafka-qdca10pro-in
-    - kafka-web-updates
+    - kafka-asite-qdca10-in
+    - kafka-asite-qdca10pro-in
+    - kafka-asite-web-updates
 ---
 apiVersion: backstage.io/v1alpha1
 kind: API
 metadata:
-  name: kafka-qdca10-in
+  name: kafka-asite-qdca10-in
   description: "Kafka トピック: qdca10-in（QDCA10への注文指示）"
   annotations:
     backstage.io/kubernetes-cluster: a-cluster
@@ -90,7 +90,7 @@ spec:
 apiVersion: backstage.io/v1alpha1
 kind: API
 metadata:
-  name: kafka-qdca10pro-in
+  name: kafka-asite-qdca10pro-in
   description: "Kafka トピック: qdca10pro-in（QDCA10Proへの注文指示）"
   annotations:
     backstage.io/kubernetes-cluster: a-cluster
@@ -135,7 +135,7 @@ spec:
 apiVersion: backstage.io/v1alpha1
 kind: API
 metadata:
-  name: kafka-web-updates
+  name: kafka-asite-web-updates
   description: "Kafka トピック: web-updates（注文ステータス更新）"
   annotations:
     backstage.io/kubernetes-cluster: a-cluster
