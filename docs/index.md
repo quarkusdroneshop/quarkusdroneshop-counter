@@ -1,88 +1,172 @@
-# Docs
-Please see the Github Pages Site for complete documentation: [quarkusdroneshop.github.io](https://quarkusdroneshop.github.io)
+# Counter マイクロサービス
 
-# About 
+## 概要
 
-This repos contains the Quarkus Coffeeshop Counter Microservice.  The Counter microservice coordinates events in the system.  It receives orders from the Web microservice from a Kakfa topic, records the orders in a database, sends messages to the QDCA10 and QDCA10Pro microservices, listens for updates from the QDCA10 and QDCA10Pro microservices, and updates the Web microservice.
+Counter はドローンショップの **注文調整マイクロサービス** です。システム全体の中心的な役割を担い、以下を処理します。
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.  If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
+- Web サービスから Kafka 経由で注文を受信
+- 注文を PostgreSQL データベースに記録
+- QDCA10・QDCA10Pro マイクロサービスへ製造指示を送信
+- 各サービスからの完了通知を受信
+- Web サービスへステータス更新を送信
 
-## Requirements
+**フレームワーク**: Quarkus（Supersonic Subatomic Java Framework）  
+**デプロイ先クラスター**: a-cluster
 
-*Java* 
-This one should be obvious.  We like [AdoptOpenJDK](https://adoptopenjdk.net/)  
+---
 
-BTW, if you want to manage multiple JDK's [SDKMan](https://sdkman.io/) is a great tool 
+## アーキテクチャ
 
-*Docker and Docker Compose*
-You can install PostgreSQL and Kafka locally, but we have a docker-compose.yaml file that will do everything for you
+```
+Web サービス
+    │
+    ▼ Kafka: orders-in
+┌─────────┐     PostgreSQL
+│ Counter │ ──► droneshopdb
+└─────────┘
+    │
+    ├──► Kafka: qdca10-in    ──► QDCA10
+    ├──► Kafka: qdca10pro-in ──► QDCA10Pro
+    │
+    ◄── Kafka: orders-up（QDCA10/Pro からの完了通知）
+    │
+    ▼ Kafka: web-updates
+Web サービス（ステータス更新）
+```
 
-## Working Locally
-Grab the supporting files
+### Kafka トピック一覧
 
-### Supporting infrastructure
+| トピック | 方向 | 説明 |
+|---------|------|------|
+| `orders-in` | 受信 | Web からの新規注文 |
+| `qdca10-in` | 送信 | QDCA10 への製造指示 |
+| `qdca10pro-in` | 送信 | QDCA10Pro への製造指示 |
+| `orders-up` / `shop-bsite-orders-up` | 受信 | 製造完了通知 |
+| `web-updates` | 送信 | フロントへのステータス更新 |
 
-Clone the quarkusdroneshop-support project (in another directory)
+### 依存サービス
+
+- **PostgreSQL** (droneshopdb): 注文データの永続化
+- **Apache Kafka**: 全メッセージングバス
+- **quarkusdroneshop-qdca10**: ドローンA製造サービス
+- **quarkusdroneshop-qdca10pro**: ドローンB製造サービス
+- **quarkusdroneshop-inventory**: 在庫管理サービス
+
+---
+
+## ローカル開発
+
+### 前提条件
+
+- Java 17+ （[SDKMan](https://sdkman.io/) での管理推奨）
+- Docker / Docker Compose
+
+### 1. インフラ起動
 
 ```shell
 git clone https://github.com/quarkusdroneshop/quarkusdroneshop-support.git
+cd quarkusdroneshop-support
+docker compose up -d
 ```
 
-From inside the quarkusdroneshop-support project (on MacOS or Linux) run:
+PostgreSQL・Kafka・Zookeeper が起動します。
+
+### 2. アプリケーション起動
 
 ```shell
-docker-compose up
-```
-
-This will start PostgreSQL, PGAdmin, Kafka and Zookeeper
-
-### Counter microservice
-
-From the quarkusdroneshop-counter directory you can start the counter microservice with:
-
-```shell
+git clone https://github.com/quarkusdroneshop/quarkusdroneshop-counter.git
+cd quarkusdroneshop-counter
 ./mvnw clean compile quarkus:dev
 ```
 
-### Kafka Consumers and Producers
+Dev UI: http://localhost:8080/q/dev
 
-If you want to monitor the Kafka topics and have Kafka's command line tools installed you can watch the topics with:
+### 3. Kafka トピック監視
 
-```shell script
-kafka-console-consumer --bootstrap-server localhost:9092 --topic orders --from-beginning
+```shell
+# 注文の受信確認
+kafka-console-consumer --bootstrap-server localhost:9092 --topic orders-in --from-beginning
+
+# Web へのステータス更新確認
 kafka-console-consumer --bootstrap-server localhost:9092 --topic web-updates --from-beginning
+
+# 製造指示確認
 kafka-console-consumer --bootstrap-server localhost:9092 --topic qdca10-in --from-beginning
 kafka-console-consumer --bootstrap-server localhost:9092 --topic qdca10pro-in --from-beginning
-kafka-console-consumer --bootstrap-server localhost:9092 --topic orders-up --from-beginning
 ```
 
-Orders can be sent directly to the topics with:
+### 環境変数
 
-```shell script
-kafka-console-producer --broker-list localhost:9092 --topic <<TOPIC_NAME>>
+| 変数名 | デフォルト | 説明 |
+|--------|-----------|------|
+| `KAFKA_BOOTSTRAP_URLS` | `localhost:9092` | Kafka ブートストラップアドレス |
+| `PGSQL_URL` | `jdbc:postgresql://localhost:5432/droneshopdb?currentSchema=droneshop` | DB 接続 URL |
+| `PGSQL_USER` | `droneshopuser` | DB ユーザー名 |
+| `PGSQL_PASS` | `redhat-21` | DB パスワード |
+
+---
+
+## 本番デプロイ（Tekton Pipeline）
+
+### パイプライン概要
+
+RHDH の **CI タブ** からパイプラインを確認・実行できます。
+
+```
+fetch-repository → semgrep-scan → maven-run → push-oc-apps
 ```
 
-## Packaging and publishing the application to a repository
+| ステップ | 内容 |
+|---------|------|
+| `fetch-repository` | GitHub からソースをクローン |
+| `semgrep-scan` | SAST セキュリティスキャン（p/java, p/owasp-top-ten, p/secrets） |
+| `maven-run` | `clean verify -Dquarkus.package.jar.type=uber-jar` |
+| `push-oc-apps` | OpenShift へビルド＆デプロイ |
+
+### 手動実行
 
 ```shell
-./mvnw clean package -Pnative -Dquarkus.native.container-build=true
+# Tekton CLI でパイプライン実行
+tkn pipeline start build-and-push-quarkusdroneshop-counter \
+  -n quarkusdroneshop-cicd \
+  --use-param-defaults
 ```
 
-```shell
-docker build -f src/main/docker/Dockerfile.native -t <<DOCKER_HUB_ID>>/quarkusdroneshop-counter .
-```
-```shell
-export KAFKA_BOOTSTRAP_URLS=localhost:9092 \
-PGSQL_URL="jdbc:postgresql://localhost:5432/droneshopdb?currentSchema=droneshop" \
-PGSQL_USER="droneshopuser" \
-PGSQL_PASS="redhat-21"
-```
+### ArgoCD による GitOps デプロイ
+
+本番環境への最終デプロイは ArgoCD が自動同期します。  
+RHDH の **CD タブ** で ArgoCD アプリの状態を確認できます。
+
+---
+
+## テスト
+
+### ユニットテスト
 
 ```shell
-docker run -i --network="host" -e PGSQL_URL=${PGSQL_URL} -e PGSQL_USER=${PGSQL_USER} -e PGSQL_PASS=${PGSQL_PASS} e KAFKA_BOOTSTRAP_URLS=${KAFKA_BOOTSTRAP_URLS} <<DOCKER_HUB_ID>>/quarkusdroneshop-counter:latest
+./mvnw test
 ```
 
+### 統合テスト
+
 ```shell
-docker images -a | grep counter
-docker tag <<RESULT>> <<DOCKER_HUB_ID>>/quarkusdroneshop-counter:<<VERSION>>
+./mvnw verify
 ```
+
+### 手動テスト（ローカル）
+
+```shell
+# 注文送信
+curl -X POST http://localhost:8080/order \
+  -H "Content-Type: application/json" \
+  -d '{"item": "DRONE_A", "quantity": 1, "location": "HOME"}'
+```
+
+---
+
+## 注意事項
+
+- **データベーススキーマ**: `droneshop` スキーマを使用。Flyway で自動マイグレーション。
+- **Kafka メッセージ形式**: JSON シリアライズ。`OrderTicket` POJO を参照。
+- **冪等性**: 同一 `orderId` の重複処理に注意。Counter は orderId で重複チェックを行います。
+- **b-cluster との通信**: Kafka MirrorMaker2 経由でクラスター間トピックを同期。`shop-bsite-*` プレフィックスのトピックは b-cluster からのミラーリング。
