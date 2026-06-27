@@ -32,7 +32,7 @@ spec:
     - component:quarkusdroneshop-inventory
     - resource:droneshopdb-asite-postgresql
     - resource:shop-cluster-kafka-asite
-    - resource:shop-orders-in
+    - resource:shop-asite-orders-in
     - resource:shop-bsite-orders-up
   consumesApis:
     - kafka-asite-orders-in
