@@ -30,8 +30,8 @@ spec:
     - component:quarkusdroneshop-qdca10
     - component:quarkusdroneshop-qdca10pro
     - component:quarkusdroneshop-inventory
-    - resource:droneshopdb-postgresql
-    - resource:shop-cluster-kafka
+    - resource:droneshopdb-asite-postgresql
+    - resource:shop-cluster-kafka-asite
     - resource:shop-orders-in
     - resource:shop-bsite-orders-up
   consumesApis:
