@@ -27,11 +27,11 @@ spec:
   system: a-cluster
   dependsOn:
     - resource:shop-cluster-kafka
-    - resource:shop-orders-in
-    - resource:droneshopdb-postgresql
+    - resource:shop-asite-orders-in
+    - resource:droneshopdb-asite-postgresql
   consumesApis:
-    - kafka-orders-in
+    - kafka-asite-orders-in
   providesApis:
-    - kafka-qdca10-in
-    - kafka-qdca10pro-in
-    - kafka-web-updates
+    - kafka-asite-qdca10-in
+    - kafka-asite-qdca10pro-in
+    - kafka-asite-web-updates
