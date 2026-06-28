@@ -1,0 +1,24 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: build-and-push-quarkusdroneshop-counter-run
+  namespace: quarkusdroneshop-cicd
+  labels:
+    app.kubernetes.io/name: quarkusdroneshop-counter
+spec:
+  pipelineRef:
+    name: build-and-push-quarkusdroneshop-counter
+  params:
+    - name: image-tag
+      value: latest
+  workspaces:
+    - name: source
+      volumeClaimTemplate:
+        spec:
+          accessModes: [ReadWriteOnce]
+          resources:
+            requests:
+              storage: 2Gi
+    - name: maven-cache
+      persistentVolumeClaim:
+        claimName: maven-cache-pvc

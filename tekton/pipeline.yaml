@@ -1,0 +1,342 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: build-and-push-quarkusdroneshop-counter
+  namespace: quarkusdroneshop-cicd
+  labels:
+    app.kubernetes.io/name: quarkusdroneshop-counter
+    tekton.dev/pipeline: build-and-push-quarkusdroneshop-counter
+spec:
+  params:
+    - name: git-url
+      type: string
+      description: ソースリポジトリ URL
+      default: https://github.com/quarkusdroneshop/quarkusdroneshop-counter.git
+    - name: git-revision
+      type: string
+      description: ブランチ / タグ / コミット SHA
+      default: main
+    - name: image-name
+      type: string
+      description: プッシュ先イメージ名（レジストリ込み）
+      default: quay.io/quarkusdroneshop/quarkusdroneshop-counter
+    - name: image-tag
+      type: string
+      description: イメージタグ
+      default: latest
+    - name: base-url
+      type: string
+      description: DAST スキャン対象 URL（デプロイ後のベース URL）
+      default: http://quarkusdroneshop-counter.quarkusdroneshop-demo.svc.cluster.local:8080
+
+  workspaces:
+    - name: source
+      description: ソースチェックアウト用 PVC
+    - name: maven-cache
+      description: Maven キャッシュ用 PVC（任意）
+      optional: true
+
+  tasks:
+    # ─────────────────────────────────────────────
+    # 1. ソースチェックアウト
+    # ─────────────────────────────────────────────
+    - name: git-clone
+      taskRef:
+        resolver: cluster
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: git-clone
+          - name: namespace
+            value: openshift-pipelines
+      workspaces:
+        - name: output
+          workspace: source
+      params:
+        - name: url
+          value: $(params.git-url)
+        - name: revision
+          value: $(params.git-revision)
+        - name: deleteExisting
+          value: "true"
+
+    # ─────────────────────────────────────────────
+    # 2. Checkstyle
+    # ─────────────────────────────────────────────
+    - name: checkstyle
+      onError: continue
+      taskRef:
+        kind: Task
+        name: maven-no-settings21
+      runAfter: [git-clone]
+      params:
+        - name: CONTEXT_DIR
+          value: .
+        - name: GOALS
+          value: "checkstyle:check -Dcheckstyle.failsOnError=false"
+      workspaces:
+        - name: source
+          workspace: source
+        - name: maven-cache
+          workspace: maven-cache
+
+    # ─────────────────────────────────────────────
+    # 3. PMD 静的解析
+    # ─────────────────────────────────────────────
+    - name: pmd
+      onError: continue
+      taskRef:
+        kind: Task
+        name: maven-no-settings21
+      runAfter: [checkstyle]
+      params:
+        - name: CONTEXT_DIR
+          value: .
+        - name: GOALS
+          value: "pmd:pmd -Dpmd.failOnViolation=false"
+      workspaces:
+        - name: source
+          workspace: source
+        - name: maven-cache
+          workspace: maven-cache
+
+    # ─────────────────────────────────────────────
+    # 4. Semgrep SAST
+    # ─────────────────────────────────────────────
+    - name: semgrep-scan
+      taskRef:
+        kind: Task
+        name: semgrep-scan
+      runAfter: [pmd]
+      params:
+        - name: RULES
+          value: "p/java,p/owasp-top-ten,p/secrets"
+        - name: FAIL_ON_FINDINGS
+          value: "false"
+      workspaces:
+        - name: source
+          workspace: source
+
+    # ─────────────────────────────────────────────
+    # 5. Gitleaks シークレットスキャン
+    # ─────────────────────────────────────────────
+    - name: gitleaks-scan
+      onError: continue
+      taskRef:
+        kind: Task
+        name: gitleaks-scan
+      runAfter: [git-clone]
+      params:
+        - name: REPORT_FORMAT
+          value: "json"
+        - name: REPORT_PATH
+          value: "target/gitleaks-report.json"
+        - name: EXIT_CODE
+          value: "0"
+      workspaces:
+        - name: source
+          workspace: source
+
+    # ─────────────────────────────────────────────
+    # 6. Trivy SCA
+    # ─────────────────────────────────────────────
+    - name: trivy-scan
+      onError: continue
+      taskRef:
+        kind: Task
+        name: trivy-scan
+      runAfter: [gitleaks-scan]
+      params:
+        - name: SCANNERS
+          value: "vuln,secret"
+        - name: EXIT_CODE
+          value: "0"
+        - name: OUTPUT_FILE
+          value: "target/trivy.txt"
+      workspaces:
+        - name: source
+          workspace: source
+
+    # ─────────────────────────────────────────────
+    # 7. Maven ユニットテスト + カバレッジ
+    # ─────────────────────────────────────────────
+    - name: unit-test
+      taskRef:
+        kind: Task
+        name: maven-no-settings21
+      runAfter: [git-clone]
+      params:
+        - name: CONTEXT_DIR
+          value: .
+        - name: GOALS
+          value: "clean verify -DskipITs"
+      workspaces:
+        - name: source
+          workspace: source
+        - name: maven-cache
+          workspace: maven-cache
+
+    # ─────────────────────────────────────────────
+    # 8. SpotBugs
+    # ─────────────────────────────────────────────
+    - name: spotbugs
+      onError: continue
+      taskRef:
+        kind: Task
+        name: maven-no-settings21
+      runAfter: [trivy-scan, unit-test]
+      params:
+        - name: CONTEXT_DIR
+          value: .
+        - name: GOALS
+          value: "spotbugs:spotbugs"
+      workspaces:
+        - name: source
+          workspace: source
+        - name: maven-cache
+          workspace: maven-cache
+
+    # ─────────────────────────────────────────────
+    # 9. Maven E2E テスト（Failsafe / Playwright）
+    # ─────────────────────────────────────────────
+    - name: e2e-test
+      onError: continue
+      taskRef:
+        kind: Task
+        name: maven-playwright
+      runAfter: [unit-test]
+      params:
+        - name: CONTEXT_DIR
+          value: .
+        - name: GOALS
+          value: "test-compile failsafe:integration-test failsafe:verify -Dsurefire.skip=true"
+      workspaces:
+        - name: source
+          workspace: source
+        - name: maven-cache
+          workspace: maven-cache
+
+    # ─────────────────────────────────────────────
+    # 10. コンテナイメージビルド & プッシュ
+    # ─────────────────────────────────────────────
+    - name: build-image
+      taskRef:
+        kind: Task
+        name: push-app-task
+      runAfter: [spotbugs, semgrep-scan, e2e-test]
+      params:
+        - name: SCRIPT
+          value: |
+            #!/bin/bash
+            set -e
+            oc delete all -l app=quarkusdroneshop-counter -n quarkusdroneshop-demo || true
+            oc delete bc/quarkusdroneshop-counter -n quarkusdroneshop-demo || true
+            RUNNER_JAR=$(ls target/*-runner.jar | head -1)
+            oc new-build --binary --name=quarkusdroneshop-counter               --docker-image=registry.access.redhat.com/ubi9/openjdk-21:latest               -n quarkusdroneshop-demo
+            oc start-build quarkusdroneshop-counter --from-file="$RUNNER_JAR" --follow -n quarkusdroneshop-demo
+            oc new-app quarkusdroneshop-counter --name=quarkusdroneshop-counter --allow-missing-images -n quarkusdroneshop-demo
+      workspaces:
+        - name: source
+          workspace: source
+
+    # ─────────────────────────────────────────────
+    # 11. Wapiti DAST
+    # ─────────────────────────────────────────────
+    - name: wapiti-scan
+      onError: continue
+      taskRef:
+        kind: Task
+        name: wapiti-scan
+      runAfter: [build-image]
+      params:
+        - name: APP_NAME
+          value: "quarkusdroneshop-counter"
+        - name: NAMESPACE
+          value: "quarkusdroneshop-demo"
+      workspaces:
+        - name: source
+          workspace: source
+
+    # ─────────────────────────────────────────────
+    # 12. テスト結果レポート生成
+    # ─────────────────────────────────────────────
+    - name: generate-report
+      onError: continue
+      taskRef:
+        kind: Task
+        name: maven-no-settings21
+      runAfter: [wapiti-scan, spotbugs]
+      params:
+        - name: CONTEXT_DIR
+          value: .
+        - name: GOALS
+          value: "exec:exec@generate-report"
+      workspaces:
+        - name: source
+          workspace: source
+        - name: maven-cache
+          workspace: maven-cache
+
+    # ─────────────────────────────────────────────
+    # 13. CSV サマリ表示
+    # ─────────────────────────────────────────────
+    - name: print-csv-table
+      onError: continue
+      taskRef:
+        kind: Task
+        name: print-csv-table
+      runAfter: [generate-report]
+      params:
+        - name: TITLE
+          value: "quarkusdroneshop-counter テスト結果サマリー"
+      workspaces:
+        - name: source
+          workspace: source
+
+    # ─────────────────────────────────────────────
+    # 14. レポート公開
+    # ─────────────────────────────────────────────
+    - name: publish-test-report
+      runAfter: [print-csv-table]
+      taskRef:
+        kind: Task
+        name: publish-test-report
+      params:
+        - name: APP_NAME
+          value: quarkusdroneshop-counter
+        - name: CONTEXT_DIR
+          value: .
+      workspaces:
+        - name: source
+          workspace: source
+
+    # ─────────────────────────────────────────────
+    # 15. パイプラインサマリ
+    # ─────────────────────────────────────────────
+    - name: pipeline-summary
+      runAfter: [publish-test-report]
+      taskRef:
+        kind: Task
+        name: pipeline-summary
+      params:
+        - name: APP_NAME
+          value: quarkusdroneshop-counter
+        - name: TEST_TOTAL
+          value: $(tasks.print-csv-table.results.total-tests)
+        - name: TEST_PASSED
+          value: $(tasks.print-csv-table.results.passed)
+        - name: TEST_FAILURES
+          value: $(tasks.print-csv-table.results.failures)
+        - name: TEST_ERRORS
+          value: $(tasks.print-csv-table.results.errors)
+        - name: SEMGREP_HIGH
+          value: $(tasks.semgrep-scan.results.high)
+        - name: SEMGREP_MEDIUM
+          value: $(tasks.semgrep-scan.results.medium)
+        - name: SEMGREP_LOW
+          value: $(tasks.semgrep-scan.results.low)
+        - name: SEMGREP_TOTAL
+          value: $(tasks.semgrep-scan.results.total)
+        - name: REPORT_URL
+          value: $(tasks.publish-test-report.results.report-url)
