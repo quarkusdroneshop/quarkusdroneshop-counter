@@ -342,6 +342,15 @@
         </executions>
       </plugin>
 
+
+      <!-- Maven Clean -->
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <configuration>
+          <failOnError>false</failOnError>
+        </configuration>
+      </plugin>
+
       <!-- Checkstyle -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
