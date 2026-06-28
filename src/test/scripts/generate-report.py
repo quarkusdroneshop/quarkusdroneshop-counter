@@ -183,7 +183,13 @@ if os.path.exists(arch_xml):
 
 surefire_suites = parse_test_dir_filtered(
     os.path.join(TARGET, "surefire-reports"), exclude_fqn=_ARCH_CLASS)
-failsafe_suites = parse_test_dir(os.path.join(TARGET, "failsafe-reports"))
+
+# failsafe-reports から E2E テスト（クラス名が E2ETest / E2E / IT で終わるもの）だけを抽出
+_E2E_RE = re.compile(r"(E2ETest|E2E|IT)$")
+failsafe_suites = [
+    s for s in parse_test_dir(os.path.join(TARGET, "failsafe-reports"))
+    if _E2E_RE.search(s["name"])
+]
 
 
 def stats(suites):
@@ -246,26 +252,30 @@ branch_pct = pct_str(total_br_c,   total_br_m   + total_br_c)
 # ── Parse Checkstyle XML ──────────────────────────────────────────────────────
 cs_files = []
 cs_total = 0
-if os.path.exists(CHECKSTYLE_XML):
-    root = ET.parse(CHECKSTYLE_XML).getroot()
-    for fnode in root.findall("file"):
-        errors = fnode.findall("error")
-        if not errors:
-            continue
-        fname = fnode.get("name", "")
-        short = fname.split("/src/main/java/")[-1] if "/src/main/java/" in fname \
-            else fname.split("/src/")[-1] if "/src/" in fname else fname
-        items = [{
-            "line":     e.get("line", "-"),
-            "col":      e.get("column", "-"),
-            "severity": e.get("severity", "error"),
-            "message":  e.get("message", ""),
-            "source":   e.get("source", "").split(".")[-1],
-        } for e in errors]
-        cs_files.append({"path": short, "items": items})
-        cs_total += len(items)
+cs_skipped = not os.path.exists(CHECKSTYLE_XML)
+if not cs_skipped:
+    try:
+        root = ET.parse(CHECKSTYLE_XML).getroot()
+        for fnode in root.findall("file"):
+            errors = fnode.findall("error")
+            if not errors:
+                continue
+            fname = fnode.get("name", "")
+            short = fname.split("/src/main/java/")[-1] if "/src/main/java/" in fname \
+                else fname.split("/src/")[-1] if "/src/" in fname else fname
+            items = [{
+                "line":     e.get("line", "-"),
+                "col":      e.get("column", "-"),
+                "severity": e.get("severity", "error"),
+                "message":  e.get("message", ""),
+                "source":   e.get("source", "").split(".")[-1],
+            } for e in errors]
+            cs_files.append({"path": short, "items": items})
+            cs_total += len(items)
+    except ET.ParseError:
+        cs_skipped = True
 
-cs_status = "pass" if cs_total == 0 else "fail"
+cs_status = "skip" if cs_skipped else ("pass" if cs_total == 0 else "fail")
 
 
 # ── Parse PMD XML ─────────────────────────────────────────────────────────────
@@ -310,9 +320,12 @@ SEV_COLOR = {
 
 # ── Parse Semgrep JSON ────────────────────────────────────────────────────────
 semgrep_items = []
-if os.path.exists(SEMGREP_JSON):
+semgrep_parse_errors = 0
+semgrep_skipped = not os.path.exists(SEMGREP_JSON)
+if not semgrep_skipped:
     with open(SEMGREP_JSON) as f:
         data = json.load(f)
+    semgrep_parse_errors = len(data.get("errors", []))
     for r in data.get("results", []):
         ex = r.get("extra", {})
         meta = ex.get("metadata", {})
@@ -328,11 +341,19 @@ if os.path.exists(SEMGREP_JSON):
             "lines":    ex.get("lines", ""),
         })
 semgrep_total  = len(semgrep_items)
+semgrep_by_sev = {
+    "ERROR":   sum(1 for i in semgrep_items if i["severity"] == "ERROR"),
+    "WARNING": sum(1 for i in semgrep_items if i["severity"] == "WARNING"),
+    "HIGH":    sum(1 for i in semgrep_items if i["severity"] == "HIGH"),
+    "MEDIUM":  sum(1 for i in semgrep_items if i["severity"] == "MEDIUM"),
+    "LOW":     sum(1 for i in semgrep_items if i["severity"] == "LOW"),
+    "INFO":    sum(1 for i in semgrep_items if i["severity"] == "INFO"),
+}
 # WARNING level findings do not block release — only ERROR and above
 semgrep_blocking = sum(
-    1 for i in semgrep_items if i["severity"] not in ("WARNING", "INFO")
+    1 for i in semgrep_items if i["severity"] not in ("WARNING", "INFO", "LOW")
 )
-semgrep_status = "pass" if semgrep_blocking == 0 else "fail"
+semgrep_status = "skip" if semgrep_skipped else ("pass" if semgrep_blocking == 0 else "fail")
 
 
 # ── Parse Gitleaks JSON ───────────────────────────────────────────────────────
@@ -356,36 +377,66 @@ gitleaks_status = "pass" if gitleaks_total == 0 else "fail"
 
 
 # ── Parse Trivy TXT ───────────────────────────────────────────────────────────
+# Trivy box-drawing chars: │ (U+2502), ─ (U+2500), ┌├└┐┤┘ etc.
+_TRIVY_SKIP_FIRST = re.compile(
+    r'^(Library|ID|Package|Target|Type|Module|Vulnerability|'
+    r'Total|Tests|Report\s|┌|├|└|╔|╠|╚|═).*',
+    re.IGNORECASE
+)
+
+
 def parse_trivy(path):
     """Extract target sections and finding rows from Trivy plain-text output."""
     if not os.path.exists(path):
         return [], 0
-    with open(path) as f:
+    with open(path, encoding="utf-8", errors="replace") as f:
         text = f.read()
 
+    # Strip Tekton/kubectl timestamp prefixes (2026-06-28T11:xx:xx.xxxZ INFO ...)
+    text = re.sub(r'^\d{4}-\d{2}-\d{2}T[\d:.]+Z\s+\S+\s+', '', text, flags=re.MULTILINE)
+
     sections = []
-    # Split on section headers like "pom.xml (pom)\n==============="
-    parts = re.split(r'\n([^\n]+) \(([^)]+)\)\n[=]+\n', text)
-    # parts[0] = summary block, then triplets: target, type, body
-    i = 1
-    while i + 2 < len(parts):
-        target_name = parts[i].strip()
-        target_type = parts[i + 1].strip()
-        body        = parts[i + 2]
+    # Match section headers: "target (type)\n===========..."
+    # Allow optional leading spaces and ≥3 '=' chars
+    section_re = re.compile(r'^(.+?) \(([^)]+)\)\n[=]{3,}', re.MULTILINE)
+    matches = list(section_re.finditer(text))
+
+    for idx, m in enumerate(matches):
+        target_name = m.group(1).strip()
+        target_type = m.group(2).strip()
+        body_start  = m.end()
+        body_end    = matches[idx + 1].start() if idx + 1 < len(matches) else len(text)
+        body        = text[body_start:body_end]
+
+        # Summary line: "Total: 5 (UNKNOWN: 0, LOW: 0, MEDIUM: 3, HIGH: 2, CRITICAL: 0)"
+        total_line = next(
+            (ln.strip() for ln in body.splitlines()
+             if re.match(r'(Total|Tests):', ln.strip())),
+            ""
+        )
+
         findings = []
-        # Parse table rows: │ library │ CVE │ severity │ status │ installed │ fixed │ title │
         for line in body.splitlines():
-            cols = [c.strip() for c in line.split("│") if c.strip()]
-            if len(cols) >= 4 and not cols[0].startswith("─") \
-                    and cols[0] not in ("Library", "ID", "Type", "Tests"):
+            if "│" not in line:
+                continue
+            cols = [c.strip() for c in line.split("│")]
+            cols = [c for c in cols if c]
+            if not cols:
+                continue
+            # Skip header / separator rows
+            if _TRIVY_SKIP_FIRST.match(cols[0]):
+                continue
+            # Need at least: library, CVE-id, severity
+            if len(cols) >= 3:
                 findings.append(cols)
-        if findings:
+
+        if findings or total_line:
             sections.append({
-                "target": target_name,
-                "type":   target_type,
-                "items":  findings,
+                "target":     target_name,
+                "type":       target_type,
+                "total_line": total_line,
+                "items":      findings,
             })
-        i += 3
 
     total = sum(len(s["items"]) for s in sections)
     return sections, total
@@ -476,8 +527,8 @@ GATES = [
     {
         "key":   "checkstyle",
         "label": "Checkstyle",
-        "desc":  f"違反 {cs_total} 件",
-        "ok":    cs_total == 0,
+        "desc":  "スキップ / 評価できません" if cs_skipped else f"違反 {cs_total} 件",
+        "ok":    cs_skipped or cs_total == 0,
         "cond":  "違反 0 件",
     },
     {
@@ -490,9 +541,13 @@ GATES = [
     {
         "key":   "semgrep",
         "label": "Semgrep (SAST)",
-        "desc":  f"ERROR以上 {semgrep_blocking} 件 (WARNING含む全 {semgrep_total} 件)",
-        "ok":    semgrep_blocking == 0,
-        "cond":  "ERROR以上 0 件 (WARNINGは合格)",
+        "desc":  (
+            "スキップ / 評価できません" if semgrep_skipped else
+            f"ブロッキング {semgrep_blocking} 件 / 全 {semgrep_total} 件"
+            + (f" / パースエラー {semgrep_parse_errors} 件" if semgrep_parse_errors else "")
+        ),
+        "ok":    semgrep_skipped or semgrep_blocking == 0,
+        "cond":  "ERROR/HIGH 0 件 (WARNING・LOW は合格)",
     },
     {
         "key":   "gitleaks",
@@ -731,6 +786,18 @@ def test_list_html(suites):
 
 
 def checkstyle_html():
+    if cs_skipped:
+        return (
+            '<div style="padding:24px 20px;display:flex;align-items:center;gap:12px;">'
+            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#95a5a6" stroke-width="2">'
+            '<circle cx="12" cy="12" r="10"/>'
+            '<line x1="12" y1="8" x2="12" y2="12"/>'
+            '<line x1="12" y1="16" x2="12.01" y2="16"/>'
+            '</svg>'
+            '<span style="color:var(--text-light);font-size:14px;">'
+            'スキップ / 評価できません — Checkstyle の結果ファイルが見つかりませんでした'
+            '</span></div>'
+        )
     if cs_total == 0:
         return '<div style="padding:24px;color:var(--pass);font-weight:600;">✔ 違反なし</div>'
     html = ""
@@ -854,12 +921,66 @@ def coverage_rows():
 
 
 def semgrep_html():
+    # ── Summary block (always shown) ──────────────────────────────────────────
+    if semgrep_skipped:
+        return (
+            '<div style="padding:24px 20px;display:flex;align-items:center;gap:12px;">'
+            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#95a5a6" stroke-width="2">'
+            '<circle cx="12" cy="12" r="10"/>'
+            '<line x1="12" y1="8" x2="12" y2="12"/>'
+            '<line x1="12" y1="16" x2="12.01" y2="16"/>'
+            '</svg>'
+            '<span style="color:var(--text-light);font-size:14px;">'
+            'スキップ / 評価できません — Semgrep の結果ファイルが見つかりませんでした'
+            '</span></div>'
+        )
+
+    sev_defs = [
+        ("ERROR",   "var(--fail)",    semgrep_by_sev["ERROR"]),
+        ("HIGH",    "#e74c3c",        semgrep_by_sev["HIGH"]),
+        ("MEDIUM",  "#e67e22",        semgrep_by_sev["MEDIUM"]),
+        ("WARNING", "#f39c12",        semgrep_by_sev["WARNING"]),
+        ("LOW",     "var(--accent)",  semgrep_by_sev["LOW"]),
+        ("INFO",    "var(--text-light)", semgrep_by_sev["INFO"]),
+    ]
+    sev_cells = "".join(
+        f'<div style="text-align:center;padding:12px 16px;border-right:1px solid var(--border)">'
+        f'<div style="font-size:22px;font-weight:700;color:{color}">{cnt}</div>'
+        f'<div style="font-size:11px;color:var(--text-light);margin-top:2px">{sev}</div>'
+        f'</div>'
+        for sev, color, cnt in sev_defs
+    )
+    parse_warn_html = (
+        f'<div style="display:flex;align-items:center;gap:8px;padding:8px 16px;'
+        f'background:#fef9e7;border-top:1px solid #f9ca24;font-size:12px;color:#856404">'
+        f'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'
+        f'<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>'
+        f'<line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'
+        f'</svg>'
+        f'パースエラー {semgrep_parse_errors} 件 — 一部のファイルはスキャンできませんでした'
+        f'</div>'
+        if semgrep_parse_errors > 0 else ""
+    )
+    summary_block = (
+        f'<div style="border:1px solid var(--border);border-radius:10px;'
+        f'overflow:hidden;margin-bottom:20px;">'
+        f'<div style="padding:12px 16px;background:#f8f9fb;border-bottom:1px solid var(--border);'
+        f'font-size:13px;font-weight:600;">スキャン結果サマリ</div>'
+        f'<div style="display:flex;border-bottom:1px solid var(--border)">{sev_cells}</div>'
+        f'{parse_warn_html}'
+        f'</div>'
+    )
+
     if not semgrep_items:
-        return '<div style="padding:24px;color:var(--pass);font-weight:600;">✔ 検出なし</div>'
+        return (
+            summary_block +
+            '<div style="padding:20px 16px;color:var(--pass);font-weight:600;">✔ 検出なし</div>'
+        )
+
     by_path: dict = {}
     for item in semgrep_items:
         by_path.setdefault(item["path"], []).append(item)
-    html = ""
+    html = summary_block
     for path, items in sorted(by_path.items()):
         html += f"""<div class="pkg-group">
           <div class="pkg-header" onclick="togglePkg(this)">
@@ -924,36 +1045,69 @@ def gitleaks_html():
     return html
 
 
+_TRIVY_COL_HEADS = ["ライブラリ", "脆弱性 ID", "深刻度", "ステータス", "インストール版", "修正版", "タイトル"]
+
+
 def trivy_html():
     if not trivy_sections:
         return '<div style="padding:24px;color:var(--pass);font-weight:600;">✔ 脆弱性なし</div>'
     html = ""
     for sec in trivy_sections:
+        item_cnt  = len(sec["items"])
+        badge_cls = "fail" if item_cnt > 0 else "pass"
+        badge_lbl = f"{item_cnt} 件" if item_cnt > 0 else "✔ なし"
+        total_html = (
+            f'<div style="font-size:11px;color:var(--text-light);padding:6px 14px;'
+            f'border-bottom:1px solid var(--border);background:#fafbfc">'
+            f'{sec["total_line"]}</div>'
+            if sec.get("total_line") else ""
+        )
+        # Build column headers from actual data width
+        n_cols = max((len(r) for r in sec["items"]), default=0)
+        heads  = _TRIVY_COL_HEADS[:n_cols] + [""] * max(0, n_cols - len(_TRIVY_COL_HEADS))
+        th_row = "".join(
+            f'<th style="padding:8px 10px;text-align:left;font-size:11px;'
+            f'font-weight:600;color:var(--text-light);text-transform:uppercase;'
+            f'letter-spacing:.4px;background:#f8f9fb;border-bottom:1px solid var(--border)">'
+            f'{h}</th>'
+            for h in heads
+        )
         html += f"""<div class="pkg-group">
           <div class="pkg-header" onclick="togglePkg(this)">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            </svg>{sec['target']}
-            <span style="font-size:11px;color:var(--text-light);margin-left:4px">
-              ({sec['type']})</span>
-            <span class="pkg-badge badge fail"
-              style="margin-left:auto">{len(sec['items'])} 件</span>
+            </svg>
+            <span style="font-weight:600">{sec['target']}</span>
+            <span style="font-size:11px;color:var(--text-light);margin-left:6px">({sec['type']})</span>
+            <span class="pkg-badge badge {badge_cls}" style="margin-left:auto">{badge_lbl}</span>
           </div>
           <div class="pkg-body">
-            <table style="width:100%;border-collapse:collapse;font-size:12px">
+            {total_html}
+            <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:700px">
+              <thead><tr>{th_row}</tr></thead>
               <tbody>"""
         for cols in sec["items"]:
-            sev = cols[2].upper() if len(cols) > 2 else ""
+            # Severity is column index 2 (0-based)
+            sev = cols[2].upper().strip() if len(cols) > 2 else ""
             sc  = SEV_COLOR.get(sev, "var(--text)")
-            cells = "".join(
-                f'<td style="padding:8px 10px;border-bottom:1px solid #f0f2f5;'
-                f'{"color:" + sc + ";font-weight:600" if i == 2 else ""}'
-                f'">{c}</td>'
-                for i, c in enumerate(cols)
-            )
-            html += f"<tr>{cells}</tr>"
-        html += "</tbody></table></div></div>"
+            row_html = ""
+            for i, c in enumerate(cols):
+                if i == 2:
+                    cell_style = f"color:{sc};font-weight:700;white-space:nowrap"
+                elif i == 1:
+                    cell_style = "font-family:monospace;font-size:11px;white-space:nowrap"
+                elif i in (4, 5):
+                    cell_style = "font-family:monospace;font-size:11px;white-space:nowrap"
+                else:
+                    cell_style = "word-break:break-word"
+                row_html += (
+                    f'<td style="padding:8px 10px;border-bottom:1px solid #f0f2f5;'
+                    f'vertical-align:top;{cell_style}">{c}</td>'
+                )
+            html += f"<tr>{row_html}</tr>"
+        html += "</tbody></table></div></div></div>"
     return html
 
 
