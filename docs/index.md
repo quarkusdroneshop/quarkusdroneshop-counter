@@ -141,16 +141,36 @@ RHDH の **CD タブ** で ArgoCD アプリの状態を確認できます。
 
 ## テスト
 
-### ユニットテスト
-
 ```shell
+# ユニットテスト(ArchUnit含む)
 ./mvnw test
-```
 
-### 統合テスト
-
-```shell
+# 統合テスト（Jacoco含む）
 ./mvnw verify
+
+# チェックスタイル
+./mvnw checkstyle:check
+
+# PMD
+./mvnw pmd:pmd
+
+# SpotBugs
+./mvnw spotbugs:spotbugs
+
+# semgrep
+semgrep scan --config p/default --json > target/semgrep-results.json
+
+# secret scan
+gitleaks detect --source . --report-format json --report-path target/gitleaks-report.json --exit-code 1
+
+# 脆弱性テスト
+trivy fs --scanners vuln,secret,misconfig,license --exit-code=1 --ignorefile ./.trivyignore.yaml ./ > target/trivy.txt
+
+# セキュリティテスト
+mvn quarkus:dev > quarkus.log 2>&1 & QUARKUS_PID=$!; sleep 10; wapiti -u http://localhost:8080 -f json -o ./target/wapiti.json; kill $QUARKUS_PID
+
+# テストレポートの作成
+./mvnw exec:exec@generate-report
 ```
 
 ### 手動テスト（ローカル）

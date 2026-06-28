@@ -97,6 +97,13 @@
     </dependency>
 
     <dependency>
+      <groupId>com.tngtech.archunit</groupId>
+      <artifactId>archunit-junit5</artifactId>
+      <version>1.3.0</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-junit-mockito</artifactId>
       <scope>test</scope>
@@ -151,9 +158,35 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-java</artifactId>
+      <version>4.27.0</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>io.github.bonigarcia</groupId>
+      <artifactId>webdrivermanager</artifactId>
+      <version>5.9.2</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
+
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
+      <testResource>
+        <directory>src/test/archtecter</directory>
+      </testResource>
+      <testResource>
+        <directory>src/test/e2e</directory>
+      </testResource>
+    </testResources>
 
     <plugins>
 
@@ -177,56 +210,81 @@
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${compiler-plugin.version}</version>
+        <configuration>
+          <compilerArgs>
+            <arg>-parameters</arg>
+          </compilerArgs>
+        </configuration>
       </plugin>
 
-      <!-- UNIT TEST -->
+      <!-- UNIT + ARCH TEST -->
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${surefire-plugin.version}</version>
+        <configuration>
+          <includes>
+            <include>**/*Test.java</include>
+          </includes>
+          <excludes>
+            <exclude>**/*E2ETest.java</exclude>
+          </excludes>
+        </configuration>
       </plugin>
 
-      <!-- E2E TEST（ここが本体） -->
+      <!-- E2E TEST -->
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
         <version>${failsafe-plugin.version}</version>
-
         <executions>
           <execution>
             <goals>
               <goal>integration-test</goal>
               <goal>verify</goal>
             </goals>
-
             <configuration>
+              <testClassesDirectory>${project.build.testOutputDirectory}</testClassesDirectory>
               <includes>
                 <include>**/*E2ETest.java</include>
+                <include>**/*IT.java</include>
               </includes>
-
               <systemPropertyVariables>
                 <quarkus.http.port>0</quarkus.http.port>
               </systemPropertyVariables>
             </configuration>
-
           </execution>
         </executions>
       </plugin>
 
-      <!-- JaCoCo -->
+      <!-- build helper -->
       <plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.15</version>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <id>add-test-source</id>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>src/test/archtecter</source>
+                <source>src/test/e2e</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
 
-      <!-- レポート生成 -->
+      <!-- Test Report Generator -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>3.3.0</version>
+        <version>3.4.1</version>
         <executions>
           <execution>
-            <id>generate-test-report</id>
-            <phase>verify</phase>
+            <id>generate-report</id>
             <goals>
               <goal>exec</goal>
             </goals>
@@ -240,6 +298,61 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+
+      <!-- JaCoCo -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.12</version>
+        <executions>
+          <execution>
+            <id>jacoco-prepare-agent</id>
+            <goals><goal>prepare-agent</goal></goals>
+            <configuration>
+              <destFile>${project.build.directory}/jacoco-unit.exec</destFile>
+            </configuration>
+          </execution>
+          <execution>
+            <id>jacoco-merge</id>
+            <phase>verify</phase>
+            <goals><goal>merge</goal></goals>
+            <configuration>
+              <destFile>${project.build.directory}/jacoco-merged.exec</destFile>
+              <fileSets>
+                <fileSet>
+                  <directory>${project.build.directory}</directory>
+                  <includes>
+                    <include>jacoco-unit.exec</include>
+                    <include>jacoco-quarkus.exec</include>
+                  </includes>
+                </fileSet>
+              </fileSets>
+            </configuration>
+          </execution>
+          <execution>
+            <id>jacoco-merged-report</id>
+            <phase>verify</phase>
+            <goals><goal>report</goal></goals>
+            <configuration>
+              <dataFile>${project.build.directory}/jacoco-merged.exec</dataFile>
+              <outputDirectory>${project.build.directory}/jacoco-merged-report</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Checkstyle -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>3.6.0</version>
+        <configuration>
+          <configLocation>checkstyle.xml</configLocation>
+          <failsOnError>true</failsOnError>
+          <consoleOutput>true</consoleOutput>
+          <excludes>**/test/**/*</excludes>
+        </configuration>
       </plugin>
 
     </plugins>
