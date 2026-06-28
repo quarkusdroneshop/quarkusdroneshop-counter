@@ -27,7 +27,7 @@ JACOCO_CSV     = next((p for p in _JACOCO_CANDIDATES
                       _JACOCO_CANDIDATES[-1])
 CHECKSTYLE_XML  = os.path.join(TARGET, "checkstyle-result.xml")
 PMD_XML         = os.path.join(TARGET, "pmd.xml")
-SEMGREP_JSON    = os.path.join(TARGET, "semgrep-results.json")
+SEMGREP_JSON    = os.path.join(TARGET, "semgrep-reports", "results.json")
 GITLEAKS_JSON   = os.path.join(TARGET, "gitleaks-report.json")
 TRIVY_TXT       = os.path.join(TARGET, "trivy.txt")
 WAPITI_JSON     = os.path.join(TARGET, "wapiti.json")
