@@ -1,88 +1,82 @@
-# Docs
-Please see the Github Pages Site for complete documentation: [quarkusdroneshop.github.io](https://quarkusdroneshop.github.io)
+# quarkusdroneshop-counter
 
-# About 
+Quarkus ベースの注文調整マイクロサービス。Web サービスから受け取った注文を PostgreSQL に記録し、QDCA10・QDCA10Pro の各ドリンク製造マイクロサービスへルーティングします。製造完了イベントを受け取り、Web サービスへ結果を通知します。
 
-This repos contains the Quarkus Coffeeshop Counter Microservice.  The Counter microservice coordinates events in the system.  It receives orders from the Web microservice from a Kakfa topic, records the orders in a database, sends messages to the QDCA10 and QDCA10Pro microservices, listens for updates from the QDCA10 and QDCA10Pro microservices, and updates the Web microservice.
+- **バージョン**: 5.2.1
+- **Quarkus**: 3.36.3
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.  If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
+## アーキテクチャ
 
-## Requirements
+```
+quarkusdroneshop-web
+    │  orders-in ──▶
+    ▼
+quarkusdroneshop-counter ──▶ qdca10-in ──▶ quarkusdroneshop-qdca10
+                         ──▶ qdca10pro-in ──▶ quarkusdroneshop-qdca10pro
+                         ◀── orders-up (shop-bsite.orders-up in prod)
+                         ──▶ web-updates ──▶ quarkusdroneshop-web
+                    ──PostgreSQL──▶ droneshopdb
+```
 
-*Java* 
-This one should be obvious.  We like [AdoptOpenJDK](https://adoptopenjdk.net/)  
+## Kafka トピック
 
-BTW, if you want to manage multiple JDK's [SDKMan](https://sdkman.io/) is a great tool 
+| チャネル | dev トピック | prod トピック | 方向 |
+|---|---|---|---|
+| orders-in | `orders-in` | `orders-in` | 受信 |
+| orders-up | `orders-up` | `shop-bsite.orders-up` | 受信 |
+| qdca10 | `qdca10-in` | `qdca10-in` | 送信 |
+| qdca10pro | `qdca10pro-in` | `qdca10pro-in` | 送信 |
+| web-updates | `web-updates` | `web-updates` | 送信 |
 
-*Docker and Docker Compose*
-You can install PostgreSQL and Kafka locally, but we have a docker-compose.yaml file that will do everything for you
-
-## Working Locally
-Grab the supporting files
-
-### Supporting infrastructure
-
-Clone the quarkusdroneshop-support project (in another directory)
+## ローカル開発
 
 ```shell
 git clone https://github.com/quarkusdroneshop/quarkusdroneshop-support.git
-```
+cd quarkusdroneshop-support
+docker compose up
 
-From inside the quarkusdroneshop-support project (on MacOS or Linux) run:
-
-```shell
-docker-compose up
-```
-
-This will start PostgreSQL, PGAdmin, Kafka and Zookeeper
-
-### Counter microservice
-
-From the quarkusdroneshop-counter directory you can start the counter microservice with:
-
-```shell
+cd ../quarkusdroneshop-counter
 ./mvnw clean compile quarkus:dev
 ```
 
-### Kafka Consumers and Producers
+## Kafka トピック確認
 
-If you want to monitor the Kafka topics and have Kafka's command line tools installed you can watch the topics with:
-
-```shell script
-kafka-console-consumer --bootstrap-server localhost:9092 --topic orders --from-beginning
+```shell
+kafka-console-consumer --bootstrap-server localhost:9092 --topic orders-in --from-beginning
 kafka-console-consumer --bootstrap-server localhost:9092 --topic web-updates --from-beginning
 kafka-console-consumer --bootstrap-server localhost:9092 --topic qdca10-in --from-beginning
 kafka-console-consumer --bootstrap-server localhost:9092 --topic qdca10pro-in --from-beginning
 kafka-console-consumer --bootstrap-server localhost:9092 --topic orders-up --from-beginning
 ```
 
-Orders can be sent directly to the topics with:
+## 環境変数 (本番)
 
-```shell script
-kafka-console-producer --broker-list localhost:9092 --topic <<TOPIC_NAME>>
-```
+| 変数名 | 説明 |
+|---|---|
+| `KAFKA_BOOTSTRAP_URLS` | Kafka ブローカー URL |
+| `POSTGRESQL_JDBC_URL` | PostgreSQL JDBC URL |
+| `POSTGRESQL_USER` | DB ユーザー名 |
+| `POSTGRESQL_PASSWORD` | DB パスワード |
 
-## Packaging and publishing the application to a repository
+## パッケージング
 
 ```shell
+# ネイティブビルド
 ./mvnw clean package -Pnative -Dquarkus.native.container-build=true
+
+# Docker イメージ作成
+docker build -f src/main/docker/Dockerfile.native -t <REGISTRY>/quarkusdroneshop-counter .
+
+# 実行
+docker run -i --network="host" \
+  -e KAFKA_BOOTSTRAP_URLS=localhost:9092 \
+  -e POSTGRESQL_JDBC_URL="jdbc:postgresql://localhost:5432/droneshopdb?currentSchema=droneshop" \
+  -e POSTGRESQL_USER=droneshopuser \
+  -e POSTGRESQL_PASSWORD=redhat-21 \
+  <REGISTRY>/quarkusdroneshop-counter:latest
 ```
 
-```shell
-docker build -f src/main/docker/Dockerfile.native -t <<DOCKER_HUB_ID>>/quarkusdroneshop-counter .
-```
-```shell
-export KAFKA_BOOTSTRAP_URLS=localhost:9092 \
-PGSQL_URL="jdbc:postgresql://localhost:5432/droneshopdb?currentSchema=droneshop" \
-PGSQL_USER="droneshopuser" \
-PGSQL_PASS="redhat-21"
-```
+## 参考
 
-```shell
-docker run -i --network="host" -e PGSQL_URL=${PGSQL_URL} -e PGSQL_USER=${PGSQL_USER} -e PGSQL_PASS=${PGSQL_PASS} e KAFKA_BOOTSTRAP_URLS=${KAFKA_BOOTSTRAP_URLS} <<DOCKER_HUB_ID>>/quarkusdroneshop-counter:latest
-```
-
-```shell
-docker images -a | grep counter
-docker tag <<RESULT>> <<DOCKER_HUB_ID>>/quarkusdroneshop-counter:<<VERSION>>
-```
+- [Quarkus](https://quarkus.io/)
+- [quarkusdroneshop.github.io](https://quarkusdroneshop.github.io)
