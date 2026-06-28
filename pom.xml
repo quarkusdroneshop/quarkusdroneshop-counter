@@ -355,6 +355,21 @@
         </configuration>
       </plugin>
 
+
+      <!-- SpotBugs -->
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <version>4.9.3.0</version>
+        <configuration>
+          <effort>Max</effort>
+          <threshold>Medium</threshold>
+          <xmlOutput>true</xmlOutput>
+          <xmlOutputDirectory>${project.build.directory}</xmlOutputDirectory>
+          <excludeFilterFile></excludeFilterFile>
+        </configuration>
+      </plugin>
+
     </plugins>
   </build>
 
