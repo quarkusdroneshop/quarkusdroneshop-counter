@@ -12,7 +12,7 @@ import re
 import shutil
 import sys
 import xml.etree.ElementTree as ET
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 TARGET       = sys.argv[1] if len(sys.argv) > 1 else "target"
 PROJECT_NAME = sys.argv[2] if len(sys.argv) > 2 else "quarkusdroneshop"
@@ -34,8 +34,9 @@ WAPITI_JSON     = os.path.join(TARGET, "wapiti.json")
 OUT_DIR         = os.path.join(TARGET, "test-report")
 OUT_FILE        = os.path.join(OUT_DIR, "index.html")
 
-now     = datetime.now()
-now_str = now.strftime("%Y-%m-%d %H:%M:%S")
+JST     = timezone(timedelta(hours=9))
+now     = datetime.now(JST)
+now_str = now.strftime("%Y-%m-%d %H:%M:%S JST")
 
 if os.path.exists(OUT_DIR):
     shutil.rmtree(OUT_DIR)
