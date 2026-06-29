@@ -198,7 +198,7 @@ public class Order {
 
   public Order(final String orderId) {
     this.orderRecord = new OrderRecord();
-    this.orderRecord.setOrderId(UUID.randomUUID());
+    this.orderRecord.setOrderId(UUID.fromString(orderId));
     this.orderRecord.setTimestamp(Instant.now());
   }
 
