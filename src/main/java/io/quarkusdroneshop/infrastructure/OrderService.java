@@ -54,6 +54,9 @@ public class OrderService {
     @Channel("web-updates")
     Emitter<DashboardUpdate> dashboardUpdateEmitter;
 
+    @Channel("homeoffice-orders-in")
+    Emitter<HomeofficeOrderMessage> homeofficeOrdersEmitter;
+
     @Transactional
     public OrderEventResult onOrderInTx(final PlaceOrderCommand placeOrderCommand) {
         logger.debug("onOrderInTx: {}", placeOrderCommand);
@@ -86,11 +89,14 @@ public class OrderService {
         }
 
         orderRepository.persist(orderRecord);
-        
+
         result.getOutboxEvents().forEach(exportedEvent -> {
             logger.debug("Firing event: {}", exportedEvent);
             event.fire(exportedEvent);
         });
+
+        // Homeoffice に直接発行 (Debezium CDC が未設定でも動作するように)
+        homeofficeOrdersEmitter.send(HomeofficeOrderMessage.from(orderRecord));
 
         return result;
     }
