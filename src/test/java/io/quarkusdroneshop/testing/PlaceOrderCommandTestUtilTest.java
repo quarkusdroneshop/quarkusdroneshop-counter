@@ -13,7 +13,7 @@ public class PlaceOrderCommandTestUtilTest {
     @Test
     public void testIt() {
 
-        PlaceOrderCommand placeOrderCommand = new PlaceOrderCommandTestUtil().withBlackCoffee().build();
+        PlaceOrderCommand placeOrderCommand = new PlaceOrderCommandTestUtil().withQDC_A101().build();
         assertNotNull(placeOrderCommand);
         assertNotNull(placeOrderCommand.getId());
         assertEquals(1, placeOrderCommand.getQdca10LineItems().get().size());

@@ -53,7 +53,7 @@ public class PlaceOrderCommandTestUtil {
         this.id = id;
     }
 
-    public PlaceOrderCommandTestUtil withBlackCoffee() {
+    public PlaceOrderCommandTestUtil withQDC_A101() {
         if (this.Qdca10LineItems == null) {
             this.Qdca10LineItems = new ArrayList<>();
         }
@@ -61,7 +61,7 @@ public class PlaceOrderCommandTestUtil {
         return this;
     }
 
-    public void withBlackCoffeeFor(final String name) {
+    public void withBlackQDC_A101For(final String name) {
         this.Qdca10LineItems.add(new CommandItem(Item.QDC_A101, name, BigDecimal.valueOf(3.50)));
     }
 
