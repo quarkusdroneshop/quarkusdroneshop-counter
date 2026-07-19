@@ -49,9 +49,9 @@ metadata:
   description: "Kafka トピック: qdca10-in（QDCA10への注文指示）"
   annotations:
     backstage.io/kubernetes-cluster: a-cluster
-    openmetadata/explore-url: "http://openmetadata-openmetadata.apps.ocp.7n8gs.sandbox847.opentlc.com/topic/external-shop-cluster-kafka-asite%3A9094.qdca10-in/schema"
+    openmetadata/explore-url: "http://openmetadata-openmetadata.apps.ocp.27qdr.sandbox1583.opentlc.com/topic/external-shop-cluster-kafka-asite%3A9094.qdca10-in/schema"
   links:
-    - url: "http://openmetadata-openmetadata.apps.ocp.7n8gs.sandbox847.opentlc.com/topic/external-shop-cluster-kafka-asite%3A9094.qdca10-in/schema"
+    - url: "http://openmetadata-openmetadata.apps.ocp.27qdr.sandbox1583.opentlc.com/topic/external-shop-cluster-kafka-asite%3A9094.qdca10-in/schema"
       title: データカタログ
       icon: dashboard
 spec:
@@ -94,9 +94,9 @@ metadata:
   description: "Kafka トピック: qdca10pro-in（QDCA10Proへの注文指示）"
   annotations:
     backstage.io/kubernetes-cluster: a-cluster
-    openmetadata/explore-url: "http://openmetadata-openmetadata.apps.ocp.7n8gs.sandbox847.opentlc.com/topic/external-shop-cluster-kafka-asite%3A9094.qdca10pro-in/schema"
+    openmetadata/explore-url: "http://openmetadata-openmetadata.apps.ocp.27qdr.sandbox1583.opentlc.com/topic/external-shop-cluster-kafka-asite%3A9094.qdca10pro-in/schema"
   links:
-    - url: "http://openmetadata-openmetadata.apps.ocp.7n8gs.sandbox847.opentlc.com/topic/external-shop-cluster-kafka-asite%3A9094.qdca10pro-in/schema"
+    - url: "http://openmetadata-openmetadata.apps.ocp.27qdr.sandbox1583.opentlc.com/topic/external-shop-cluster-kafka-asite%3A9094.qdca10pro-in/schema"
       title: データカタログ
       icon: dashboard
 spec:
@@ -139,9 +139,9 @@ metadata:
   description: "Kafka トピック: web-updates（注文ステータス更新）"
   annotations:
     backstage.io/kubernetes-cluster: a-cluster
-    openmetadata/explore-url: "http://openmetadata-openmetadata.apps.ocp.7n8gs.sandbox847.opentlc.com/topic/external-shop-cluster-kafka-asite%3A9094.web-updates/schema"
+    openmetadata/explore-url: "http://openmetadata-openmetadata.apps.ocp.27qdr.sandbox1583.opentlc.com/topic/external-shop-cluster-kafka-asite%3A9094.web-updates/schema"
   links:
-    - url: "http://openmetadata-openmetadata.apps.ocp.7n8gs.sandbox847.opentlc.com/topic/external-shop-cluster-kafka-asite%3A9094.web-updates/schema"
+    - url: "http://openmetadata-openmetadata.apps.ocp.27qdr.sandbox1583.opentlc.com/topic/external-shop-cluster-kafka-asite%3A9094.web-updates/schema"
       title: データカタログ
       icon: dashboard
 spec:
