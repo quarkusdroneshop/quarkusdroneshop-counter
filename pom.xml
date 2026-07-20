@@ -58,6 +58,14 @@
       <artifactId>quarkus-messaging-kafka</artifactId>
     </dependency>
 
+    <!-- dataproduct-order-events (Avro / Apicurio Service Registry) 購読用。
+         Quarkus 公式拡張を使うことで、Apicurio クライアントのバージョンは
+         Quarkus platform BOM が一貫して管理する (手動 pin は不要)。 -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-apicurio-registry-avro</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-smallrye-health</artifactId>

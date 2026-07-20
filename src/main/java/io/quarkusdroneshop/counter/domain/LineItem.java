@@ -46,6 +46,24 @@ public class LineItem extends PanacheEntityBase {
     this.order = order;
   }
 
+  // dataproduct-order-events (orders-in 由来) と orders-up (QDCA10/QDCA10pro
+  // 発行) を同じ itemId で突合できるよう、Web 側で採番された itemId を
+  // そのまま引き継ぐ。itemId が null/不正な場合のみ新規採番する。
+  public LineItem(String itemId, Item item, String name, BigDecimal price, LineItemStatus lineItemStatus, OrderRecord order) {
+    UUID parsed;
+    try {
+      parsed = itemId != null ? UUID.fromString(itemId) : UUID.randomUUID();
+    } catch (IllegalArgumentException e) {
+      parsed = UUID.randomUUID();
+    }
+    this.itemId = parsed;
+    this.item = item;
+    this.name = name;
+    this.price = price;
+    this.lineItemStatus = lineItemStatus;
+    this.order = order;
+  }
+
   @Override
   public String toString() {
     return new StringJoiner(", ", LineItem.class.getSimpleName() + "[", "]")

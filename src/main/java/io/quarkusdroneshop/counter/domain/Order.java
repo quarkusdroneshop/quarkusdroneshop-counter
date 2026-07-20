@@ -75,7 +75,7 @@ public class Order {
     if (placeOrderCommand.getQdca10LineItems().isPresent()) {
       placeOrderCommand.getQdca10LineItems().get().forEach(commandItem -> {
         logger.info("createOrderFromCommand adding QDCA10Item from {}", commandItem.toString());
-        LineItem lineItem = new LineItem(commandItem.getItem(), commandItem.getName(), commandItem.getPrice(),
+        LineItem lineItem = new LineItem(commandItem.getItemId(), commandItem.getItem(), commandItem.getName(), commandItem.getPrice(),
                 LineItemStatus.IN_PROGRESS, order.getOrderRecord());
         order.addQdca10LineItem(lineItem);
       });
@@ -85,7 +85,7 @@ public class Order {
       logger.info("createOrderFromCommand adding QDCA10ProOrders {}",
               placeOrderCommand.getQdca10proLineItems().get().size());
       placeOrderCommand.getQdca10proLineItems().get().forEach(commandItem -> {
-        LineItem lineItem = new LineItem(commandItem.getItem(), commandItem.getName(), commandItem.getPrice(),
+        LineItem lineItem = new LineItem(commandItem.getItemId(), commandItem.getItem(), commandItem.getName(), commandItem.getPrice(),
                 LineItemStatus.IN_PROGRESS, order.getOrderRecord());
         order.addQDCA10ProLineItem(lineItem);
       });

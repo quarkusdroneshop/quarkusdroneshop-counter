@@ -5,9 +5,16 @@ import io.quarkusdroneshop.counter.domain.Item;
 
 import java.math.BigDecimal;
 import java.util.StringJoiner;
+import java.util.UUID;
 
 @RegisterForReflection
 public class CommandItem {
+
+    // Web 側 (OrderLineItem) で採番された itemId をそのまま引き継ぐ。
+    // dataproduct-order-events (orders-in 由来) と orders-up (QDCA10/QDCA10pro
+    // 発行) を同じ itemId で突合するために必要。未指定 (テスト等) の場合のみ
+    // ここで新規採番する。
+    public final String itemId;
 
     public final Item item;
 
@@ -15,7 +22,8 @@ public class CommandItem {
 
     public final BigDecimal price;
 
-    public CommandItem(Item item, String name, BigDecimal price) {
+    public CommandItem(String itemId, Item item, String name, BigDecimal price) {
+        this.itemId = itemId != null ? itemId : UUID.randomUUID().toString();
         this.item = item;
         this.name = name;
         this.price = price;
@@ -24,6 +32,7 @@ public class CommandItem {
     @Override
     public String toString() {
         return new StringJoiner(", ", CommandItem.class.getSimpleName() + "[", "]")
+                .add("itemId='" + itemId + "'")
                 .add("item=" + item)
                 .add("name='" + name + "'")
                 .add("price=" + price)
@@ -48,6 +57,10 @@ public class CommandItem {
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (price != null ? price.hashCode() : 0);
         return result;
+    }
+
+    public String getItemId() {
+        return itemId;
     }
 
     public Item getItem() {
