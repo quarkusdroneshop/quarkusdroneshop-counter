@@ -14,7 +14,7 @@ public class OrderRecord extends PanacheEntityBase {
 
     @Id
     @Column(nullable = false, unique = true, name = "order_id")
-    private UUID orderId;
+    private String orderId;
 
     @Enumerated(EnumType.STRING)
     private OrderSource orderSource;
@@ -39,7 +39,7 @@ public class OrderRecord extends PanacheEntityBase {
     }
 
     public OrderRecord(UUID orderId, OrderSource orderSource, String loyaltyMemberId, Instant timestamp, OrderStatus orderStatus, Location location, List<LineItem> qdca10LineItems, List<LineItem> qdca10proLineItems) {
-        this.orderId = orderId;
+        this.orderId = orderId != null ? orderId.toString() : null;
         this.orderSource = orderSource;
         this.loyaltyMemberId = loyaltyMemberId;
         this.timestamp = timestamp;
@@ -96,11 +96,11 @@ public class OrderRecord extends PanacheEntityBase {
         return result;
     }
 
-    public UUID getOrderId() {
+    public String getOrderId() {
         return orderId;
     }
 
-    public void setOrderId(UUID orderId) {
+    public void setOrderId(String orderId) {
         this.orderId = orderId;
     }
 

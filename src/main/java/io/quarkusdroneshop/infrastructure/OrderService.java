@@ -106,7 +106,7 @@ public class OrderService {
         logger.debug("Handling TicketUp: {}", ticketUp);
     
         // 該当注文を取得
-        OrderRecord orderRecord = orderRepository.findById(ticketUp.getOrderId());
+        OrderRecord orderRecord = orderRepository.findById(ticketUp.getOrderId().toString());
         if (orderRecord == null) {
             logger.warn("Order not found for ID: {}", ticketUp.getOrderId());
             return new OrderEventResult(Collections.emptyList());

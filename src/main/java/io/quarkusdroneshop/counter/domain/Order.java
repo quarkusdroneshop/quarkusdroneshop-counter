@@ -192,13 +192,13 @@ public class Order {
 
   public Order() {
     this.orderRecord = new OrderRecord();
-    this.orderRecord.setOrderId(UUID.randomUUID());
+    this.orderRecord.setOrderId(UUID.randomUUID().toString());
     this.orderRecord.setTimestamp(Instant.now());
   }
 
   public Order(final String orderId) {
     this.orderRecord = new OrderRecord();
-    this.orderRecord.setOrderId(UUID.fromString(orderId));
+    this.orderRecord.setOrderId(orderId);
     this.orderRecord.setTimestamp(Instant.now());
   }
 
@@ -206,7 +206,7 @@ public class Order {
                final String loyaltyMemberId, final Instant timestamp, final OrderStatus orderStatus,
                final List<LineItem> Qdca10LineItems, final List<LineItem> Qdca10proLineItems) {
     this.orderRecord = new OrderRecord();
-    this.orderRecord.setOrderId(UUID.randomUUID());
+    this.orderRecord.setOrderId(UUID.randomUUID().toString());
     this.orderRecord.setOrderSource(orderSource);
     this.orderRecord.setLocation(location);
     this.orderRecord.setLoyaltyMemberId(loyaltyMemberId);
@@ -243,7 +243,7 @@ public class Order {
     return orderRecord != null ? orderRecord.hashCode() : 0;
   }
 
-  public UUID getOrderId() {
+  public String getOrderId() {
     return this.orderRecord.getOrderId();
   }
 
