@@ -20,8 +20,8 @@ public class LineItem extends PanacheEntityBase {
   OrderRecord order;
 
   @Id
-  @Column(nullable = false, unique = true)
-  private String itemId;
+  @Column(name = "id", nullable = false, unique = true)
+  private UUID itemId;
 
   @Enumerated(EnumType.STRING)
   private Item item;
@@ -34,11 +34,11 @@ public class LineItem extends PanacheEntityBase {
   private LineItemStatus lineItemStatus;
 
   public LineItem() {
-    this.itemId = UUID.randomUUID().toString();
+    this.itemId = UUID.randomUUID();
   }
 
   public LineItem(Item item, String name, BigDecimal price, LineItemStatus lineItemStatus, OrderRecord order) {
-    this.itemId = UUID.randomUUID().toString();
+    this.itemId = UUID.randomUUID();
     this.item = item;
     this.name = name;
     this.price = price;
@@ -115,7 +115,7 @@ public class LineItem extends PanacheEntityBase {
   }
 
   public String getItemId() {
-    return this.itemId;
+    return this.itemId != null ? this.itemId.toString() : null;
   }
   
 }
