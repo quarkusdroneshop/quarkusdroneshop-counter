@@ -114,42 +114,72 @@ public class OrderService {
     
         // ドメイン変換（将来の拡張のため）
         Order order = Order.fromOrderRecord(orderRecord);
-    
+
         // 更新する LineItem を収集（再送防止）
         List<OrderUpdate> updates = new ArrayList<>();
         List<LineItem> allLineItems = new ArrayList<>();
-    
+
         if (orderRecord.getQdca10LineItems() != null) {
             allLineItems.addAll(orderRecord.getQdca10LineItems());
         }
         if (orderRecord.getQdca10proLineItems() != null) {
             allLineItems.addAll(orderRecord.getQdca10proLineItems());
         }
-    
-        for (LineItem li : allLineItems) {
-            if (li.getLineItemStatus() != LineItemStatus.FULFILLED) {
-                li.setLineItemStatus(LineItemStatus.FULFILLED);
-                updates.add(new OrderUpdate(
-                    orderRecord.getOrderId().toString(),
-                    li.getItemId().toString(),
-                    li.getName(),
-                    li.getItem(),
-                    LineItemStatus.FULFILLED,
-                    ticketUp.getMadeBy()
-                ));
-                break;
+
+        if (ticketUp.getStatus() == OrderStatus.CANCELLED) {
+            // 欠品(eighty-six)によるキャンセル。TicketUp には対象の lineItemId が
+            // 含まれているため、他の明細を巻き込まないよう明細IDで特定して更新する
+            // (FULFILLED の下のループのような「先頭の未完了明細」方式は使えない)。
+            for (LineItem li : allLineItems) {
+                if (li.getLineItemStatus() == LineItemStatus.CANCELLED
+                        || li.getLineItemStatus() == LineItemStatus.FULFILLED) {
+                    continue;
+                }
+                if (ticketUp.getLineItemId() != null
+                        && ticketUp.getLineItemId().toString().equals(li.getItemId())) {
+                    li.setLineItemStatus(LineItemStatus.CANCELLED);
+                    updates.add(new OrderUpdate(
+                        orderRecord.getOrderId().toString(),
+                        li.getItemId().toString(),
+                        li.getName(),
+                        li.getItem(),
+                        LineItemStatus.CANCELLED,
+                        ticketUp.getMadeBy()
+                    ));
+                    break;
+                }
+            }
+        } else {
+            for (LineItem li : allLineItems) {
+                if (li.getLineItemStatus() != LineItemStatus.FULFILLED) {
+                    li.setLineItemStatus(LineItemStatus.FULFILLED);
+                    updates.add(new OrderUpdate(
+                        orderRecord.getOrderId().toString(),
+                        li.getItemId().toString(),
+                        li.getName(),
+                        li.getItem(),
+                        LineItemStatus.FULFILLED,
+                        ticketUp.getMadeBy()
+                    ));
+                    break;
+                }
             }
         }
-    
+
         // Order 状態も更新（変更があったときのみ）
         if (!updates.isEmpty()) {
-            orderRecord.setOrderStatus(OrderStatus.FULFILLED);
+            boolean allTerminal = allLineItems.stream().allMatch(li ->
+                li.getLineItemStatus() == LineItemStatus.FULFILLED || li.getLineItemStatus() == LineItemStatus.CANCELLED);
+            boolean anyCancelled = allLineItems.stream().anyMatch(li -> li.getLineItemStatus() == LineItemStatus.CANCELLED);
+            if (allTerminal) {
+                orderRecord.setOrderStatus(anyCancelled ? OrderStatus.CANCELLED : OrderStatus.FULFILLED);
+            }
             orderRepository.persist(orderRecord);
             logger.debug("Order and {} LineItems updated and persisted", updates.size());
         } else {
-            logger.debug("No updates required (all LineItems already FULFILLED)");
+            logger.debug("No updates required (all LineItems already in a terminal state)");
         }
-    
+
         return new OrderEventResult(updates);
     }
 

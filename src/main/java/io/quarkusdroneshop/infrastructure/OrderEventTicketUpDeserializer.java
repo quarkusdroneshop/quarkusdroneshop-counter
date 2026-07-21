@@ -15,9 +15,12 @@ import java.util.UUID;
 
 /**
  * dataproduct-order-events (Avro, order-events Flink job が発行) から
- * LINE_ITEM_STATUS_CHANGED イベントのみを TicketUp に変換する。
- * それ以外の eventType (ORDER_PLACED / ORDER_CANCELLED) は null を返し、
- * KafkaService#orderUp 側の null チェックでスキップされる。
+ * LINE_ITEM_STATUS_CHANGED / ORDER_CANCELLED イベントを TicketUp に変換する。
+ * ORDER_CANCELLED は qdca10/qdca10pro の欠品(eighty-six)から生成されるイベントで、
+ * status=CANCELLED の TicketUp として扱うことで、既存の orders-up 処理経路
+ * (KafkaService#orderUp → OrderService#onOrderUpTx) を再利用して該当明細を
+ * CANCELLED に更新できるようにする。それ以外の eventType (ORDER_PLACED) は
+ * null を返し、KafkaService#orderUp 側の null チェックでスキップされる。
  */
 public class OrderEventTicketUpDeserializer implements Deserializer<TicketUp> {
 
@@ -42,13 +45,14 @@ public class OrderEventTicketUpDeserializer implements Deserializer<TicketUp> {
         }
 
         Object eventTypeObj = record.get("eventType");
-        if (eventTypeObj == null || !"LINE_ITEM_STATUS_CHANGED".equals(eventTypeObj.toString())) {
+        String eventType = eventTypeObj != null ? eventTypeObj.toString() : null;
+        if (!"LINE_ITEM_STATUS_CHANGED".equals(eventType) && !"ORDER_CANCELLED".equals(eventType)) {
             return null;
         }
 
         GenericRecord lineItem = (GenericRecord) record.get("lineItem");
         if (lineItem == null) {
-            logger.warn("LINE_ITEM_STATUS_CHANGED event without lineItem: {}", record);
+            logger.warn("{} event without lineItem: {}", eventType, record);
             return null;
         }
 
@@ -56,9 +60,16 @@ public class OrderEventTicketUpDeserializer implements Deserializer<TicketUp> {
             UUID orderId = UUID.fromString(record.get("orderId").toString());
             UUID lineItemId = UUID.fromString(lineItem.get("itemId").toString());
             Item item = Item.valueOf(lineItem.get("item").toString());
+            Instant timestamp = Instant.ofEpochMilli((Long) record.get("eventTimestamp"));
+
+            if ("ORDER_CANCELLED".equals(eventType)) {
+                // 欠品(eighty-six)由来のイベント。lineItem.name/madeBy は
+                // qdca10/qdca10pro 側で欠品検知時点では未確定のため常に null。
+                return new TicketUp(orderId, lineItemId, item, null, timestamp, OrderStatus.CANCELLED, null);
+            }
+
             String name = String.valueOf(lineItem.get("name"));
             OrderStatus status = OrderStatus.valueOf(lineItem.get("lineItemStatus").toString());
-            Instant timestamp = Instant.ofEpochMilli((Long) record.get("eventTimestamp"));
             Object madeByObj = lineItem.get("madeBy");
             String madeBy = madeByObj != null ? madeByObj.toString() : null;
 
