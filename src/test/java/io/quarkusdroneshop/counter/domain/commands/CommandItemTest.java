@@ -11,7 +11,7 @@ public class CommandItemTest {
 
     @Test
     public void testConstructorAndGetters() {
-        CommandItem item = new CommandItem(Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50));
+        CommandItem item = new CommandItem(null, Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50));
         assertEquals(Item.QDC_A101, item.getItem());
         assertEquals("Taro", item.getName());
         assertEquals(BigDecimal.valueOf(135.50), item.getPrice());
@@ -19,7 +19,7 @@ public class CommandItemTest {
 
     @Test
     public void testPublicFields() {
-        CommandItem item = new CommandItem(Item.QDC_A102, "Hanako", BigDecimal.valueOf(155.50));
+        CommandItem item = new CommandItem(null, Item.QDC_A102, "Hanako", BigDecimal.valueOf(155.50));
         assertEquals(Item.QDC_A102, item.item);
         assertEquals("Hanako", item.name);
         assertEquals(BigDecimal.valueOf(155.50), item.price);
@@ -27,8 +27,8 @@ public class CommandItemTest {
 
     @Test
     public void testEquals() {
-        CommandItem a = new CommandItem(Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50));
-        CommandItem b = new CommandItem(Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50));
+        CommandItem a = new CommandItem(null, Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50));
+        CommandItem b = new CommandItem(null, Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50));
         assertEquals(a, b);
         assertEquals(a, a);
         assertNotEquals(a, null);
@@ -37,27 +37,27 @@ public class CommandItemTest {
 
     @Test
     public void testEqualsDifferentFields() {
-        CommandItem a = new CommandItem(Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50));
-        CommandItem b = new CommandItem(Item.QDC_A102, "Taro", BigDecimal.valueOf(135.50));
+        CommandItem a = new CommandItem(null, Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50));
+        CommandItem b = new CommandItem(null, Item.QDC_A102, "Taro", BigDecimal.valueOf(135.50));
         assertNotEquals(a, b);
 
-        CommandItem c = new CommandItem(Item.QDC_A101, "Other", BigDecimal.valueOf(135.50));
+        CommandItem c = new CommandItem(null, Item.QDC_A101, "Other", BigDecimal.valueOf(135.50));
         assertNotEquals(a, c);
 
-        CommandItem d = new CommandItem(Item.QDC_A101, "Taro", BigDecimal.valueOf(999.99));
+        CommandItem d = new CommandItem(null, Item.QDC_A101, "Taro", BigDecimal.valueOf(999.99));
         assertNotEquals(a, d);
     }
 
     @Test
     public void testHashCode() {
-        CommandItem a = new CommandItem(Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50));
-        CommandItem b = new CommandItem(Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50));
+        CommandItem a = new CommandItem(null, Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50));
+        CommandItem b = new CommandItem(null, Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50));
         assertEquals(a.hashCode(), b.hashCode());
     }
 
     @Test
     public void testToString() {
-        CommandItem item = new CommandItem(Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50));
+        CommandItem item = new CommandItem(null, Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50));
         String str = item.toString();
         assertTrue(str.contains("QDC_A101"));
         assertTrue(str.contains("Taro"));
@@ -65,17 +65,17 @@ public class CommandItemTest {
 
     @Test
     public void testNullFields() {
-        CommandItem a = new CommandItem(null, null, null);
-        CommandItem b = new CommandItem(null, null, null);
+        CommandItem a = new CommandItem(null, null, null, null);
+        CommandItem b = new CommandItem(null, null, null, null);
         assertEquals(a, b);
         assertEquals(a.hashCode(), b.hashCode());
     }
 
     @Test
     public void testEqualsNullOnOneSide() {
-        CommandItem nonNull = new CommandItem(Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50));
+        CommandItem nonNull = new CommandItem(null, Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50));
         // name null on one side
-        assertNotEquals(new CommandItem(Item.QDC_A101, null, BigDecimal.valueOf(135.50)), nonNull);
-        assertNotEquals(nonNull, new CommandItem(Item.QDC_A101, null, BigDecimal.valueOf(135.50)));
+        assertNotEquals(new CommandItem(null, Item.QDC_A101, null, BigDecimal.valueOf(135.50)), nonNull);
+        assertNotEquals(nonNull, new CommandItem(null, Item.QDC_A101, null, BigDecimal.valueOf(135.50)));
     }
 }

@@ -122,7 +122,7 @@ public class OrderFullTest {
     @Test
     public void testFromOrderRecord() {
         OrderRecord record = new OrderRecord();
-        record.setOrderId(UUID.randomUUID());
+        record.setOrderId(UUID.randomUUID().toString());
         record.setOrderSource(OrderSource.WEB);
         record.setOrderStatus(OrderStatus.PLACED);
         record.setLocation(Location.ATLANTA);
@@ -167,7 +167,7 @@ public class OrderFullTest {
         LineItem lineItem = order.getQdca10LineItems().get().get(0);
 
         TicketUp ticketUp = new TicketUp(
-            order.getOrderId(),
+            UUID.fromString(order.getOrderId()),
             UUID.fromString(lineItem.getItemId()),
             lineItem.getItem(),
             lineItem.getName(),
@@ -188,7 +188,7 @@ public class OrderFullTest {
         LineItem lineItem = order.getQdca10proLineItems().get().get(0);
 
         TicketUp ticketUp = new TicketUp(
-            order.getOrderId(),
+            UUID.fromString(order.getOrderId()),
             UUID.fromString(lineItem.getItemId()),
             lineItem.getItem(),
             lineItem.getName(),
@@ -207,7 +207,7 @@ public class OrderFullTest {
         Order order = Order.fromPlaceOrderCommand(cmd);
 
         TicketUp ticketUp = new TicketUp(
-            order.getOrderId(),
+            UUID.fromString(order.getOrderId()),
             UUID.randomUUID(), // unknown lineItemId
             Item.QDC_A101,
             "Unknown",
@@ -227,8 +227,8 @@ public class OrderFullTest {
             Location.ATLANTA,
             null,
             Optional.of(Arrays.asList(
-                new CommandItem(Item.QDC_A101, "A", BigDecimal.valueOf(135.50)),
-                new CommandItem(Item.QDC_A102, "B", BigDecimal.valueOf(155.50))
+                new CommandItem(null, Item.QDC_A101, "A", BigDecimal.valueOf(135.50)),
+                new CommandItem(null, Item.QDC_A102, "B", BigDecimal.valueOf(155.50))
             )),
             Optional.empty()
         );
@@ -237,7 +237,7 @@ public class OrderFullTest {
         LineItem first = items.get(0);
 
         TicketUp ticketUp = new TicketUp(
-            order.getOrderId(),
+            UUID.fromString(order.getOrderId()),
             UUID.fromString(first.getItemId()),
             first.getItem(),
             first.getName(),
@@ -268,7 +268,7 @@ public class OrderFullTest {
             OrderSource.WEB,
             Location.ATLANTA,
             null,
-            Optional.of(Arrays.asList(new CommandItem(Item.QDC_A101, "Foo", BigDecimal.valueOf(135.50)))),
+            Optional.of(Arrays.asList(new CommandItem(null, Item.QDC_A101, "Foo", BigDecimal.valueOf(135.50)))),
             Optional.empty()
         );
         OrderEventResult result = Order.createFromCommand(cmd);

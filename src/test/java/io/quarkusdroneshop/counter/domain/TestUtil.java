@@ -32,11 +32,11 @@ public class TestUtil {
     };
 
     private static List<CommandItem> stubSingleQDCA10Item() {
-        return Arrays.asList(new CommandItem(Item.QDC_A101, "Foo", BigDecimal.valueOf(135.50)));
+        return Arrays.asList(new CommandItem(null, Item.QDC_A101, "Foo", BigDecimal.valueOf(135.50)));
     }
 
     private static List<CommandItem> stubSingleQDCA10ProItem() {
-        return Arrays.asList(new CommandItem(Item.QDC_A105_Pro01, "Foo", BigDecimal.valueOf(553.00)));
+        return Arrays.asList(new CommandItem(null, Item.QDC_A105_Pro01, "Foo", BigDecimal.valueOf(553.00)));
     }
 
     public static Order stubOrder() {

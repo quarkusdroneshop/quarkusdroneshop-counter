@@ -11,7 +11,7 @@ public class LineItemTest {
 
     private OrderRecord buildOrderRecord() {
         OrderRecord record = new OrderRecord();
-        record.setOrderId(UUID.randomUUID());
+        record.setOrderId(UUID.randomUUID().toString());
         return record;
     }
 
@@ -82,7 +82,7 @@ public class LineItemTest {
         // Force same itemId
         java.lang.reflect.Field f = LineItem.class.getDeclaredField("itemId");
         f.setAccessible(true);
-        String baseItemId = (String) f.get(base);
+        java.util.UUID baseItemId = (java.util.UUID) f.get(base);
 
         // item differs (same order, same itemId)
         LineItem diffItem = new LineItem(Item.QDC_A102, "Taro", BigDecimal.valueOf(135.50), LineItemStatus.IN_PROGRESS, rec);

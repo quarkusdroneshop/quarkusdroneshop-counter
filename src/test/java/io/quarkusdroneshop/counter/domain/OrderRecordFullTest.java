@@ -28,7 +28,7 @@ public class OrderRecordFullTest {
 
         OrderRecord record = new OrderRecord(id, OrderSource.WEB, "member123", now, OrderStatus.PLACED, Location.TOKYO, qdca10Items, qdca10proItems);
 
-        assertEquals(id, record.getOrderId());
+        assertEquals(id.toString(), record.getOrderId());
         assertEquals(OrderSource.WEB, record.getOrderSource());
         assertEquals("member123", record.getLoyaltyMemberId());
         assertEquals(now, record.getTimestamp());
@@ -44,7 +44,7 @@ public class OrderRecordFullTest {
         UUID id = UUID.randomUUID();
         Instant now = Instant.now();
 
-        record.setOrderId(id);
+        record.setOrderId(id.toString());
         record.setOrderSource(OrderSource.COUNTER);
         record.setLoyaltyMemberId("loyalty-xyz");
         record.setTimestamp(now);
@@ -53,7 +53,7 @@ public class OrderRecordFullTest {
         record.setQdca10LineItems(new ArrayList<>());
         record.setQdca10proLineItems(new ArrayList<>());
 
-        assertEquals(id, record.getOrderId());
+        assertEquals(id.toString(), record.getOrderId());
         assertEquals(OrderSource.COUNTER, record.getOrderSource());
         assertEquals("loyalty-xyz", record.getLoyaltyMemberId());
         assertEquals(now, record.getTimestamp());
@@ -66,7 +66,7 @@ public class OrderRecordFullTest {
     @Test
     public void testGetLineItemsBothPresent() {
         OrderRecord record = new OrderRecord();
-        record.setOrderId(UUID.randomUUID());
+        record.setOrderId(UUID.randomUUID().toString());
 
         LineItem item1 = new LineItem(Item.QDC_A101, "Alice", BigDecimal.valueOf(135.50), LineItemStatus.IN_PROGRESS, record);
         LineItem item2 = new LineItem(Item.QDC_A105_Pro01, "Bob", BigDecimal.valueOf(553.00), LineItemStatus.IN_PROGRESS, record);
@@ -86,7 +86,7 @@ public class OrderRecordFullTest {
     @Test
     public void testGetLineItemsOnlyQdca10() {
         OrderRecord record = new OrderRecord();
-        record.setOrderId(UUID.randomUUID());
+        record.setOrderId(UUID.randomUUID().toString());
 
         LineItem item1 = new LineItem(Item.QDC_A101, "Alice", BigDecimal.valueOf(135.50), LineItemStatus.IN_PROGRESS, record);
         List<LineItem> qdca10 = new ArrayList<>();
@@ -100,7 +100,7 @@ public class OrderRecordFullTest {
     @Test
     public void testGetLineItemsEmpty() {
         OrderRecord record = new OrderRecord();
-        record.setOrderId(UUID.randomUUID());
+        record.setOrderId(UUID.randomUUID().toString());
 
         List<LineItem> all = record.getLineItems();
         assertEquals(0, all.size());
@@ -180,7 +180,7 @@ public class OrderRecordFullTest {
     public void testToString() {
         OrderRecord record = new OrderRecord();
         UUID id = UUID.randomUUID();
-        record.setOrderId(id);
+        record.setOrderId(id.toString());
         record.setOrderSource(OrderSource.WEB);
         String str = record.toString();
         assertTrue(str.contains(id.toString()));
