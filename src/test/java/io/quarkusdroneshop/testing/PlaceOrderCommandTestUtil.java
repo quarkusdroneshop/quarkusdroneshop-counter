@@ -57,12 +57,12 @@ public class PlaceOrderCommandTestUtil {
         if (this.Qdca10LineItems == null) {
             this.Qdca10LineItems = new ArrayList<>();
         }
-        this.Qdca10LineItems.add(new CommandItem(Item.QDC_A101, "Jerry", BigDecimal.valueOf(3.50)));
+        this.Qdca10LineItems.add(new CommandItem(null, Item.QDC_A101, "Jerry", BigDecimal.valueOf(3.50)));
         return this;
     }
 
     public void withBlackQDC_A101For(final String name) {
-        this.Qdca10LineItems.add(new CommandItem(Item.QDC_A101, name, BigDecimal.valueOf(3.50)));
+        this.Qdca10LineItems.add(new CommandItem(null, Item.QDC_A101, name, BigDecimal.valueOf(3.50)));
     }
 
     public PlaceOrderCommand build() {

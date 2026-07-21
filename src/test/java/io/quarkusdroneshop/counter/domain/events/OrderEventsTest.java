@@ -17,7 +17,7 @@ public class OrderEventsTest {
     private Order buildOrderWithQdca10() {
         PlaceOrderCommand cmd = new PlaceOrderCommand(
             UUID.randomUUID().toString(), OrderSource.WEB, Location.ATLANTA, null,
-            Optional.of(Arrays.asList(new CommandItem(Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50)))),
+            Optional.of(Arrays.asList(new CommandItem(null, Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50)))),
             Optional.empty()
         );
         return Order.fromPlaceOrderCommand(cmd);
@@ -26,8 +26,8 @@ public class OrderEventsTest {
     private Order buildOrderWithBoth() {
         PlaceOrderCommand cmd = new PlaceOrderCommand(
             UUID.randomUUID().toString(), OrderSource.WEB, Location.TOKYO, "member-1",
-            Optional.of(Arrays.asList(new CommandItem(Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50)))),
-            Optional.of(Arrays.asList(new CommandItem(Item.QDC_A105_Pro01, "Hanako", BigDecimal.valueOf(553.00))))
+            Optional.of(Arrays.asList(new CommandItem(null, Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50)))),
+            Optional.of(Arrays.asList(new CommandItem(null, Item.QDC_A105_Pro01, "Hanako", BigDecimal.valueOf(553.00))))
         );
         return Order.fromPlaceOrderCommand(cmd);
     }
@@ -36,7 +36,7 @@ public class OrderEventsTest {
         PlaceOrderCommand cmd = new PlaceOrderCommand(
             UUID.randomUUID().toString(), OrderSource.COUNTER, Location.RALEIGH, null,
             Optional.empty(),
-            Optional.of(Arrays.asList(new CommandItem(Item.QDC_A105_Pro01, "Hanako", BigDecimal.valueOf(553.00))))
+            Optional.of(Arrays.asList(new CommandItem(null, Item.QDC_A105_Pro01, "Hanako", BigDecimal.valueOf(553.00))))
         );
         return Order.fromPlaceOrderCommand(cmd);
     }
@@ -112,7 +112,7 @@ public class OrderEventsTest {
     public void testLoyaltyMemberPurchaseEventWithOnlyQdca10() {
         PlaceOrderCommand cmd = new PlaceOrderCommand(
             UUID.randomUUID().toString(), OrderSource.WEB, Location.ATLANTA, "member-2",
-            Optional.of(Arrays.asList(new CommandItem(Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50)))),
+            Optional.of(Arrays.asList(new CommandItem(null, Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50)))),
             Optional.empty()
         );
         Order order = Order.fromPlaceOrderCommand(cmd);
@@ -125,7 +125,7 @@ public class OrderEventsTest {
         PlaceOrderCommand cmd = new PlaceOrderCommand(
             UUID.randomUUID().toString(), OrderSource.WEB, Location.CHARLOTTE, "member-3",
             Optional.empty(),
-            Optional.of(Arrays.asList(new CommandItem(Item.QDC_A105_Pro01, "Hanako", BigDecimal.valueOf(553.00))))
+            Optional.of(Arrays.asList(new CommandItem(null, Item.QDC_A105_Pro01, "Hanako", BigDecimal.valueOf(553.00))))
         );
         Order order = Order.fromPlaceOrderCommand(cmd);
         LoyaltyMemberPurchaseEvent event = LoyaltyMemberPurchaseEvent.of(order);

@@ -29,6 +29,11 @@ public class KafkaService {
     @Incoming("orders-in")
     @Blocking
     public void orderIn(final PlaceOrderCommand placeOrderCommand) {
+        if (placeOrderCommand == null || placeOrderCommand.getId() == null) {
+            logger.warn("Received null or invalid PlaceOrderCommand message (missing id): " + placeOrderCommand);
+            return;
+        }
+
         logger.debug("PlaceOrderCommand received: {}", placeOrderCommand);
 
         // トランザクション内の処理を分離

@@ -18,8 +18,8 @@ public class PlaceOrderCommandTest {
     @Test
     public void testConstructorWithAllFields() {
         String id = UUID.randomUUID().toString();
-        List<CommandItem> qdca10 = Arrays.asList(new CommandItem(Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50)));
-        List<CommandItem> qdca10pro = Arrays.asList(new CommandItem(Item.QDC_A105_Pro01, "Hanako", BigDecimal.valueOf(553.00)));
+        List<CommandItem> qdca10 = Arrays.asList(new CommandItem(null, Item.QDC_A101, "Taro", BigDecimal.valueOf(135.50)));
+        List<CommandItem> qdca10pro = Arrays.asList(new CommandItem(null, Item.QDC_A105_Pro01, "Hanako", BigDecimal.valueOf(553.00)));
 
         PlaceOrderCommand cmd = new PlaceOrderCommand(
             id, OrderSource.WEB, Location.TOKYO, "loyalty-123",
@@ -83,7 +83,7 @@ public class PlaceOrderCommandTest {
         // Different loyaltyMemberId
         assertNotEquals(base, new PlaceOrderCommand(id, OrderSource.WEB, Location.ATLANTA, "m2", Optional.empty(), Optional.empty()));
         // Different qdca10
-        assertNotEquals(base, new PlaceOrderCommand(id, OrderSource.WEB, Location.ATLANTA, "m1", Optional.of(Arrays.asList(new CommandItem(Item.QDC_A101, "T", BigDecimal.ONE))), Optional.empty()));
+        assertNotEquals(base, new PlaceOrderCommand(id, OrderSource.WEB, Location.ATLANTA, "m1", Optional.of(Arrays.asList(new CommandItem(null, Item.QDC_A101, "T", BigDecimal.ONE))), Optional.empty()));
     }
 
     @Test

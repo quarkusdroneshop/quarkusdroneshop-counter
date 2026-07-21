@@ -16,7 +16,7 @@ public class OrderEventResultFullTest {
 
     private Order buildOrder() {
         OrderRecord record = new OrderRecord();
-        record.setOrderId(UUID.randomUUID());
+        record.setOrderId(UUID.randomUUID().toString());
         record.setOrderSource(OrderSource.WEB);
         record.setLocation(Location.ATLANTA);
         return Order.fromOrderRecord(record);

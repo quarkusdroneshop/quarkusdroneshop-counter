@@ -102,14 +102,14 @@ public class OrderServiceFullTest {
         PlaceOrderCommand cmd = TestUtil.stubPlaceOrderCommand();
         OrderEventResult placed = orderService.onOrderInTx(cmd);
         Order order = placed.getOrder();
-        UUID orderId = order.getOrderId();
+        String orderId = order.getOrderId();
 
         // 2. Get the lineItem
         LineItem lineItem = order.getQdca10LineItems().get().get(0);
 
         // 3. Send TicketUp
         TicketUp ticketUp = new TicketUp(
-            orderId,
+            UUID.fromString(orderId),
             UUID.fromString(lineItem.getItemId()),
             lineItem.getItem(),
             lineItem.getName(),
@@ -129,11 +129,11 @@ public class OrderServiceFullTest {
         // Place and then fulfill
         PlaceOrderCommand cmd = TestUtil.stubPlaceOrderCommand();
         OrderEventResult placed = orderService.onOrderInTx(cmd);
-        UUID orderId = placed.getOrder().getOrderId();
+        String orderId = placed.getOrder().getOrderId();
         LineItem lineItem = placed.getOrder().getQdca10LineItems().get().get(0);
 
         TicketUp ticketUp = new TicketUp(
-            orderId, UUID.fromString(lineItem.getItemId()),
+            UUID.fromString(orderId), UUID.fromString(lineItem.getItemId()),
             lineItem.getItem(), lineItem.getName(), OrderStatus.FULFILLED, "Worker"
         );
         orderService.onOrderUpTx(ticketUp);
@@ -151,12 +151,12 @@ public class OrderServiceFullTest {
         PlaceOrderCommand cmd = TestUtil.stubPlaceOrderCommandQDCA10AndQDCA10Pro();
         OrderEventResult placed = orderService.onOrderInTx(cmd);
         Order order = placed.getOrder();
-        UUID orderId = order.getOrderId();
+        String orderId = order.getOrderId();
 
         // Fulfill the qdca10pro item
         LineItem proItem = order.getQdca10proLineItems().get().get(0);
         TicketUp ticketUp = new TicketUp(
-            orderId,
+            UUID.fromString(orderId),
             UUID.fromString(proItem.getItemId()),
             proItem.getItem(),
             proItem.getName(),
