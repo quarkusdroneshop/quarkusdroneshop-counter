@@ -7,7 +7,6 @@ import io.quarkusdroneshop.counter.domain.*;
 import io.quarkusdroneshop.counter.domain.commands.PlaceOrderCommand;
 import io.quarkusdroneshop.counter.domain.valueobjects.OrderEventResult;
 import io.quarkusdroneshop.counter.domain.valueobjects.TicketUp;
-import io.quarkusdroneshop.counter.domain.valueobjects.OrderTicket;
 import io.quarkusdroneshop.counter.domain.valueobjects.OrderUpdate;
 import io.smallrye.reactive.messaging.memory.InMemoryConnector;
 import io.smallrye.reactive.messaging.memory.InMemorySink;
@@ -42,9 +41,6 @@ public class OrderServiceFullTest {
 
         assertNotNull(result);
         assertNotNull(result.getOrder());
-        assertTrue(result.getQdca10Tickets().isPresent());
-        assertEquals(1, result.getQdca10Tickets().get().size());
-        assertFalse(result.getQdca10proTickets().isPresent());
         assertNotNull(result.getOrderUpdates());
     }
 
@@ -55,8 +51,7 @@ public class OrderServiceFullTest {
         OrderEventResult result = orderService.onOrderInTx(cmd);
 
         assertNotNull(result);
-        assertTrue(result.getQdca10proTickets().isPresent());
-        assertFalse(result.getQdca10Tickets().isPresent());
+        assertNotNull(result.getOrder());
     }
 
     @Test
@@ -66,8 +61,8 @@ public class OrderServiceFullTest {
         OrderEventResult result = orderService.onOrderInTx(cmd);
 
         assertNotNull(result);
-        assertTrue(result.getQdca10Tickets().isPresent());
-        assertTrue(result.getQdca10proTickets().isPresent());
+        assertTrue(result.getOrder().getQdca10LineItems().isPresent());
+        assertTrue(result.getOrder().getQdca10proLineItems().isPresent());
     }
 
     @Test
@@ -174,20 +169,6 @@ public class OrderServiceFullTest {
         InMemorySink<Object> sink = connector.sink("web-updates");
         OrderUpdate update = new OrderUpdate("o1", "i1", "Taro", Item.QDC_A101, LineItemStatus.FULFILLED, "Worker");
         assertDoesNotThrow(() -> orderService.sendOrderUpdate(update));
-    }
-
-    @Test
-    public void testSendQdca10() {
-        InMemorySink<Object> sink = connector.sink("qdca10");
-        OrderTicket ticket = new OrderTicket("o1", "l1", Item.QDC_A101, "Taro");
-        assertDoesNotThrow(() -> orderService.sendQdca10(ticket));
-    }
-
-    @Test
-    public void testSendQdca10pro() {
-        InMemorySink<Object> sink = connector.sink("qdca10pro");
-        OrderTicket ticket = new OrderTicket("o1", "l1", Item.QDC_A105_Pro01, "Hanako");
-        assertDoesNotThrow(() -> orderService.sendQdca10pro(ticket));
     }
 
     @Test

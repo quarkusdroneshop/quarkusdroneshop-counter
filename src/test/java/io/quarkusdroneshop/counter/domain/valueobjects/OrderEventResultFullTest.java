@@ -5,7 +5,6 @@ import io.quarkusdroneshop.counter.domain.*;
 import io.quarkusdroneshop.counter.domain.events.OrderCreatedEvent;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -28,8 +27,6 @@ public class OrderEventResultFullTest {
         assertNull(result.getOrder());
         assertNull(result.getOutboxEvents());
         assertNull(result.getOrderUpdates());
-        assertFalse(result.getQdca10Tickets().isPresent());
-        assertFalse(result.getQdca10proTickets().isPresent());
     }
 
     @Test
@@ -75,41 +72,12 @@ public class OrderEventResultFullTest {
     }
 
     @Test
-    public void testAddQdca10Ticket() {
-        OrderEventResult result = new OrderEventResult();
-        OrderTicket ticket = new OrderTicket("o1", "l1", Item.QDC_A101, "Taro");
-        result.addQdca10Ticket(ticket);
-        assertTrue(result.getQdca10Tickets().isPresent());
-        assertEquals(1, result.getQdca10Tickets().get().size());
-
-        // add second
-        result.addQdca10Ticket(ticket);
-        assertEquals(2, result.getQdca10Tickets().get().size());
-    }
-
-    @Test
-    public void testAddQDdca10proTicket() {
-        OrderEventResult result = new OrderEventResult();
-        OrderTicket ticket = new OrderTicket("o1", "l1", Item.QDC_A105_Pro01, "Hanako");
-        result.addQDdca10proTicket(ticket);
-        assertTrue(result.getQdca10proTickets().isPresent());
-        assertEquals(1, result.getQdca10proTickets().get().size());
-
-        result.addQDdca10proTicket(ticket);
-        assertEquals(2, result.getQdca10proTickets().get().size());
-    }
-
-    @Test
     public void testSetters() {
         OrderEventResult result = new OrderEventResult();
         result.setOutboxEvents(Arrays.asList());
-        result.setQdca10Tickets(Arrays.asList());
-        result.setQdca10proTickets(Arrays.asList());
         result.setOrderUpdates(Arrays.asList());
 
         assertNotNull(result.getOutboxEvents());
-        assertTrue(result.getQdca10Tickets().isPresent());
-        assertTrue(result.getQdca10proTickets().isPresent());
         assertNotNull(result.getOrderUpdates());
     }
 
@@ -137,8 +105,6 @@ public class OrderEventResultFullTest {
         OrderEventResult a = new OrderEventResult();
         a.setOrder(buildOrder());
         a.setOutboxEvents(Arrays.asList());
-        a.setQdca10Tickets(Arrays.asList());
-        a.setQdca10proTickets(Arrays.asList());
         a.setOrderUpdates(Arrays.asList());
         assertDoesNotThrow(a::hashCode);
     }
@@ -146,14 +112,10 @@ public class OrderEventResultFullTest {
     @Test
     public void testEqualsWithNonNullEqualFields() {
         OrderEventResult a = new OrderEventResult();
-        a.setQdca10Tickets(Arrays.asList(new OrderTicket("o1","l1",Item.QDC_A101,"Taro")));
-        a.setQdca10proTickets(Arrays.asList(new OrderTicket("o1","l1",Item.QDC_A105_Pro01,"Hanako")));
         a.setOrderUpdates(Arrays.asList(new OrderUpdate("o1","i1","Taro",Item.QDC_A101,LineItemStatus.FULFILLED)));
         a.setOutboxEvents(Arrays.asList());
 
         OrderEventResult b = new OrderEventResult();
-        b.setQdca10Tickets(a.getQdca10Tickets().get());
-        b.setQdca10proTickets(a.getQdca10proTickets().get());
         b.setOrderUpdates(a.getOrderUpdates());
         b.setOutboxEvents(a.getOutboxEvents());
 
@@ -176,17 +138,6 @@ public class OrderEventResultFullTest {
         OrderEventResult withUpdates = new OrderEventResult();
         withUpdates.setOrderUpdates(java.util.Collections.emptyList());
         assertNotEquals(withUpdates, new OrderEventResult());
-    }
-
-    @Test
-    public void testEqualsWithDifferentTickets() {
-        OrderEventResult a = new OrderEventResult();
-        a.setQdca10Tickets(Arrays.asList(new OrderTicket("o1","l1",Item.QDC_A101,"Taro")));
-
-        OrderEventResult b = new OrderEventResult();
-        b.setQdca10Tickets(Arrays.asList(new OrderTicket("o2","l2",Item.QDC_A102,"Jiro")));
-
-        assertNotEquals(a, b);
     }
 
     @Test

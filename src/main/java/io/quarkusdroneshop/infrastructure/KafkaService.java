@@ -41,8 +41,6 @@ public class KafkaService {
 
         // トランザクション外でKafka送信
         result.getOrderUpdates().forEach(orderService::sendOrderUpdate);
-        result.getQdca10Tickets().ifPresent(list -> list.forEach(orderService::sendQdca10));
-        result.getQdca10proTickets().ifPresent(list -> list.forEach(orderService::sendQdca10pro));
     }
 
     @Incoming("orders-up")

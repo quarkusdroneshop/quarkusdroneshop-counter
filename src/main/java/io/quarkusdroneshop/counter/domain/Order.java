@@ -110,24 +110,16 @@ public class Order {
     return orderUpdates;
   }
 
-  private static List<OrderTicket> createOrderTickets(String orderId, List<LineItem> lineItems) {
-    List<OrderTicket> orderTickets = new ArrayList<>(lineItems.size());
-    lineItems.forEach(lineItem -> {
-      orderTickets.add(new OrderTicket(orderId, lineItem.getItemId(), lineItem.getItem(), lineItem.getName()));
-    });
-    return orderTickets;
-  }
+  // QDCA10/QDCA10pro への新規注文通知は、直接 qdca10-in/qdca10pro-in へ発行するのではなく
+  // dataproduct-order-events 経由 (order-events Flink ジョブが orders-in を取り込んで
+  // ORDER_PLACED として再発行し、QDCA10/QDCA10pro はそれを購読する) に統一されている。
+  // このメソッドが発行していた OrderTicket は本番では誰にも購読されないトピック
+  // (qdca10-in/qdca10pro-in) 宛てだったため削除した。
 
   public static OrderEventResult createFromCommand(final PlaceOrderCommand placeOrderCommand) {
     Order order = Order.fromPlaceOrderCommand(placeOrderCommand);
     OrderEventResult orderEventResult = new OrderEventResult();
     orderEventResult.setOrder(order);
-    if (order.getQdca10LineItems().isPresent()) {
-      orderEventResult.setQdca10Tickets(createOrderTickets(order.getOrderId().toString(), order.getQdca10LineItems().get()));
-    }
-    if (order.getQdca10proLineItems().isPresent()) {
-      orderEventResult.setQdca10proTickets(createOrderTickets(order.getOrderId().toString(), order.getQdca10proLineItems().get()));
-    }
     orderEventResult.setOrderUpdates(createOrderUpdates(order));
     orderEventResult.addEvent(OrderCreatedEvent.of(order));
     if (placeOrderCommand.getLoyaltyMemberId().isPresent()) {

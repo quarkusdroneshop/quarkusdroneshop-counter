@@ -36,7 +36,6 @@ public class KafkaServiceFullTest {
 
         doReturn(result).when(orderService).onOrderInTx(any(PlaceOrderCommand.class));
         doNothing().when(orderService).sendOrderUpdate(any());
-        doNothing().when(orderService).sendQdca10(any());
 
         kafkaService.orderIn(cmd);
 
@@ -70,20 +69,4 @@ public class KafkaServiceFullTest {
         verify(orderService, never()).onOrderUpTx(any());
     }
 
-    @Test
-    public void testOrderInWithQdca10proTickets() {
-        OrderEventResult result = new OrderEventResult(java.util.Collections.emptyList());
-        result.setOrder(new io.quarkusdroneshop.counter.domain.Order(java.util.UUID.randomUUID().toString()));
-        result.setQdca10proTickets(java.util.Arrays.asList(
-            new io.quarkusdroneshop.counter.domain.valueobjects.OrderTicket("o1", "l1", Item.QDC_A105_Pro01, "Hanako")
-        ));
-        result.setOutboxEvents(java.util.Collections.emptyList());
-
-        doReturn(result).when(orderService).onOrderInTx(any(PlaceOrderCommand.class));
-        doNothing().when(orderService).sendQdca10pro(any());
-
-        kafkaService.orderIn(TestUtil.stubPlaceOrderCommandSingleQDCA10Pro());
-
-        verify(orderService, times(1)).sendQdca10pro(any());
-    }
 }

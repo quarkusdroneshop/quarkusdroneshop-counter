@@ -10,7 +10,6 @@ import io.quarkusdroneshop.counter.domain.OrderRecord;
 import io.quarkusdroneshop.counter.domain.commands.PlaceOrderCommand;
 import io.quarkusdroneshop.counter.domain.valueobjects.DashboardUpdate;
 import io.quarkusdroneshop.counter.domain.valueobjects.OrderEventResult;
-import io.quarkusdroneshop.counter.domain.valueobjects.OrderTicket;
 import io.quarkusdroneshop.counter.domain.valueobjects.OrderUpdate;
 import io.quarkusdroneshop.counter.domain.valueobjects.TicketUp;
 import org.eclipse.microprofile.context.ThreadContext;
@@ -45,17 +44,8 @@ public class OrderService {
     @Inject
     Event<ExportedEvent<?, ?>> event;
 
-    @Channel("qdca10")
-    Emitter<OrderTicket> qdca10Emitter;
-
-    @Channel("qdca10pro")
-    Emitter<OrderTicket> qdca10proEmitter;
-
     @Channel("web-updates")
     Emitter<DashboardUpdate> dashboardUpdateEmitter;
-
-    @Channel("homeoffice-orders-in")
-    Emitter<HomeofficeOrderMessage> homeofficeOrdersEmitter;
 
     @Transactional
     public OrderEventResult onOrderInTx(final PlaceOrderCommand placeOrderCommand) {
@@ -95,8 +85,9 @@ public class OrderService {
             event.fire(exportedEvent);
         });
 
-        // Homeoffice に直接発行 (Debezium CDC が未設定でも動作するように)
-        homeofficeOrdersEmitter.send(HomeofficeOrderMessage.from(orderRecord));
+        // Homeoffice への注文通知は dataproduct-order-events (order-events Flink ジョブが
+        // orders-in を取り込んで発行する ORDER_PLACED) 経由に統一されている。
+        // Homeoffice 側で orderId 単位に明細を集約して受信する。
 
         return result;
     }
@@ -197,24 +188,12 @@ public class OrderService {
         dashboardUpdateEmitter.send(dashboardUpdate);
     }
 
-    public void sendQdca10(OrderTicket ticket) {
-        logger.debug("Sending QDCA10 Ticket: {}", ticket);
-        qdca10Emitter.send(ticket);
-    }
-
-    public void sendQdca10pro(OrderTicket ticket) {
-        logger.debug("Sending QDCA10Pro Ticket: {}", ticket);
-        qdca10proEmitter.send(ticket);
-    }
-
     @Override
     public String toString() {
         return "OrderService{" +
                 "threadContext=" + threadContext +
                 ", orderRepository=" + orderRepository +
                 ", event=" + event +
-                ", qdca10Emitter=" + qdca10Emitter +
-                ", qdca10proEmitter=" + qdca10proEmitter +
                 ", orderUpdateEmitter=" + dashboardUpdateEmitter +
                 '}';
     }

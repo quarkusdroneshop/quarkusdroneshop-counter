@@ -5,7 +5,6 @@ import io.quarkusdroneshop.counter.domain.commands.CommandItem;
 import io.quarkusdroneshop.counter.domain.commands.PlaceOrderCommand;
 import io.quarkusdroneshop.counter.domain.events.OrderCreatedEvent;
 import io.quarkusdroneshop.counter.domain.valueobjects.OrderEventResult;
-import io.quarkusdroneshop.counter.domain.valueobjects.OrderTicket;
 import io.quarkusdroneshop.counter.domain.valueobjects.TicketUp;
 
 import java.math.BigDecimal;
@@ -68,7 +67,6 @@ public class TestUtil {
         order.setOrderStatus(OrderStatus.IN_PROGRESS);
 
         orderEventResult.setOrder(order);
-        orderEventResult.setQdca10Tickets(TestUtil.stubQdca10Tickets());
         orderEventResult.setOutboxEvents(mockOrderInEvent());
         orderEventResult.setOrderUpdates(java.util.Collections.emptyList());
         return orderEventResult;
@@ -76,10 +74,6 @@ public class TestUtil {
 
     private static List<ExportedEvent> mockOrderInEvent() {
         return Arrays.asList(OrderCreatedEvent.of(stubOrder()));
-    }
-
-    private static List<OrderTicket> stubQdca10Tickets() {
-        return Arrays.asList(new OrderTicket(UUID.randomUUID().toString(), UUID.randomUUID().toString(), Item.QDC_A101, "Rocky"));
     }
 
     public static TicketUp stubOrderTicketUp() {
