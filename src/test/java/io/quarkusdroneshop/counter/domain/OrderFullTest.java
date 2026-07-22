@@ -167,8 +167,8 @@ public class OrderFullTest {
         LineItem lineItem = order.getQdca10LineItems().get().get(0);
 
         TicketUp ticketUp = new TicketUp(
-            UUID.fromString(order.getOrderId()),
-            UUID.fromString(lineItem.getItemId()),
+            order.getOrderId(),
+            lineItem.getItemId(),
             lineItem.getItem(),
             lineItem.getName(),
             OrderStatus.FULFILLED,
@@ -188,8 +188,8 @@ public class OrderFullTest {
         LineItem lineItem = order.getQdca10proLineItems().get().get(0);
 
         TicketUp ticketUp = new TicketUp(
-            UUID.fromString(order.getOrderId()),
-            UUID.fromString(lineItem.getItemId()),
+            order.getOrderId(),
+            lineItem.getItemId(),
             lineItem.getItem(),
             lineItem.getName(),
             OrderStatus.FULFILLED,
@@ -207,8 +207,8 @@ public class OrderFullTest {
         Order order = Order.fromPlaceOrderCommand(cmd);
 
         TicketUp ticketUp = new TicketUp(
-            UUID.fromString(order.getOrderId()),
-            UUID.randomUUID(), // unknown lineItemId
+            order.getOrderId(),
+            UUID.randomUUID().toString(), // unknown lineItemId
             Item.QDC_A101,
             "Unknown",
             OrderStatus.FULFILLED,
@@ -237,8 +237,8 @@ public class OrderFullTest {
         LineItem first = items.get(0);
 
         TicketUp ticketUp = new TicketUp(
-            UUID.fromString(order.getOrderId()),
-            UUID.fromString(first.getItemId()),
+            order.getOrderId(),
+            first.getItemId(),
             first.getItem(),
             first.getName(),
             OrderStatus.FULFILLED,

@@ -79,8 +79,8 @@ public class TestUtil {
     public static TicketUp stubOrderTicketUp() {
 
         return new TicketUp(
-                UUID.randomUUID(),
-                UUID.randomUUID(),
+                UUID.randomUUID().toString(),
+                UUID.randomUUID().toString(),
                 Item.QDC_A101,
                 "Capt. Kirk",
                 "Mr. Spock"

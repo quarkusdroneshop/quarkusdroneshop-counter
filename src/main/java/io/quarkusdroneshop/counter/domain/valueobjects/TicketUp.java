@@ -6,7 +6,6 @@ import io.quarkusdroneshop.counter.domain.OrderStatus;
 import java.time.Instant;
 import java.util.StringJoiner;
 import java.util.List;
-import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -14,9 +13,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TicketUp {
 
-    public UUID orderId;
+    // orderId は自由形式の String (Web/Counter が採番する注文IDは UUID とは限らない)。
+    // 以前 UUID 型だったため、非UUID形式のorderIdを含む LINE_ITEM_STATUS_CHANGED
+    // イベントのデシリアライズが常に失敗し、注文ステータスが FULFILLED に
+    // 更新されない不具合があった。
+    public String orderId;
 
-    public UUID lineItemId;
+    public String lineItemId;
 
     public Item item;
 
@@ -31,8 +34,8 @@ public class TicketUp {
 
     @JsonCreator
     public TicketUp(
-        @JsonProperty("orderId") UUID orderId,
-        @JsonProperty("lineItemId") UUID lineItemId,
+        @JsonProperty("orderId") String orderId,
+        @JsonProperty("lineItemId") String lineItemId,
         @JsonProperty("item") Item item,
         @JsonProperty("name") String name,
         @JsonProperty("timestamp") Object timestamp,
@@ -54,7 +57,7 @@ public class TicketUp {
         this.madeBy = madeBy;
     }
 
-    public TicketUp(UUID orderId, UUID lineItemId, Item item, String name, String madeBy) {
+    public TicketUp(String orderId, String lineItemId, Item item, String name, String madeBy) {
         this.orderId = orderId;
         this.lineItemId = lineItemId;
         this.item = item;
@@ -63,7 +66,7 @@ public class TicketUp {
         this.madeBy = madeBy;
     }
 
-    public TicketUp(UUID orderId, UUID lineItemId, Item item, String name, OrderStatus status, String madeBy) {
+    public TicketUp(String orderId, String lineItemId, Item item, String name, OrderStatus status, String madeBy) {
         this.orderId = orderId;
         this.lineItemId = lineItemId;
         this.item = item;
@@ -111,11 +114,11 @@ public class TicketUp {
         return result;
     }
 
-    public UUID getOrderId() {
+    public String getOrderId() {
         return orderId;
     }
 
-    public UUID getLineItemId() {
+    public String getLineItemId() {
         return lineItemId;
     }
 

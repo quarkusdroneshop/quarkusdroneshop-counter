@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
-import java.util.UUID;
 
 /**
  * dataproduct-order-events (Avro, order-events Flink job が発行) から
@@ -57,8 +56,8 @@ public class OrderEventTicketUpDeserializer implements Deserializer<TicketUp> {
         }
 
         try {
-            UUID orderId = UUID.fromString(record.get("orderId").toString());
-            UUID lineItemId = UUID.fromString(lineItem.get("itemId").toString());
+            String orderId = record.get("orderId").toString();
+            String lineItemId = lineItem.get("itemId").toString();
             Item item = Item.valueOf(lineItem.get("item").toString());
             Instant timestamp = Instant.ofEpochMilli((Long) record.get("eventTimestamp"));
 

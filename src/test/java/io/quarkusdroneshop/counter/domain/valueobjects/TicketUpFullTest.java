@@ -13,8 +13,8 @@ public class TicketUpFullTest {
 
     @Test
     public void testJsonCreatorConstructorWithStringTimestamp() {
-        UUID orderId = UUID.randomUUID();
-        UUID lineItemId = UUID.randomUUID();
+        String orderId = UUID.randomUUID().toString();
+        String lineItemId = UUID.randomUUID().toString();
         String timestamp = Instant.now().toString();
 
         TicketUp ticketUp = new TicketUp(orderId, lineItemId, Item.QDC_A101, "Taro", timestamp, OrderStatus.FULFILLED, "Worker");
@@ -30,8 +30,8 @@ public class TicketUpFullTest {
 
     @Test
     public void testJsonCreatorConstructorWithNumberTimestamp() {
-        UUID orderId = UUID.randomUUID();
-        UUID lineItemId = UUID.randomUUID();
+        String orderId = UUID.randomUUID().toString();
+        String lineItemId = UUID.randomUUID().toString();
         long epochMilli = System.currentTimeMillis();
 
         TicketUp ticketUp = new TicketUp(orderId, lineItemId, Item.QDC_A102, "Hanako", epochMilli, OrderStatus.IN_PROGRESS, "Drone");
@@ -41,8 +41,8 @@ public class TicketUpFullTest {
 
     @Test
     public void testJsonCreatorConstructorWithNullTimestamp() {
-        UUID orderId = UUID.randomUUID();
-        UUID lineItemId = UUID.randomUUID();
+        String orderId = UUID.randomUUID().toString();
+        String lineItemId = UUID.randomUUID().toString();
 
         TicketUp ticketUp = new TicketUp(orderId, lineItemId, Item.QDC_A103, "Ichiro", null, OrderStatus.PLACED, "Bot");
 
@@ -51,8 +51,8 @@ public class TicketUpFullTest {
 
     @Test
     public void testSecondConstructorWithMadeBy() {
-        UUID orderId = UUID.randomUUID();
-        UUID lineItemId = UUID.randomUUID();
+        String orderId = UUID.randomUUID().toString();
+        String lineItemId = UUID.randomUUID().toString();
 
         TicketUp ticketUp = new TicketUp(orderId, lineItemId, Item.QDC_A101, "Taro", "Drone");
 
@@ -65,8 +65,8 @@ public class TicketUpFullTest {
 
     @Test
     public void testThirdConstructorWithStatus() {
-        UUID orderId = UUID.randomUUID();
-        UUID lineItemId = UUID.randomUUID();
+        String orderId = UUID.randomUUID().toString();
+        String lineItemId = UUID.randomUUID().toString();
 
         TicketUp ticketUp = new TicketUp(orderId, lineItemId, Item.QDC_A105_Pro01, "Hanako", OrderStatus.FULFILLED, "Worker");
 
@@ -80,8 +80,8 @@ public class TicketUpFullTest {
 
     @Test
     public void testEquals() {
-        UUID orderId = UUID.randomUUID();
-        UUID lineItemId = UUID.randomUUID();
+        String orderId = UUID.randomUUID().toString();
+        String lineItemId = UUID.randomUUID().toString();
         String ts = Instant.now().toString();
 
         TicketUp a = new TicketUp(orderId, lineItemId, Item.QDC_A101, "Taro", ts, OrderStatus.FULFILLED, "Worker");
@@ -95,13 +95,13 @@ public class TicketUpFullTest {
 
     @Test
     public void testEqualsDifferentFields() {
-        UUID orderId = UUID.randomUUID();
-        UUID lineItemId = UUID.randomUUID();
+        String orderId = UUID.randomUUID().toString();
+        String lineItemId = UUID.randomUUID().toString();
         String ts = Instant.now().toString();
 
         TicketUp a = new TicketUp(orderId, lineItemId, Item.QDC_A101, "Taro", ts, OrderStatus.FULFILLED, "Worker");
-        assertNotEquals(a, new TicketUp(UUID.randomUUID(), lineItemId, Item.QDC_A101, "Taro", ts, OrderStatus.FULFILLED, "Worker"));
-        assertNotEquals(a, new TicketUp(orderId, UUID.randomUUID(), Item.QDC_A101, "Taro", ts, OrderStatus.FULFILLED, "Worker"));
+        assertNotEquals(a, new TicketUp(UUID.randomUUID().toString(), lineItemId, Item.QDC_A101, "Taro", ts, OrderStatus.FULFILLED, "Worker"));
+        assertNotEquals(a, new TicketUp(orderId, UUID.randomUUID().toString(), Item.QDC_A101, "Taro", ts, OrderStatus.FULFILLED, "Worker"));
         assertNotEquals(a, new TicketUp(orderId, lineItemId, Item.QDC_A102, "Taro", ts, OrderStatus.FULFILLED, "Worker"));
         assertNotEquals(a, new TicketUp(orderId, lineItemId, Item.QDC_A101, "Other", ts, OrderStatus.FULFILLED, "Worker"));
         assertNotEquals(a, new TicketUp(orderId, lineItemId, Item.QDC_A101, "Taro", ts, OrderStatus.FULFILLED, "Other"));
@@ -109,8 +109,8 @@ public class TicketUpFullTest {
 
     @Test
     public void testHashCode() {
-        UUID orderId = UUID.randomUUID();
-        UUID lineItemId = UUID.randomUUID();
+        String orderId = UUID.randomUUID().toString();
+        String lineItemId = UUID.randomUUID().toString();
         String ts = Instant.now().toString();
 
         TicketUp a = new TicketUp(orderId, lineItemId, Item.QDC_A101, "Taro", ts, OrderStatus.FULFILLED, "Worker");
@@ -122,7 +122,7 @@ public class TicketUpFullTest {
     @Test
     public void testEqualsNullOnOneSide() {
         String ts = Instant.now().toString();
-        TicketUp nonNull = new TicketUp(UUID.randomUUID(), UUID.randomUUID(), Item.QDC_A101, "Taro", ts, OrderStatus.FULFILLED, "Worker");
+        TicketUp nonNull = new TicketUp(UUID.randomUUID().toString(), UUID.randomUUID().toString(), Item.QDC_A101, "Taro", ts, OrderStatus.FULFILLED, "Worker");
         // orderId null on one side
         TicketUp nullOrderId = new TicketUp(null, nonNull.getLineItemId(), Item.QDC_A101, "Taro", ts, OrderStatus.FULFILLED, "Worker");
         assertNotEquals(nonNull, nullOrderId);
@@ -148,7 +148,7 @@ public class TicketUpFullTest {
 
     @Test
     public void testToString() {
-        TicketUp ticketUp = new TicketUp(UUID.randomUUID(), UUID.randomUUID(), Item.QDC_A101, "Taro", "Worker");
+        TicketUp ticketUp = new TicketUp(UUID.randomUUID().toString(), UUID.randomUUID().toString(), Item.QDC_A101, "Taro", "Worker");
         String str = ticketUp.toString();
         assertTrue(str.contains("QDC_A101"));
         assertTrue(str.contains("Taro"));

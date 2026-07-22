@@ -80,7 +80,7 @@ public class OrderServiceFullTest {
     @TestTransaction
     public void testOnOrderUpTxOrderNotFound() {
         TicketUp ticketUp = new TicketUp(
-            UUID.randomUUID(), UUID.randomUUID(), Item.QDC_A101, "Taro", OrderStatus.FULFILLED, "Worker"
+            UUID.randomUUID().toString(), UUID.randomUUID().toString(), Item.QDC_A101, "Taro", OrderStatus.FULFILLED, "Worker"
         );
 
         OrderEventResult result = orderService.onOrderUpTx(ticketUp);
@@ -104,8 +104,8 @@ public class OrderServiceFullTest {
 
         // 3. Send TicketUp
         TicketUp ticketUp = new TicketUp(
-            UUID.fromString(orderId),
-            UUID.fromString(lineItem.getItemId()),
+            orderId,
+            lineItem.getItemId(),
             lineItem.getItem(),
             lineItem.getName(),
             OrderStatus.FULFILLED,
@@ -128,7 +128,7 @@ public class OrderServiceFullTest {
         LineItem lineItem = placed.getOrder().getQdca10LineItems().get().get(0);
 
         TicketUp ticketUp = new TicketUp(
-            UUID.fromString(orderId), UUID.fromString(lineItem.getItemId()),
+            orderId, lineItem.getItemId(),
             lineItem.getItem(), lineItem.getName(), OrderStatus.FULFILLED, "Worker"
         );
         orderService.onOrderUpTx(ticketUp);
@@ -151,8 +151,8 @@ public class OrderServiceFullTest {
         // Fulfill the qdca10pro item
         LineItem proItem = order.getQdca10proLineItems().get().get(0);
         TicketUp ticketUp = new TicketUp(
-            UUID.fromString(orderId),
-            UUID.fromString(proItem.getItemId()),
+            orderId,
+            proItem.getItemId(),
             proItem.getItem(),
             proItem.getName(),
             OrderStatus.FULFILLED,
