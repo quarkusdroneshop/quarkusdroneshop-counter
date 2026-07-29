@@ -5,6 +5,7 @@ import io.quarkusdroneshop.counter.domain.Item;
 import io.quarkusdroneshop.counter.domain.OrderStatus;
 import io.quarkusdroneshop.counter.domain.valueobjects.TicketUp;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.slf4j.Logger;
@@ -34,6 +35,13 @@ public class OrderEventTicketUpDeserializer implements Deserializer<TicketUp> {
 
     @Override
     public TicketUp deserialize(String topic, byte[] data) {
+        // Kafka の Deserializer#deserialize(topic, data) はヘッダーを受け取れないため、
+        // 実際のコンシューマからは呼ばれない。実装は headers 付きオーバーロードに委譲する。
+        return deserialize(topic, new RecordHeaders(), data);
+    }
+
+    @Override
+    public TicketUp deserialize(String topic, Headers headers, byte[] data) {
         if (data == null) {
             return null;
         }
@@ -41,7 +49,7 @@ public class OrderEventTicketUpDeserializer implements Deserializer<TicketUp> {
         long startNanos = System.nanoTime();
         GenericRecord record;
         try {
-            record = avroDeserializer.deserialize(topic, new RecordHeaders(), data);
+            record = avroDeserializer.deserialize(topic, headers, data);
         } catch (RuntimeException e) {
             long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000;
             logger.error("Avro deserialize failed for topic {} after {}ms", topic, elapsedMs, e);
