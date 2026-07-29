@@ -46,15 +46,22 @@ public class KafkaService {
     @Incoming("orders-up")
     @Blocking
     public void orderUp(final TicketUp ticketUp) {
-        if (ticketUp == null || ticketUp.getOrderId() == null) {
-            logger.warn("Received null or invalid TicketUp message: " + ticketUp);
-            return;
+        long startNanos = System.nanoTime();
+        logger.debug("orderUp invoked (thread={})", Thread.currentThread().getName());
+        try {
+            if (ticketUp == null || ticketUp.getOrderId() == null) {
+                logger.warn("Received null or invalid TicketUp message: " + ticketUp);
+                return;
+            }
+
+            logger.debug("TicketUp received: {}", ticketUp);
+
+            OrderEventResult result = orderService.onOrderUpTx(ticketUp);
+
+            result.getOrderUpdates().forEach(orderService::sendOrderUpdate);
+        } finally {
+            long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000;
+            logger.debug("orderUp completed in {}ms", elapsedMs);
         }
-
-        logger.debug("TicketUp received: {}", ticketUp);
-
-        OrderEventResult result = orderService.onOrderUpTx(ticketUp);
-
-        result.getOrderUpdates().forEach(orderService::sendOrderUpdate);
     }
 }
