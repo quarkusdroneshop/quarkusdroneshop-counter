@@ -8,10 +8,11 @@ public class EnumValuesTest {
 
     @Test
     public void testLineItemStatusValues() {
-        assertEquals(3, LineItemStatus.values().length);
+        assertEquals(4, LineItemStatus.values().length);
         assertEquals(LineItemStatus.PLACED, LineItemStatus.valueOf("PLACED"));
         assertEquals(LineItemStatus.IN_PROGRESS, LineItemStatus.valueOf("IN_PROGRESS"));
         assertEquals(LineItemStatus.FULFILLED, LineItemStatus.valueOf("FULFILLED"));
+        assertEquals(LineItemStatus.CANCELLED, LineItemStatus.valueOf("CANCELLED"));
     }
 
     @Test
@@ -33,9 +34,10 @@ public class EnumValuesTest {
 
     @Test
     public void testOrderStatusValues() {
-        assertEquals(3, OrderStatus.values().length);
+        assertEquals(4, OrderStatus.values().length);
         assertEquals(OrderStatus.PLACED, OrderStatus.valueOf("PLACED"));
         assertEquals(OrderStatus.IN_PROGRESS, OrderStatus.valueOf("IN_PROGRESS"));
         assertEquals(OrderStatus.FULFILLED, OrderStatus.valueOf("FULFILLED"));
+        assertEquals(OrderStatus.CANCELLED, OrderStatus.valueOf("CANCELLED"));
     }
 }
