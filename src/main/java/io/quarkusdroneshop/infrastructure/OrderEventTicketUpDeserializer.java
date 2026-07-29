@@ -38,14 +38,32 @@ public class OrderEventTicketUpDeserializer implements Deserializer<TicketUp> {
             return null;
         }
 
-        GenericRecord record = avroDeserializer.deserialize(topic, new RecordHeaders(), data);
+        long startNanos = System.nanoTime();
+        GenericRecord record;
+        try {
+            record = avroDeserializer.deserialize(topic, new RecordHeaders(), data);
+        } catch (RuntimeException e) {
+            long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000;
+            logger.error("Avro deserialize failed for topic {} after {}ms", topic, elapsedMs, e);
+            throw e;
+        }
+        long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000;
+        if (elapsedMs > 1000) {
+            logger.warn("Avro deserialize (registry round-trip) took {}ms for topic {}", elapsedMs, topic);
+        } else {
+            logger.debug("Avro deserialize took {}ms for topic {}", elapsedMs, topic);
+        }
+
         if (record == null) {
+            logger.debug("Avro deserializer returned null GenericRecord for topic {}", topic);
             return null;
         }
 
         Object eventTypeObj = record.get("eventType");
         String eventType = eventTypeObj != null ? eventTypeObj.toString() : null;
         if (!"LINE_ITEM_STATUS_CHANGED".equals(eventType) && !"ORDER_CANCELLED".equals(eventType)) {
+            logger.debug("Skipping event with eventType={} (orderId={})", eventType,
+                    record.get("orderId"));
             return null;
         }
 
