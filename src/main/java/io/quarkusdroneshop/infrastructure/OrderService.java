@@ -28,7 +28,6 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import java.util.Optional;
 import java.util.ArrayList;
-import java.util.Collections;
 
 @ApplicationScoped
 public class OrderService {
@@ -99,8 +98,9 @@ public class OrderService {
         // 該当注文を取得
         OrderRecord orderRecord = orderRepository.findById(ticketUp.getOrderId().toString());
         if (orderRecord == null) {
-            logger.warn("Order not found for ID: {}", ticketUp.getOrderId());
-            return new OrderEventResult(Collections.emptyList());
+            // dataproduct-order-events はパーティション順序が保証されないため、
+            // ORDER_PLACED より先にこのイベントが届くことがある。呼び出し元でリトライさせる。
+            throw new OrderNotFoundException(ticketUp.getOrderId().toString());
         }
     
         // ドメイン変換（将来の拡張のため）

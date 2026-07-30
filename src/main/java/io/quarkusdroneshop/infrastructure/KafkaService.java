@@ -43,6 +43,14 @@ public class KafkaService {
         result.getOrderUpdates().forEach(orderService::sendOrderUpdate);
     }
 
+    // dataproduct-order-events は ORDER_PLACED と LINE_ITEM_STATUS_CHANGED/ORDER_CANCELLED を
+    // Flink側の別々の並列INSERT文から同一トピックの別パーティションに書くため、
+    // パーティション間の順序保証が無く、注文作成より先にこのイベントが届くことがある。
+    // ここで指数バックオフしながら再試行し、それでも見つからなければ例外を投げて
+    // failure-strategy=dead-letter-queue に委ねる (メッセージを失わない)。
+    private static final int ORDER_UP_MAX_RETRIES = 5;
+    private static final long ORDER_UP_RETRY_BASE_DELAY_MS = 200;
+
     @Incoming("orders-up")
     @Blocking
     public void orderUp(final TicketUp ticketUp) {
@@ -56,12 +64,35 @@ public class KafkaService {
 
             logger.debug("TicketUp received: {}", ticketUp);
 
-            OrderEventResult result = orderService.onOrderUpTx(ticketUp);
+            OrderEventResult result = processWithRetry(ticketUp);
 
             result.getOrderUpdates().forEach(orderService::sendOrderUpdate);
         } finally {
             long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000;
             logger.debug("orderUp completed in {}ms", elapsedMs);
         }
+    }
+
+    private OrderEventResult processWithRetry(TicketUp ticketUp) {
+        for (int attempt = 1; attempt <= ORDER_UP_MAX_RETRIES; attempt++) {
+            try {
+                return orderService.onOrderUpTx(ticketUp);
+            } catch (OrderNotFoundException e) {
+                if (attempt == ORDER_UP_MAX_RETRIES) {
+                    logger.error("Giving up after {} attempts: {}", attempt, e.getMessage());
+                    throw e;
+                }
+                long delayMs = ORDER_UP_RETRY_BASE_DELAY_MS * (1L << (attempt - 1));
+                logger.warn("Attempt {}/{}: {} — retrying in {}ms",
+                        attempt, ORDER_UP_MAX_RETRIES, e.getMessage(), delayMs);
+                try {
+                    Thread.sleep(delayMs);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw e;
+                }
+            }
+        }
+        throw new IllegalStateException("unreachable");
     }
 }
