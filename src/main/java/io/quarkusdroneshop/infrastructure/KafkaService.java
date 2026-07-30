@@ -64,7 +64,15 @@ public class KafkaService {
 
             logger.debug("TicketUp received: {}", ticketUp);
 
-            OrderEventResult result = processWithRetry(ticketUp);
+            OrderEventResult result;
+            try {
+                result = processWithRetry(ticketUp);
+            } catch (OrderNotFoundException e) {
+                // リトライを使い切っても見つからない場合、ここで例外を伝播させると
+                // channelが停止する。オフセットは進めてメッセージをスキップする。
+                logger.error("Dropping TicketUp after exhausting retries: {}", ticketUp, e);
+                return;
+            }
 
             result.getOrderUpdates().forEach(orderService::sendOrderUpdate);
         } finally {
