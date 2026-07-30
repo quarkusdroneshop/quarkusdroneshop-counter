@@ -79,15 +79,14 @@ public class OrderServiceFullTest {
     @Test
     @TestTransaction
     public void testOnOrderUpTxOrderNotFound() {
+        // dataproduct-order-events はパーティション順序が保証されないため、
+        // 対象注文がまだ永続化されていない場合は例外を投げ、呼び出し元でリトライさせる
+        // (KafkaService#orderUp 参照)。
         TicketUp ticketUp = new TicketUp(
             UUID.randomUUID().toString(), UUID.randomUUID().toString(), Item.QDC_A101, "Taro", OrderStatus.FULFILLED, "Worker"
         );
 
-        OrderEventResult result = orderService.onOrderUpTx(ticketUp);
-
-        assertNotNull(result);
-        assertNotNull(result.getOrderUpdates());
-        assertEquals(0, result.getOrderUpdates().size());
+        assertThrows(OrderNotFoundException.class, () -> orderService.onOrderUpTx(ticketUp));
     }
 
     @Test
