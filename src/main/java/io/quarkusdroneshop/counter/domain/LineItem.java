@@ -4,7 +4,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.StringJoiner;
 import java.util.UUID;
@@ -49,7 +57,8 @@ public class LineItem extends PanacheEntityBase {
   // dataproduct-order-events (orders-in 由来) と orders-up (QDCA10/QDCA10pro
   // 発行) を同じ itemId で突合できるよう、Web 側で採番された itemId を
   // そのまま引き継ぐ。itemId が null/不正な場合のみ新規採番する。
-  public LineItem(String itemId, Item item, String name, BigDecimal price, LineItemStatus lineItemStatus, OrderRecord order) {
+  public LineItem(String itemId, Item item, String name, BigDecimal price,
+                   LineItemStatus lineItemStatus, OrderRecord order) {
     UUID parsed;
     try {
       parsed = itemId != null ? UUID.fromString(itemId) : UUID.randomUUID();
@@ -78,15 +87,27 @@ public class LineItem extends PanacheEntityBase {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     LineItem lineItem = (LineItem) o;
 
-    if (itemId != null ? !itemId.equals(lineItem.itemId) : lineItem.itemId != null) return false;
-    if (item != lineItem.item) return false;
-    if (name != null ? !name.equals(lineItem.name) : lineItem.name != null) return false;
-    if (price != null ? !price.equals(lineItem.price) : lineItem.price != null) return false;
+    if (itemId != null ? !itemId.equals(lineItem.itemId) : lineItem.itemId != null) {
+      return false;
+    }
+    if (item != lineItem.item) {
+      return false;
+    }
+    if (name != null ? !name.equals(lineItem.name) : lineItem.name != null) {
+      return false;
+    }
+    if (price != null ? !price.equals(lineItem.price) : lineItem.price != null) {
+      return false;
+    }
     return lineItemStatus == lineItem.lineItemStatus;
   }
 

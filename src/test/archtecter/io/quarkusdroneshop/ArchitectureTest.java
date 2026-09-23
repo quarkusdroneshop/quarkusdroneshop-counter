@@ -99,7 +99,9 @@ public class ArchitectureTest {
                 "com.fasterxml..",
                 "org.slf4j..",
                 "org.jboss..",
-                "io.debezium..");
+                "io.debezium..",
+                "io.apicurio..",
+                "org.apache.avro..");
 
     // =========================================================================
     // 4. 循環依存

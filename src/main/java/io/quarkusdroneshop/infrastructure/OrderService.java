@@ -18,15 +18,11 @@ import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.NotFoundException;
-import java.util.Optional;
 import java.util.ArrayList;
 
 @ApplicationScoped
@@ -160,8 +156,10 @@ public class OrderService {
         // Order 状態も更新（変更があったときのみ）
         if (!updates.isEmpty()) {
             boolean allTerminal = allLineItems.stream().allMatch(li ->
-                li.getLineItemStatus() == LineItemStatus.FULFILLED || li.getLineItemStatus() == LineItemStatus.CANCELLED);
-            boolean anyCancelled = allLineItems.stream().anyMatch(li -> li.getLineItemStatus() == LineItemStatus.CANCELLED);
+                li.getLineItemStatus() == LineItemStatus.FULFILLED
+                        || li.getLineItemStatus() == LineItemStatus.CANCELLED);
+            boolean anyCancelled = allLineItems.stream()
+                    .anyMatch(li -> li.getLineItemStatus() == LineItemStatus.CANCELLED);
             if (allTerminal) {
                 orderRecord.setOrderStatus(anyCancelled ? OrderStatus.CANCELLED : OrderStatus.FULFILLED);
             }
@@ -190,11 +188,11 @@ public class OrderService {
 
     @Override
     public String toString() {
-        return "OrderService{" +
-                "threadContext=" + threadContext +
-                ", orderRepository=" + orderRepository +
-                ", event=" + event +
-                ", orderUpdateEmitter=" + dashboardUpdateEmitter +
-                '}';
+        return "OrderService{"
+                + "threadContext=" + threadContext
+                + ", orderRepository=" + orderRepository
+                + ", event=" + event
+                + ", orderUpdateEmitter=" + dashboardUpdateEmitter
+                + '}';
     }
 }

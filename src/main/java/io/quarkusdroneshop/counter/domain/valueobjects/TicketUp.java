@@ -5,7 +5,6 @@ import io.quarkusdroneshop.counter.domain.OrderStatus;
 
 import java.time.Instant;
 import java.util.StringJoiner;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -90,16 +89,30 @@ public class TicketUp {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+          return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+          return false;
+        }
 
         TicketUp ticketUp = (TicketUp) o;
 
-        if (orderId != null ? !orderId.equals(ticketUp.orderId) : ticketUp.orderId != null) return false;
-        if (lineItemId != null ? !lineItemId.equals(ticketUp.lineItemId) : ticketUp.lineItemId != null) return false;
-        if (item != ticketUp.item) return false;
-        if (name != null ? !name.equals(ticketUp.name) : ticketUp.name != null) return false;
-        if (timestamp != null ? !timestamp.equals(ticketUp.timestamp) : ticketUp.timestamp != null) return false;
+        if (orderId != null ? !orderId.equals(ticketUp.orderId) : ticketUp.orderId != null) {
+          return false;
+        }
+        if (lineItemId != null ? !lineItemId.equals(ticketUp.lineItemId) : ticketUp.lineItemId != null) {
+          return false;
+        }
+        if (item != ticketUp.item) {
+          return false;
+        }
+        if (name != null ? !name.equals(ticketUp.name) : ticketUp.name != null) {
+          return false;
+        }
+        if (timestamp != null ? !timestamp.equals(ticketUp.timestamp) : ticketUp.timestamp != null) {
+          return false;
+        }
         return madeBy != null ? madeBy.equals(ticketUp.madeBy) : ticketUp.madeBy == null;
     }
 

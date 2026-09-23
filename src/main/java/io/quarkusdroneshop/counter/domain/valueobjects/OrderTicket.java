@@ -30,15 +30,27 @@ public class OrderTicket {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof OrderTicket)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof OrderTicket)) {
+      return false;
+    }
 
     OrderTicket orderTicket = (OrderTicket) o;
 
-    if (orderId != null ? !orderId.equals(orderTicket.orderId) : orderTicket.orderId != null) return false;
-    if (lineItemId != null ? !lineItemId.equals(orderTicket.lineItemId) : orderTicket.lineItemId != null) return false;
-    if (item != orderTicket.item) return false;
-    if (name != null ? !name.equals(orderTicket.name) : orderTicket.name != null) return false;
+    if (orderId != null ? !orderId.equals(orderTicket.orderId) : orderTicket.orderId != null) {
+      return false;
+    }
+    if (lineItemId != null ? !lineItemId.equals(orderTicket.lineItemId) : orderTicket.lineItemId != null) {
+      return false;
+    }
+    if (item != orderTicket.item) {
+      return false;
+    }
+    if (name != null ? !name.equals(orderTicket.name) : orderTicket.name != null) {
+      return false;
+    }
     return timestamp != null ? timestamp.equals(orderTicket.timestamp) : orderTicket.timestamp == null;
   }
 
@@ -54,13 +66,13 @@ public class OrderTicket {
 
   @Override
   public String toString() {
-    return "OrderTicket{" +
-      "orderId='" + orderId + '\'' +
-      ", id=" + lineItemId +
-      ", item=" + item +
-      ", name='" + name + '\'' +
-      ", timestamp=" + timestamp +
-      '}';
+    return "OrderTicket{"
+      + "orderId='" + orderId + '\''
+      + ", id=" + lineItemId
+      + ", item=" + item
+      + ", name='" + name + '\''
+      + ", timestamp=" + timestamp
+      + '}';
   }
 
   public String getOrderId() {

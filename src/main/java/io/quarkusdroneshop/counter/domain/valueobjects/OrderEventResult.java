@@ -2,13 +2,9 @@ package io.quarkusdroneshop.counter.domain.valueobjects;
 
 import io.debezium.outbox.quarkus.ExportedEvent;
 import io.quarkusdroneshop.counter.domain.Order;
-import io.quarkusdroneshop.infrastructure.OrderService;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import jakarta.transaction.Transactional;
-import jakarta.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,22 +49,30 @@ public class OrderEventResult {
 
   @Override
   public String toString() {
-    return "OrderEventResult{" +
-      "order=" + order +
-      ", outboxEvents=" + outboxEvents +
-      ", orderUpdates=" + orderUpdates +
-      '}';
+    return "OrderEventResult{"
+      + "order=" + order
+      + ", outboxEvents=" + outboxEvents
+      + ", orderUpdates=" + orderUpdates
+      + '}';
   }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof OrderEventResult)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof OrderEventResult)) {
+      return false;
+    }
 
     OrderEventResult that = (OrderEventResult) o;
 
-    if (getOrder() != null ? !getOrder().equals(that.getOrder()) : that.getOrder() != null) return false;
-    if (outboxEvents != null ? !outboxEvents.equals(that.outboxEvents) : that.outboxEvents != null) return false;
+    if (getOrder() != null ? !getOrder().equals(that.getOrder()) : that.getOrder() != null) {
+      return false;
+    }
+    if (outboxEvents != null ? !outboxEvents.equals(that.outboxEvents) : that.outboxEvents != null) {
+      return false;
+    }
     return orderUpdates != null ? orderUpdates.equals(that.orderUpdates) : that.orderUpdates == null;
   }
 

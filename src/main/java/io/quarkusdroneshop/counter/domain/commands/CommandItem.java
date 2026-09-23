@@ -41,13 +41,21 @@ public class CommandItem {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         CommandItem that = (CommandItem) o;
 
-        if (item != that.item) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
+        if (item != that.item) {
+            return false;
+        }
+        if (name != null ? !name.equals(that.name) : that.name != null) {
+            return false;
+        }
         return price != null ? price.equals(that.price) : that.price == null;
     }
 

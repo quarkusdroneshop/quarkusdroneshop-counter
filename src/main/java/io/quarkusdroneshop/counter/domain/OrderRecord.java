@@ -2,7 +2,15 @@ package io.quarkusdroneshop.counter.domain;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +46,9 @@ public class OrderRecord extends PanacheEntityBase {
     public OrderRecord() {
     }
 
-    public OrderRecord(UUID orderId, OrderSource orderSource, String loyaltyMemberId, Instant timestamp, OrderStatus orderStatus, Location location, List<LineItem> qdca10LineItems, List<LineItem> qdca10proLineItems) {
+    public OrderRecord(UUID orderId, OrderSource orderSource, String loyaltyMemberId, Instant timestamp,
+                        OrderStatus orderStatus, Location location,
+                        List<LineItem> qdca10LineItems, List<LineItem> qdca10proLineItems) {
         this.orderId = orderId != null ? orderId.toString() : null;
         this.orderSource = orderSource;
         this.loyaltyMemberId = loyaltyMemberId;
@@ -66,21 +76,39 @@ public class OrderRecord extends PanacheEntityBase {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         OrderRecord that = (OrderRecord) o;
 
-        if (orderId != null ? !orderId.equals(that.orderId) : that.orderId != null) return false;
-        if (orderSource != that.orderSource) return false;
-        if (loyaltyMemberId != null ? !loyaltyMemberId.equals(that.loyaltyMemberId) : that.loyaltyMemberId != null)
+        if (orderId != null ? !orderId.equals(that.orderId) : that.orderId != null) {
             return false;
-        if (timestamp != null ? !timestamp.equals(that.timestamp) : that.timestamp != null) return false;
-        if (orderStatus != that.orderStatus) return false;
-        if (location != that.location) return false;
-        if (qdca10LineItems != null ? !qdca10LineItems.equals(that.qdca10LineItems) : that.qdca10LineItems != null)
+        }
+        if (orderSource != that.orderSource) {
             return false;
-        return qdca10proLineItems != null ? qdca10proLineItems.equals(that.qdca10proLineItems) : that.qdca10proLineItems == null;
+        }
+        if (loyaltyMemberId != null ? !loyaltyMemberId.equals(that.loyaltyMemberId) : that.loyaltyMemberId != null) {
+            return false;
+        }
+        if (timestamp != null ? !timestamp.equals(that.timestamp) : that.timestamp != null) {
+            return false;
+        }
+        if (orderStatus != that.orderStatus) {
+            return false;
+        }
+        if (location != that.location) {
+            return false;
+        }
+        if (qdca10LineItems != null ? !qdca10LineItems.equals(that.qdca10LineItems) : that.qdca10LineItems != null) {
+            return false;
+        }
+        return qdca10proLineItems != null
+                ? qdca10proLineItems.equals(that.qdca10proLineItems)
+                : that.qdca10proLineItems == null;
     }
 
     @Override

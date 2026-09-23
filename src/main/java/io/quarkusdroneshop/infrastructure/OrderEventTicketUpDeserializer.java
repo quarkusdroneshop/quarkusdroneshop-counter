@@ -24,7 +24,7 @@ import java.time.Instant;
  */
 public class OrderEventTicketUpDeserializer implements Deserializer<TicketUp> {
 
-    private static final Logger logger = LoggerFactory.getLogger(OrderEventTicketUpDeserializer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderEventTicketUpDeserializer.class);
 
     private final AvroKafkaDeserializer<GenericRecord> avroDeserializer = new AvroKafkaDeserializer<>();
 
@@ -52,32 +52,32 @@ public class OrderEventTicketUpDeserializer implements Deserializer<TicketUp> {
             record = avroDeserializer.deserialize(topic, headers, data);
         } catch (RuntimeException e) {
             long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000;
-            logger.error("Avro deserialize failed for topic {} after {}ms", topic, elapsedMs, e);
+            LOGGER.error("Avro deserialize failed for topic {} after {}ms", topic, elapsedMs, e);
             throw e;
         }
         long elapsedMs = (System.nanoTime() - startNanos) / 1_000_000;
         if (elapsedMs > 1000) {
-            logger.warn("Avro deserialize (registry round-trip) took {}ms for topic {}", elapsedMs, topic);
+            LOGGER.warn("Avro deserialize (registry round-trip) took {}ms for topic {}", elapsedMs, topic);
         } else {
-            logger.debug("Avro deserialize took {}ms for topic {}", elapsedMs, topic);
+            LOGGER.debug("Avro deserialize took {}ms for topic {}", elapsedMs, topic);
         }
 
         if (record == null) {
-            logger.debug("Avro deserializer returned null GenericRecord for topic {}", topic);
+            LOGGER.debug("Avro deserializer returned null GenericRecord for topic {}", topic);
             return null;
         }
 
         Object eventTypeObj = record.get("eventType");
         String eventType = eventTypeObj != null ? eventTypeObj.toString() : null;
         if (!"LINE_ITEM_STATUS_CHANGED".equals(eventType) && !"ORDER_CANCELLED".equals(eventType)) {
-            logger.debug("Skipping event with eventType={} (orderId={})", eventType,
+            LOGGER.debug("Skipping event with eventType={} (orderId={})", eventType,
                     record.get("orderId"));
             return null;
         }
 
         GenericRecord lineItem = (GenericRecord) record.get("lineItem");
         if (lineItem == null) {
-            logger.warn("{} event without lineItem: {}", eventType, record);
+            LOGGER.warn("{} event without lineItem: {}", eventType, record);
             return null;
         }
 
@@ -100,7 +100,7 @@ public class OrderEventTicketUpDeserializer implements Deserializer<TicketUp> {
 
             return new TicketUp(orderId, lineItemId, item, name, timestamp, status, madeBy);
         } catch (Exception e) {
-            logger.warn("Failed to convert OrderEvent to TicketUp: {}", record, e);
+            LOGGER.warn("Failed to convert OrderEvent to TicketUp: {}", record, e);
             return null;
         }
     }

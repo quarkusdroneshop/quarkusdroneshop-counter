@@ -2,7 +2,6 @@ package io.quarkusdroneshop.counter.domain.valueobjects;
 
 import io.quarkusdroneshop.counter.domain.Item;
 import io.quarkusdroneshop.counter.domain.LineItemStatus;
-import io.quarkusdroneshop.counter.domain.OrderStatus;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.quarkus.runtime.annotations.RegisterForReflection;

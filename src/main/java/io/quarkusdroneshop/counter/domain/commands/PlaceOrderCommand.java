@@ -22,9 +22,9 @@ public class PlaceOrderCommand {
 
   private final String loyaltyMemberId;
 
-  private final List<CommandItem> Qdca10LineItems;
+  private final List<CommandItem> qdca10LineItems;
 
-  private final List<CommandItem> Qdca10proLineItems;
+  private final List<CommandItem> qdca10proLineItems;
 
   private final Instant timestamp;
 
@@ -34,57 +34,67 @@ public class PlaceOrderCommand {
           @JsonProperty("orderSource") final OrderSource orderSource,
           @JsonProperty("location") final Location location,
           @JsonProperty("loyaltyMemberId") final String loyaltyMemberId,
-          @JsonProperty("qdca10LineItems") Optional<List<CommandItem>> Qdca10LineItems,
-          @JsonProperty("qdca10proLineItems") Optional<List<CommandItem>> Qdca10proLineItems) {
+          @JsonProperty("qdca10LineItems") Optional<List<CommandItem>> qdca10LineItems,
+          @JsonProperty("qdca10proLineItems") Optional<List<CommandItem>> qdca10proLineItems) {
     this.id = id;
     this.orderSource = orderSource;
     this.location = location;
     this.loyaltyMemberId = loyaltyMemberId;
-    if (Qdca10LineItems.isPresent()) {
-      this.Qdca10LineItems = Qdca10LineItems.get();
-    }else{
-      this.Qdca10LineItems = null;
+    if (qdca10LineItems.isPresent()) {
+      this.qdca10LineItems = qdca10LineItems.get();
+    } else {
+      this.qdca10LineItems = null;
     }
-    if (Qdca10proLineItems.isPresent()) {
-      this.Qdca10proLineItems = Qdca10proLineItems.get();
-    }else{
-      this.Qdca10proLineItems = null;
+    if (qdca10proLineItems.isPresent()) {
+      this.qdca10proLineItems = qdca10proLineItems.get();
+    } else {
+      this.qdca10proLineItems = null;
     }
     this.timestamp = Instant.now();
   }
 
   @Override
   public String toString() {
-    return "PlaceOrderCommand{" +
-            "id='" + id + '\'' +
-            ", orderSource=" + orderSource +
-            ", location=" + location +
-            ", loyaltyMemberId='" + loyaltyMemberId + '\'' +
-            ", Qdca10LineItems=" + Qdca10LineItems +
-            ", Qdca10proLineItems=" + Qdca10proLineItems +
-            ", timestamp=" + timestamp +
-            '}';
+    return "PlaceOrderCommand{"
+            + "id='" + id + '\''
+            + ", orderSource=" + orderSource
+            + ", location=" + location
+            + ", loyaltyMemberId='" + loyaltyMemberId + '\''
+            + ", qdca10LineItems=" + qdca10LineItems
+            + ", qdca10proLineItems=" + qdca10proLineItems
+            + ", timestamp=" + timestamp
+            + '}';
   }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     PlaceOrderCommand that = (PlaceOrderCommand) o;
-    return Objects.equals(id, that.id) && orderSource == that.orderSource && location == that.location && Objects.equals(loyaltyMemberId, that.loyaltyMemberId) && Objects.equals(Qdca10LineItems, that.Qdca10LineItems) && Objects.equals(Qdca10proLineItems, that.Qdca10proLineItems) && Objects.equals(timestamp, that.timestamp);
+    return Objects.equals(id, that.id)
+            && orderSource == that.orderSource
+            && location == that.location
+            && Objects.equals(loyaltyMemberId, that.loyaltyMemberId)
+            && Objects.equals(qdca10LineItems, that.qdca10LineItems)
+            && Objects.equals(qdca10proLineItems, that.qdca10proLineItems)
+            && Objects.equals(timestamp, that.timestamp);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, orderSource, location, loyaltyMemberId, Qdca10LineItems, Qdca10proLineItems, timestamp);
+    return Objects.hash(id, orderSource, location, loyaltyMemberId, qdca10LineItems, qdca10proLineItems, timestamp);
   }
 
   public Optional<List<CommandItem>> getQdca10LineItems() {
-    return Optional.ofNullable(Qdca10LineItems);
+    return Optional.ofNullable(qdca10LineItems);
   }
 
   public Optional<List<CommandItem>> getQdca10proLineItems() {
-    return Optional.ofNullable(Qdca10proLineItems);
+    return Optional.ofNullable(qdca10proLineItems);
   }
 
   public Optional<String> getLoyaltyMemberId() {

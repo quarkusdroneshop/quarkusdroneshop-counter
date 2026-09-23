@@ -45,24 +45,24 @@ public class OrderCreatedEvent implements ExportedEvent<String, JsonNode> {
                 .put("timestamp", order.getTimestamp().toString());
 
         if (order.getQdca10LineItems().isPresent()) {
-            ArrayNode Qdca10LineItems = asJson.putArray("Qdca10LineItems") ;
+            ArrayNode qdca10LineItems = asJson.putArray("Qdca10LineItems");
             for (LineItem lineItem : order.getQdca10LineItems().get()) {
                 lineItem.setOrder(orderRecord);
                 ObjectNode lineAsJon = mapper.createObjectNode()
                         .put("item", lineItem.getItem().toString())
                         .put("name", lineItem.getName());
-                Qdca10LineItems.add(lineAsJon);
+                qdca10LineItems.add(lineAsJon);
             }
         }
 
         if (order.getQdca10proLineItems().isPresent()) {
-            ArrayNode Qdca10proLineItems = asJson.putArray("Qdca10proLineItems") ;
+            ArrayNode qdca10proLineItems = asJson.putArray("Qdca10proLineItems");
             for (LineItem lineItem : order.getQdca10proLineItems().get()) {
                 lineItem.setOrder(orderRecord);
                 ObjectNode lineAsJon = mapper.createObjectNode()
                         .put("item", lineItem.getItem().toString())
                         .put("name", lineItem.getName());
-                Qdca10proLineItems.add(lineAsJon);
+                qdca10proLineItems.add(lineAsJon);
             }
         }
 

@@ -4,14 +4,19 @@ import io.quarkusdroneshop.counter.domain.commands.PlaceOrderCommand;
 import io.quarkusdroneshop.counter.domain.events.LoyaltyMemberPurchaseEvent;
 import io.quarkusdroneshop.counter.domain.events.OrderCreatedEvent;
 import io.quarkusdroneshop.counter.domain.events.OrderUpdatedEvent;
-import io.quarkusdroneshop.counter.domain.valueobjects.*;
+import io.quarkusdroneshop.counter.domain.valueobjects.OrderEventResult;
+import io.quarkusdroneshop.counter.domain.valueobjects.OrderUpdate;
+import io.quarkusdroneshop.counter.domain.valueobjects.TicketUp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.persistence.Transient;
 import java.time.Instant;
-import java.util.*;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.StringJoiner;
+import java.util.UUID;
 
 public class Order {
 
@@ -75,7 +80,8 @@ public class Order {
     if (placeOrderCommand.getQdca10LineItems().isPresent()) {
       placeOrderCommand.getQdca10LineItems().get().forEach(commandItem -> {
         logger.info("createOrderFromCommand adding QDCA10Item from {}", commandItem.toString());
-        LineItem lineItem = new LineItem(commandItem.getItemId(), commandItem.getItem(), commandItem.getName(), commandItem.getPrice(),
+        LineItem lineItem = new LineItem(commandItem.getItemId(), commandItem.getItem(),
+                commandItem.getName(), commandItem.getPrice(),
                 LineItemStatus.IN_PROGRESS, order.getOrderRecord());
         order.addQdca10LineItem(lineItem);
       });
@@ -85,7 +91,8 @@ public class Order {
       logger.info("createOrderFromCommand adding QDCA10ProOrders {}",
               placeOrderCommand.getQdca10proLineItems().get().size());
       placeOrderCommand.getQdca10proLineItems().get().forEach(commandItem -> {
-        LineItem lineItem = new LineItem(commandItem.getItemId(), commandItem.getItem(), commandItem.getName(), commandItem.getPrice(),
+        LineItem lineItem = new LineItem(commandItem.getItemId(), commandItem.getItem(),
+                commandItem.getName(), commandItem.getPrice(),
                 LineItemStatus.IN_PROGRESS, order.getOrderRecord());
         order.addQDCA10ProLineItem(lineItem);
       });
@@ -162,16 +169,16 @@ public class Order {
     return Optional.ofNullable(this.orderRecord.getQdca10LineItems());
   }
 
-  public void setQdca10LineItems(List<LineItem> Qdca10LineItems) {
-    this.orderRecord.setQdca10LineItems(Qdca10LineItems);
+  public void setQdca10LineItems(List<LineItem> qdca10LineItems) {
+    this.orderRecord.setQdca10LineItems(qdca10LineItems);
   }
 
   public Optional<List<LineItem>> getQdca10proLineItems() {
     return Optional.ofNullable(this.orderRecord.getQdca10proLineItems());
   }
 
-  public void setQdca10proLineItems(List<LineItem> Qdca10proLineItems) {
-    this.orderRecord.setQdca10proLineItems(Qdca10proLineItems);
+  public void setQdca10proLineItems(List<LineItem> qdca10proLineItems) {
+    this.orderRecord.setQdca10proLineItems(qdca10proLineItems);
   }
 
   public Optional<String> getLoyaltyMemberId() {
@@ -196,7 +203,7 @@ public class Order {
 
   public Order(final String orderId, final OrderSource orderSource, final Location location,
                final String loyaltyMemberId, final Instant timestamp, final OrderStatus orderStatus,
-               final List<LineItem> Qdca10LineItems, final List<LineItem> Qdca10proLineItems) {
+               final List<LineItem> qdca10LineItems, final List<LineItem> qdca10proLineItems) {
     this.orderRecord = new OrderRecord();
     this.orderRecord.setOrderId(UUID.randomUUID().toString());
     this.orderRecord.setOrderSource(orderSource);
@@ -204,8 +211,8 @@ public class Order {
     this.orderRecord.setLoyaltyMemberId(loyaltyMemberId);
     this.orderRecord.setTimestamp(timestamp);
     this.orderRecord.setOrderStatus(orderStatus);
-    this.orderRecord.setQdca10LineItems(Qdca10LineItems);
-    this.orderRecord.setQdca10proLineItems(Qdca10proLineItems);
+    this.orderRecord.setQdca10LineItems(qdca10LineItems);
+    this.orderRecord.setQdca10proLineItems(qdca10proLineItems);
   }
 
   @Override
@@ -224,8 +231,12 @@ public class Order {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     Order order = (Order) o;
     return orderRecord != null ? orderRecord.equals(order.orderRecord) : order.orderRecord == null;
   }
